@@ -1,6 +1,7 @@
 [profile.default]
 out = "out"
 src = "contracts"
+remappings = ["@gluwa/usc-contracts/=node_modules/@gluwa/usc-contracts/contracts/"]
 
 libs = ["node_modules"]
 solc_version = "0.8.30"
