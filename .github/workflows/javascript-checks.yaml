@@ -15,7 +15,7 @@ permissions: read-all
 jobs:
   execute-command:
     name: execute-command-${{ matrix.command }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
