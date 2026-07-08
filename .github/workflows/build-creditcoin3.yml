@@ -13,6 +13,12 @@ name: Reusable workflow to build a creditcoin3 client
 
 permissions: read-all
 
+# GCC 13+ (Ubuntu 26.04) no longer transitively includes
+# <cstdint>. The bundled RocksDB 8.1.1 headers (librocksdb-sys 0.11.0+8.1.1)
+# use uint64_t without including it, so force-include cstdint when compiling C/C++.
+env:
+  CXXFLAGS: "-include cstdint"
+
 jobs:
   build-creditcoin3:
     runs-on: ubuntu-26.04
@@ -43,11 +49,6 @@ jobs:
 
       - name: Build SUT
         uses: gluwa/cargo@dev
-        env:
-          # GCC 13+ (Ubuntu 26.04) no longer transitively includes <cstdint>,
-          # so the bundled librocksdb-sys C++ sources fail with
-          # "'uint64_t' has not been declared". Force-include it.
-          CXXFLAGS: -include cstdint
         with:
           command: build
           args: ${{ inputs.build-options }}
