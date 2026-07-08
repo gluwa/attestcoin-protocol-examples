@@ -139,7 +139,7 @@ Save the resulting wallet address and private key for future use.
 
 ```bash
 Address:     0xBE7959cA1b19e159D8C0649860793dDcd125a2D5
-Private key: 0xb9c179ed56514accb60c23a862194fa2a6db8bdeb815d16e2c21aa4d7dc2845d
+Private key: 0xb9c179ed56514accb60c23a862194fa2a6db8bdeb815d16e2c21aa4d7dc2845d # betterleaks:allow
 ```
 
 Whether you decided to create two new accounts or just one, we can now update the `.env` with the final variables:
@@ -262,12 +262,12 @@ Registering loan with the following terms:
   Fund Flow: {
   "from": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
   "to": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-  "withToken": "0xc351628EB244ec633d5f21fBD6621e1a683B1181"
+  "withToken": "0xc351628EB244ec633d5f21fBD6621e1a683B1181" # betterleaks:allow
 }
   Repay Flow: {
   "from": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
   "to": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-  "withToken": "0xc351628EB244ec633d5f21fBD6621e1a683B1181"
+  "withToken": "0xc351628EB244ec633d5f21fBD6621e1a683B1181" # betterleaks:allow
 }
   Loan Terms: {
   "loanAmount": 1000,
@@ -300,7 +300,7 @@ Loan Details:
  Loan ID: 1
  From: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
  To: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
- With Token: 0x5FbDB2315678afecb367f032d93F642f64180aa3
+ With Token: 0x5FbDB2315678afecb367f032d93F642f64180aa3 # betterleaks:allow
  Loan Amount: 1000
  Interest Rate (basis points): 500
  Expected Repayment Amount: 1050

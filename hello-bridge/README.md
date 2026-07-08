@@ -48,7 +48,7 @@ Save the resulting wallet address and private key for future use. They should lo
 
 ```bash
 Address:     0xBE7959cA1b19e159D8C0649860793dDcd125a2D5
-Private key: 0xb9c179ed56514accb60c23a862194fa2a6db8bdeb815d16e2c21aa4d7dc2845d
+Private key: 0xb9c179ed56514accb60c23a862194fa2a6db8bdeb815d16e2c21aa4d7dc2845d # betterleaks:allow
 ```
 
 Save this private key on the `.env` file in the root of the repository:
