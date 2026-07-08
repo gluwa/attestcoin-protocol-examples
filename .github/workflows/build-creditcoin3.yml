@@ -43,6 +43,11 @@ jobs:
 
       - name: Build SUT
         uses: gluwa/cargo@dev
+        env:
+          # GCC 13+ (Ubuntu 26.04) no longer transitively includes <cstdint>,
+          # so the bundled librocksdb-sys C++ sources fail with
+          # "'uint64_t' has not been declared". Force-include it.
+          CXXFLAGS: -include cstdint
         with:
           command: build
           args: ${{ inputs.build-options }}
