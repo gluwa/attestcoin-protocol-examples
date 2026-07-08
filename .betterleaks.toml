@@ -1,0 +1,27 @@
+# betterleaks configuration
+#
+# betterleaks (the gitleaks successor) runs in MegaLinter as REPOSITORY_BETTERLEAKS.
+# We inherit the built-in default ruleset and add a global filter to drop known
+# false positives.
+#
+# All findings suppressed here are illustrative example values, NOT real secrets:
+#   * The "Private key: 0xb9c179ed...2845d" strings in the tutorial READMEs are
+#     example output of `cast wallet new` (a well-known public dev key). The docs
+#     immediately instruct the reader to substitute their own key.
+#   * The .env / .env.devnet example files contain public ERC-20 contract
+#     addresses (USC_MINTABLE_TOKEN, etc.), not API keys/tokens.
+
+[extend]
+# Keep the built-in betterleaks ruleset; we only add the filter below.
+useDefault = true
+
+# Global filter: if it evaluates to true for a finding, that finding is skipped.
+# We skip any finding located in the tutorial READMEs or the example env files.
+filter = '''
+filter.matchesAny(get(attributes, "path", ""), [
+  `(?:^|/)hello-bridge/README\.md$`,
+  `(?:^|/)loan-flow/README\.md$`,
+  `(?:^|/)\.env$`,
+  `(?:^|/)\.env\.devnet$`,
+])
+'''
