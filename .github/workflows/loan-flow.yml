@@ -324,6 +324,12 @@ jobs:
           echo "$OUTPUT" | grep "Token authorized with transaction hash:"
 
 
+          echo "INFO: Register the source loan contract with the loan manager"
+          OUTPUT=$(yarn loan_flow:register_source_contract "$SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS")
+          echo "$OUTPUT"
+          echo "$OUTPUT" | grep "Source loan contract registered with transaction hash:"
+
+
           echo "INFO: start offchain worker"
           yarn loan_flow:start_worker > /var/tmp/loan-flow-logs/offchain-worker.log 2>&1 &
           sleep 10

@@ -38,6 +38,11 @@ contract USCLoanManager is Ownable, ReentrancyGuard, USCBase {
     mapping(uint256 => LoanOrder) public loanOrders;
     mapping(uint256 => bool) public registeredLoans;
 
+    // Address of the source-chain loan contract (AuxiliaryLoanContract) that is
+    // authorized to emit the LoanFunded / LoanRepaid events we act upon. Any log
+    // whose emitting address does not match this is rejected.
+    address public sourceLoanContract;
+
     uint256 public nextLoanId;
 
     // Events
@@ -53,6 +58,7 @@ contract USCLoanManager is Ownable, ReentrancyGuard, USCBase {
     event LoanRepaid(uint256 indexed loanId);
     event LoanPartiallyRepaid(uint256 indexed loanId, uint256 amount);
     event LoanExpired(uint256 indexed loanId);
+    event SourceLoanContractRegistered(address indexed sourceLoanContract);
 
     constructor() Ownable(msg.sender) {
         nextLoanId = 1;
@@ -132,6 +138,19 @@ contract USCLoanManager is Ownable, ReentrancyGuard, USCBase {
         nextLoanId += 1;
 
         return loanId;
+    }
+
+    /**
+     * @dev Register the source-chain loan contract authorized to emit loan events.
+     * Only events emitted by this address will be accepted when processing proofs.
+     * @param _sourceLoanContract Address of the source-chain loan contract
+     */
+    function registerSourceLoanContract(address _sourceLoanContract) external onlyOwner {
+        require(_sourceLoanContract != address(0), "Source loan contract cannot be the zero address");
+
+        sourceLoanContract = _sourceLoanContract;
+
+        emit SourceLoanContractRegistered(_sourceLoanContract);
     }
 
     // Processes a USC action resulting from the `execute` function of the USCBase contract
@@ -229,13 +248,25 @@ contract USCLoanManager is Ownable, ReentrancyGuard, USCBase {
 
     function _processFundLogs(EvmV1Decoder.LogEntry[] memory fundLogs)
         internal
-        pure
+        view
         returns (uint256 loanId)
     {
         // For this demonstration we only process the first fund log found within a transaction.
         // We only expect a single fund log to exist per transaction anyways
         require(fundLogs.length > 0);
         EvmV1Decoder.LogEntry memory log = fundLogs[0];
+
+        // Verify the event was emitted by the registered source-chain loan contract.
+        // Without this, anyone could deploy a contract that emits a LoanFunded event
+        // with an arbitrary loanId and prove it to fraudulently fund loans.
+        require(
+            sourceLoanContract != address(0),
+            "Source loan contract not registered!"
+        );
+        require(
+            log.address_ == sourceLoanContract,
+            "LoanFunded event not emitted by registered source loan contract!"
+        );
 
         require(log.topics.length == 2, "Invalid LoanFunded topics");
         require(log.topics[0] == FUND_EVENT_SIGNATURE, "Not LoanFunded event");
@@ -247,13 +278,25 @@ contract USCLoanManager is Ownable, ReentrancyGuard, USCBase {
 
     function _processRepayLogs(EvmV1Decoder.LogEntry[] memory repayLogs)
         internal
-        pure
+        view
         returns (uint256 loanId, uint256 amount)
     {
         // For this demonstration we only process the first repay log found within a transaction.
         // We only expect a single repay log to exist per transaction anyways
         require(repayLogs.length > 0);
         EvmV1Decoder.LogEntry memory log = repayLogs[0];
+
+        // Verify the event was emitted by the registered source-chain loan contract.
+        // Without this, anyone could deploy a contract that emits a LoanRepaid event
+        // with an arbitrary loanId/amount and prove it to fraudulently repay loans.
+        require(
+            sourceLoanContract != address(0),
+            "Source loan contract not registered!"
+        );
+        require(
+            log.address_ == sourceLoanContract,
+            "LoanRepaid event not emitted by registered source loan contract!"
+        );
 
         require(log.topics.length == 2, "Invalid LoanRepaid topics");
         require(log.topics[0] == REPAY_EVENT_SIGNATURE, "Not LoanRepaid event");

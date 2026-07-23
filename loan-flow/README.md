@@ -217,6 +217,29 @@ This will show you the following:
 Token authorized with transaction hash:  0x119dbd81c2ee8db6d5e86815429e2aaa059c6d6f6104f1ea931a9bbca93de43d
 ```
 
+## 1.5 Registering the source loan contract
+
+There's one last piece of setup. The loan manager on Creditcoin marks loans as funded or repaid by verifying `LoanFunded` and
+`LoanRepaid` events proven from the source chain. But an event is only trustworthy if we know _which_ contract emitted it —
+otherwise anyone could deploy their own contract, emit a `LoanFunded` event with an arbitrary loan id, prove its inclusion,
+and trick the manager into funding a loan that was never actually funded.
+
+To close that gap, we tell the manager the address of the one source-chain contract it should trust: our
+`AuxiliaryLoanContract`. Any loan event not emitted by this address will be rejected.
+
+Since the loan manager is `Ownable`, this is a one-time step done by the deployer account (`CREDITCOIN_WALLET_PRIVATE_KEY`):
+
+```sh
+yarn loan_flow:register_source_contract $SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS
+```
+
+This will show you the following:
+
+```sh
+Registering source loan contract:  0x814Fd6EfA5E1cb49B623599Fd63Ab74142762A46
+Source loan contract registered with transaction hash:  0x8c5e...
+```
+
 Now we are ready, let the usury begin! 💰💰💰
 
 ## 2. Start the Offchain Worker

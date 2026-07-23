@@ -7,6 +7,7 @@
     "custom_bridge:submit_query": "tsx custom-contracts-bridging/submit_query.ts",
     "offchain:start_worker": "tsx bridge-offchain-worker/worker.ts",
     "loan_flow:authorize_token": "tsx loan-flow/authorize.ts",
+    "loan_flow:register_source_contract": "tsx loan-flow/register_source_contract.ts",
     "loan_flow:register_loan": "tsx loan-flow/register.ts",
     "loan_flow:fund_loan": "tsx loan-flow/fund_loan.ts",
     "loan_flow:repay_loan": "tsx loan-flow/repay_loan.ts",

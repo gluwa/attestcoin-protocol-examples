@@ -93,9 +93,9 @@ const main = async () => {
       const approveTx = await sourceChainERC20Contract.approve(sourceChainLoanContractAddress, allowanceAmount);
       console.log('Allowance granted: ', approveTx.hash);
 
-      // wait for 15 seconds to ensure approval is mined
-      console.log('Waiting 15 seconds for approval to be mined...');
-      await new Promise((resolve) => setTimeout(resolve, 15000));
+      // Wait for the approval to actually be mined before we try to spend it
+      console.log('Waiting for approval to be mined...');
+      await approveTx.wait();
     }
   } catch (error: any) {
     console.error('Error requesting allowance: ', error.shortMessage);
@@ -111,6 +111,11 @@ const main = async () => {
       lenderWallet.address,
       sourceChainERC20ContractAddress
     );
+    // Wait for the repayment tx to be mined before exiting, otherwise a subsequent
+    // partial repayment would read stale on-chain state and the two repayments could
+    // collide over the same allowance.
+    console.log('Repayment transaction submitted, waiting for it to be mined: ', tx.hash);
+    await tx.wait();
     console.log('Loan repaid: ', tx.hash);
   } catch (error: any) {
     console.error('Error repaying loan: ', error);

@@ -92,9 +92,9 @@ const main = async () => {
       const approveTx = await sourceChainERC20Contract.approve(sourceChainLoanContractAddress, loanAmount);
       console.log('Allowance granted: ', approveTx.hash);
 
-      // wait for 15 seconds to ensure approval is mined
-      console.log('Waiting 15 seconds for approval to be mined...');
-      await new Promise((resolve) => setTimeout(resolve, 15000));
+      // Wait for the approval to actually be mined before we try to spend it
+      console.log('Waiting for approval to be mined...');
+      await approveTx.wait();
     }
   } catch (error: any) {
     console.error('Error requesting allowance: ', error.shortMessage);
@@ -110,6 +110,12 @@ const main = async () => {
       borrowerWallet.address,
       sourceChainERC20ContractAddress
     );
+    // Wait for the funding tx to be mined. Without this the script exits while the tx
+    // is still pending, so a subsequent partial funding would read stale on-chain state
+    // (e.g. an allowance that hasn't been consumed yet) and the two fundings would
+    // collide, leaving the loan only partially funded.
+    console.log('Funding transaction submitted, waiting for it to be mined: ', tx.hash);
+    await tx.wait();
     console.log('Loan funded: ', tx.hash);
   } catch (error: any) {
     console.error('Error funding loan: ', error.shortMessage);
