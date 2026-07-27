@@ -190,6 +190,19 @@
     "type": "event"
   },
   {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "sourceLoanContract",
+        "type": "address"
+      }
+    ],
+    "name": "SourceLoanContractRegistered",
+    "type": "event"
+  },
+  {
     "inputs": [],
     "name": "FUND_EVENT_SIGNATURE",
     "outputs": [
@@ -677,6 +690,19 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_sourceLoanContract",
+        "type": "address"
+      }
+    ],
+    "name": "registerSourceLoanContract",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
@@ -701,45 +727,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "sourceLoanContract",
-        "type": "address"
-      }
-    ],
-    "name": "SourceLoanContractRegistered",
-    "type": "event"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_sourceLoanContract",
-        "type": "address"
-      }
-    ],
-    "name": "registerSourceLoanContract",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "sourceLoanContract",
     "outputs": [
@@ -750,6 +737,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]
