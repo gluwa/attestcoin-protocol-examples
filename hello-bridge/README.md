@@ -118,7 +118,7 @@ the Creditcoin Oracle described in our [DApp Design Patterns] Gitbook page.
 
 But your new Sepolia account doesn't have these tokens yet!
 
-For your convenience, we have [already deployed] a test `ERC20` contract to Sepolia which you can
+For your convenience, we have already deployed a test `ERC20` contract to Sepolia which you can
 use to mint some dummy ERC20 tokens. Run the following command:
 
 ```bash
@@ -232,7 +232,6 @@ be used by teams of DApp builders who will handle data provisioning on behalf of
 <!-- markdown-link-check-disable -->
 
 [Infura]: https://developer.metamask.io/register
-[already deployed]: https://sepolia.etherscan.io/address/0x15166Ba9d24aBfa477C0c88dD1E6321297214eC8
 [step 1.1]: #11-generate-a-new-wallet-address
 [step 2]: #2-minting-some-tokens-on-sepolia
 [step 4]: #4-submit-a-mint-query-to-the-usc-contract
