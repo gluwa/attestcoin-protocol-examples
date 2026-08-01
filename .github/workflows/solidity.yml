@@ -25,7 +25,7 @@ jobs:
           ~/.foundry/bin/foundryup
 
       - name: Install Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: 'yarn'
@@ -47,7 +47,7 @@ jobs:
           sudo .github/install-solidity-compiler.sh
 
       - name: Install Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: 'yarn'
