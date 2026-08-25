@@ -4,7 +4,7 @@ name: Reusable workflow to exercise loan-flow example
 "on":
   workflow_call:
     inputs:
-      usc_kind:
+      asc_kind:
         required: true
         type: string
       source_chain_kind:
@@ -49,9 +49,9 @@ jobs:
           # note: this is NEW_LENDER_ in 1Password & must be funded on Sepolia
           echo "wallet_pk=${{ secrets.DEVNET_EVM_PK }}" >> "$GITHUB_OUTPUT"
 
-      - name: Local USC ENV
+      - name: Local ASC ENV
         id: local
-        if: inputs.usc_kind == 'local'
+        if: inputs.asc_kind == 'local'
         run: |
           # shellcheck disable=SC2129
           echo "creditcoin_rpc_url=http://127.0.0.1:9944" >> "$GITHUB_OUTPUT"
@@ -61,12 +61,12 @@ jobs:
 
       - name: Devnet ENV
         id: devnet
-        if: inputs.usc_kind == 'devnet'
+        if: inputs.asc_kind == 'devnet'
         run: |
           # shellcheck disable=SC2129
           echo "creditcoin_rpc_url=https://rpc.cc3-devnet.creditcoin.network" >> "$GITHUB_OUTPUT"
           echo "proof_builder_url=https://prover.cc3-devnet.creditcoin.network/" >> "$GITHUB_OUTPUT"
-          # note: this is NEW_LENDER_ in 1Password & must be funded on USC Devnet
+          # note: this is NEW_LENDER_ in 1Password & must be funded on ASC Devnet
           echo "wallet_pk=${{ secrets.DEVNET_EVM_PK }}" >> "$GITHUB_OUTPUT"
 
       - name: Final ENV
@@ -87,7 +87,7 @@ jobs:
           ref: ${{ inputs.checkout_ref }}
 
       - name: Download binaries
-        if: inputs.usc_kind == 'local'
+        if: inputs.asc_kind == 'local'
         uses: actions/download-artifact@v8
         with:
           name: binary-for-testing-ci
@@ -96,7 +96,7 @@ jobs:
       - run: mkdir -p /var/tmp/loan-flow-logs/
 
       - name: Start creditcoin3-node - Alice
-        if: inputs.usc_kind == 'local'
+        if: inputs.asc_kind == 'local'
         run: |
           chmod a+x ./target/release/creditcoin3-node
           ./target/release/creditcoin3-node \
@@ -125,7 +125,7 @@ jobs:
           .github/wait-for-ethereum.sh 'http://127.0.0.1:8141'
 
       - name: Start Attestation Zombienet for Alice - Anvil 1
-        if: inputs.usc_kind == 'local'
+        if: inputs.asc_kind == 'local'
         run: |
           mkdir -p /var/tmp/loan-flow-logs/attestors-alice
 
@@ -144,7 +144,7 @@ jobs:
           .github/wait-for-attestors.sh 'http://127.0.0.1:9944'
 
       - name: Start proof-gen-api-server
-        if: inputs.usc_kind == 'local'
+        if: inputs.asc_kind == 'local'
         run: |
           chmod a+x ./target/release/proof-gen-api-server
 
@@ -222,16 +222,16 @@ jobs:
           echo "$OUTPUT"
           DECODER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
 
-          echo "INFO: deploy USCLoanManager.sol to Creditcoin"
+          echo "INFO: deploy ASCLoanManager.sol to Creditcoin"
           OUTPUT=$(~/.foundry/bin/forge create \
                 --broadcast                    \
                 --rpc-url "$CREDITCOIN_RPC_URL"  \
                 --private-key "$WALLET_PK"   \
                 --libraries "node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:$DECODER_CONTRACT_ADDRESS" \
-                contracts/sol/USCLoanManager.sol:USCLoanManager)
+                contracts/sol/ASCLoanManager.sol:ASCLoanManager)
           echo "$OUTPUT"
-          USC_LOAN_MANAGER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
-          echo "usc_loan_manager_contract_address=$USC_LOAN_MANAGER_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
+          ASC_LOAN_MANAGER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
+          echo "asc_loan_manager_contract_address=$ASC_LOAN_MANAGER_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 
           echo "INFO: generate a Lender wallet"
           OUTPUT=$(~/.foundry/bin/cast wallet new)
@@ -294,7 +294,7 @@ jobs:
           echo "SOURCE_CHAIN_RPC_URL='${{ steps.env.outputs.source_chain_rpc_url }}'" >> .env
           echo "CREDITCOIN_RPC_URL='${{ steps.env.outputs.creditcoin_rpc_url }}'" >> .env
           echo "PROOF_BUILDER_URL='${{ steps.env.outputs.proof_builder_url }}'" >> .env
-          echo "USC_LOAN_MANAGER_CONTRACT_ADDRESS='${{ steps.setup.outputs.usc_loan_manager_contract_address }}'" >> .env
+          echo "ASC_LOAN_MANAGER_CONTRACT_ADDRESS='${{ steps.setup.outputs.asc_loan_manager_contract_address }}'" >> .env
           echo "SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS='${{ steps.setup.outputs.source_chain_contract_address }}'" >> .env
           echo "SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS='${{ steps.setup.outputs.aux_loan_contract_address }}'" >> .env
           echo "CREDITCOIN_WALLET_PRIVATE_KEY='${{ steps.setup.outputs.creditcoin_wallet_pk }}'" >> .env

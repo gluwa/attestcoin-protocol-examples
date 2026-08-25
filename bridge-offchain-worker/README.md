@@ -13,7 +13,7 @@ on the Sepolia _source chain_.
 
 An Offchain Worker is a script responsible for watching the state of a _source chain_: in this
 case, Sepolia. In more complex cases this would also listen to state changes on the Creditcoin execution chain. The worker queries to our
-_Universal Smart Contract_ on Creditcoin in response to specific events on
+_Attestcoin Smart Contract_ on Creditcoin in response to specific events on
 each chain. With an offchain worker, all the end user needs to do is sign a single transaction
 on the source chain kicking off cross-chain interaction.
 
@@ -30,7 +30,7 @@ yarn install
 This is the same as in [Hello Bridge]. If you have not already done so, follow the installation
 steps in the [setup] section there.
 
-Additionally you need to have the `USC_CUSTOM_MINTER_CONTRACT_ADDRESS` environment variable set as seen in the [Custom Contract Bridging] tutorial.
+Additionally you need to have the `ASC_CUSTOM_MINTER_CONTRACT_ADDRESS` environment variable set as seen in the [Custom Contract Bridging] tutorial.
 
 Once that is done, you will need to set up some additional configuration for the offchain worker.
 Check the `.env` file in the root of the repository and make sure it contains the following:
@@ -47,11 +47,11 @@ SOURCE_CHAIN_RPC_URL="https://sepolia.infura.io/v3/<your_infura_api_key>"
 SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS=<test_erc20_contract_address_from_custom_contracts_bridging>
 
 # ============================================================================ #
-#                      Creditcoin USC Chain Configuration                      #
+#                      Creditcoin ASC Chain Configuration                      #
 # ============================================================================ #
 
 # Address of your custom minter contract on Creditcoin
-USC_CUSTOM_MINTER_CONTRACT_ADDRESS=<erc20_minter_address_from_custom_contracts_bridging>
+ASC_CUSTOM_MINTER_CONTRACT_ADDRESS=<erc20_minter_address_from_custom_contracts_bridging>
 
 # Private key of the wallet that will submit mint requests
 CREDITCOIN_WALLET_PRIVATE_KEY=<your_private_key>
@@ -79,7 +79,7 @@ Once it's up and running, you start to see the following logs:
 Starting...
 Worker started! Listening for burn events...
 Polling source chain from block 11073265
-Polling USC chain from block 4969330
+Polling ASC chain from block 4969330
 ```
 
 ## 3. Burning the tokens you want to bridge
@@ -136,7 +136,7 @@ Run the following command to check your funds:
 
 ```sh
 WALLET_ADDRESS=$(cast wallet address --private-key $CREDITCOIN_WALLET_PRIVATE_KEY)
-yarn utils:check_balance $USC_CUSTOM_MINTABLE_TOKEN $WALLET_ADDRESS
+yarn utils:check_balance $ASC_CUSTOM_MINTABLE_TOKEN $WALLET_ADDRESS
 ```
 
 It should show something like this:
@@ -161,6 +161,6 @@ repayments truly happened.
 [how to customize our trustless bridging logic]: ../custom-contracts-bridging/README.md
 [Hello Bridge]: ../hello-bridge/README.md
 [setup]: ../hello-bridge/README.md#1-setup
-[Custom Contracts Bridging]: ../custom-contracts-bridging/README.md#33-update-environment-with-yout-usc-contract-address
-[USC Gitbook]: https://docs.creditcoin.org/usc
+[Custom Contracts Bridging]: ../custom-contracts-bridging/README.md#33-update-environment-with-your-asc-contract-address
+[ASC Gitbook]: https://docs.creditcoin.org/attestcoin-protocol
 [Loan Flow]: ../loan-flow/README.md

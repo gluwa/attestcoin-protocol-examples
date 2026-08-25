@@ -1,6 +1,6 @@
-# Troubleshooting USCMinter Contract Deployment
+# Troubleshooting ASCMinter Contract Deployment
 
-This guide explains how to deploy the `USCMinter` contract to Creditcoin USC networks. The contract serves as a bridge minter that verifies cross-chain proofs and mints tokens on Creditcoin.
+This guide explains how to deploy the `ASCMinter` contract to Creditcoin ASC networks. The contract serves as a bridge minter that verifies cross-chain proofs and mints tokens on Creditcoin.
 
 ## Verify Deployment
 
@@ -10,7 +10,7 @@ Search for your contract address to see deployment details and transaction histo
 
 ## Contract Details
 
-- **Contract Name**: `USCMinter`
+- **Contract Name**: `ASCMinter`
 - **Token Name**: "Mintable (BTKT)"
 - **Token Symbol**: "BTKT"
 - **Decimals**: 18 (inherited from OpenZeppelin ERC20)
@@ -46,13 +46,13 @@ forge create \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
     --gas-price <higher_gas_price> \
     --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/USCMinter.sol:USCMinter
+    contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
 **Solution 2: Wait and retry** (recommended)
 
 Usually waiting for around 10s-30s and trying to deploy again will work, if you already managed to deploy the decoder you only need to
-retry redeploying the `USCMinter` contract:
+retry redeploying the `ASCMinter` contract:
 
 ```bash
 forge create \
@@ -60,7 +60,7 @@ forge create \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
     --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/USCMinter.sol:USCMinter
+    contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
 **Solution 3: Check current nonce and use next**
@@ -76,7 +76,7 @@ forge create \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
     --nonce X \
     --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/USCMinter.sol:USCMinter
+    contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
 **Solution 4: Check if contract was already deployed**
@@ -137,7 +137,7 @@ forge create \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
     --nonce $((CURRENT_NONCE + 1)) \
     --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/USCMinter.sol:USCMinter
+    contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
 ## Next Steps

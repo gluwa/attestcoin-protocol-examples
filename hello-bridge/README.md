@@ -6,7 +6,7 @@ bridging!** Cross-chain bridging on Creditcoin can be broken down into three bro
 1. To begin, the `ERC20` tokens to bridge are burned using a smart contract on our _source chain_
    (in this case, Sepolia).
 2. Then, we generate merkle and continuity proofs corresponding to our source chain token burn
-3. Using the proofs we generated, we call our minter universal smart contract (USC) which will internally call the Creditcoin oracle's native proof verifier
+3. Using the proofs we generated, we call our minter Attestcoin smart contract (ASC) which will internally call the Creditcoin oracle's native proof verifier
 4. After that the same contract will mint the tokens on Creditcoin
 
 ## 0. Install
@@ -22,7 +22,7 @@ yarn install
 This tutorial involves the use of two different blockchains.
 
 - Sepolia, which serves as our _source chain_ for the tutorial. This is where tokens are burned.
-- Creditcoin CC3 Testnet, which serves as our _execution chain_ for the tutorial. This is where our minter universal smart contract lives. Tokens are minted by that contract.
+- Creditcoin CC3 Testnet, which serves as our _execution chain_ for the tutorial. This is where our minter Attestcoin smart contract lives. Tokens are minted by that contract.
 
 In order to use both blockchains we need to create a wallet and fund it with the native tokens of
 both networks.
@@ -151,7 +151,7 @@ transactionHash         0xbc1aefc42f7bc5897e7693e815831729dc401877df182b137ab3bf
 
 Save the transaction hash. You will be needing it in the next step.
 
-## 4. Submit a mint query to the USC contract
+## 4. Submit a mint query to the ASC contract
 
 Great, we've burned some tokens! But how can we prove it? Most cross-chain bridges rely on a
 _centralized_, _trusted_ approach: one service or company handles all the token burns on the _source
@@ -159,8 +159,8 @@ chain_ and is responsible for distributing the same amount of tokens on the targ
 be an issue, since nothing is preventing that company from censoring certain transactions or even
 stealing funds! Web3 was made to be _trustless_ and _decentralized_, let's make it that way 😎.
 
-Now that we've burnt funds on Sepolia, we can use that transaction to request a mint in our USC contract.
-But before we can submit our USC call, we need to generate proofs which will be submitted to the Creditcoin
+Now that we've burnt funds on Sepolia, we can use that transaction to request a mint in our ASC contract.
+But before we can submit our ASC call, we need to generate proofs which will be submitted to the Creditcoin
 Oracle to verify our cross-chain data.
 
 All these steps are condensed in the `hello_bridge:submit_query` script, which is run as follows:
@@ -189,7 +189,7 @@ Waiting for transaction to be mined...
 Tokens minted! Contract: 0x914Cf96BF28b7b4921db27b264ecEd71aC91134E, To: 0x20dB67795C2AEb4De075986b0D4217A109FEF2B5, Amount: 50000000000000000000, QueryId: 0xf655981895d3e55d883e52c239ba490afba06b87e33c569a5afe9a7980721c47
 ```
 
-With a comparatively slow source chain such as Ethereum or Sepolia, transactions in very recent blocks will take ~8-10 minutes to be attested. This delay is necessary to keep the USC protocol secure in the event of a **source chain reversion**.
+With a comparatively slow source chain such as Ethereum or Sepolia, transactions in very recent blocks will take ~8-10 minutes to be attested. This delay is necessary to keep the ASC protocol secure in the event of a **source chain reversion**.
 
 Once that's done we only need to check our newly minted tokens!
 
@@ -199,7 +199,7 @@ As a final check, verify that your tokens were successfully minted on Creditcoin
 
 ```bash
 WALLET_ADDRESS=$(cast wallet address --private-key $CREDITCOIN_WALLET_PRIVATE_KEY)
-yarn utils:check_balance $USC_MINTABLE_TOKEN $WALLET_ADDRESS
+yarn utils:check_balance $ASC_MINTABLE_TOKEN $WALLET_ADDRESS
 ```
 
 This will return your balance in whole (BTKT) token units.
@@ -234,6 +234,6 @@ be used by teams of DApp builders who will handle data provisioning on behalf of
 [Infura]: https://developer.metamask.io/register
 [step 1.1]: #11-generate-a-new-wallet-address
 [step 2]: #2-minting-some-tokens-on-sepolia
-[step 4]: #4-submit-a-mint-query-to-the-usc-contract
-[DApp Design Patterns]: https://docs.creditcoin.org/usc/dapp-builder-infrastructure/dapp-design-patterns
+[step 4]: #4-submit-a-mint-query-to-the-asc-contract
+[DApp Design Patterns]: https://docs.creditcoin.org/attestcoin-protocol/dapp-builder-infrastructure/dapp-design-patterns-readability
 [Custom Contracts Bridging]: ../custom-contracts-bridging/README.md

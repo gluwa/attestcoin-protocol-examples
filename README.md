@@ -1,4 +1,4 @@
-# 🌉 USC Testnet Bridge Examples 🌉
+# 🌉 ASC Testnet Bridge Examples 🌉
 
 This repository is designed as a starting point for users and builders alike to explore the new
 Creditcoin cross-chain features brought forwards in the new `CC3 Testnet` update. Learn how to use
@@ -68,15 +68,15 @@ shows you how offchain workers can be used to simplify the user flow of your cro
 ### Loan Flow
 
 Building on top of what we learned with the [Bridge Offchain Worker] we take it a step further by
-implementing a loaning system using both a USC contract, a source chain helper and an offchain worker
+implementing a loaning system using both a ASC contract, a source chain helper and an offchain worker
 to seamlesly coordinate between the two, and of course making use of our Oracle proving capabilities to
 add the final touches of trust into the process.
 
 ## External Resources
 
-- 📚 [USC Architecture Overview]
+- 📚 [ASC Architecture Overview]
 - 📚 [DApp Builder Infrastructure]
-- 📚 [Creditcoin Oracle Subsystem]
+- 📚 [Attestcoin Readability Subsystems]
 
 [yarn]: https://yarnpkg.com/getting-started/install
 [foundry]: https://getfoundry.sh/
@@ -84,6 +84,6 @@ add the final touches of trust into the process.
 [Custom Contracts Bridging]: ./custom-contracts-bridging/README.md
 [Bridge Offchain Worker]: ./bridge-offchain-worker/README.md
 [Loan Flow]: ./loan-flow/README.md
-[USC Architecture Overview]: https://docs.creditcoin.org/usc/overview/usc-architecture-overview
-[DApp Builder Infrastructure]: https://docs.creditcoin.org/usc/dapp-builder-infrastructure/
-[Creditcoin Oracle Subsystem]: https://docs.creditcoin.org/usc/creditcoin-oracle-subsystems/
+[ASC Architecture Overview]: https://docs.creditcoin.org/attestcoin-protocol/architecture
+[DApp Builder Infrastructure]: https://docs.creditcoin.org/attestcoin-protocol/dapp-builder-infrastructure
+[Attestcoin Readability Subsystems]: https://docs.creditcoin.org/attestcoin-protocol/attestcoin-readability

@@ -34,7 +34,7 @@ The setup of this example is a bit more complex than previous ones. So let's go 
 Our system will have three contracts:
 
 - An ERC20 contract deployed on Sepolia, which will be the contract where the lending and borrowing will happen
-- A loan manager USC contract deployed on Creditcoin, this will be where loan will be registered and their state updated from the worker
+- A loan manager ASC contract deployed on Creditcoin, this will be where loan will be registered and their state updated from the worker
 - An auxiliary loan contract deployed on Sepolia, this is where both funding and repayment events are emitted
 
 Make sure to first load your `.env` file with:
@@ -68,7 +68,7 @@ SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS=<erc20_contract_address>
 ```
 
 Now we need to deploy a `EvmV1Decoder` library so that we can reference it in our
-`USCLoanManager`. We do so like this:
+`ASCLoanManager`. We do so like this:
 
 ```bash
 forge create \
@@ -86,7 +86,7 @@ Deployed to: 0xfE119359B96Bb1A32c14d32dD6b7E2f977Cd1060
 Transaction hash: 0xd1689ff2d26fd9e271d8c03e7933ce98f2f38836dd18441f6240e86a5816ec8d
 ```
 
-Use the contract address shown in `Deployed to:` to deploy your `USCMinter` using the following command:
+Use the contract address shown in `Deployed to:` to deploy your `ASCMinter` using the following command:
 
 ```sh
 forge create \
@@ -94,7 +94,7 @@ forge create \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
     --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/USCLoanManager.sol:USCLoanManager
+    contracts/sol/ASCLoanManager.sol:ASCLoanManager
 ```
 
 > [!IMPORTANT]
@@ -103,7 +103,7 @@ forge create \
 As before, grab the address and add it to the `.env` file, like so:
 
 ```env
-USC_LOAN_MANAGER_CONTRACT_ADDRESS=<usc_loan_manager_contract_address>
+ASC_LOAN_MANAGER_CONTRACT_ADDRESS=<asc_loan_manager_contract_address>
 ```
 
 Finally, we deploy the loan helper contract:
@@ -256,7 +256,7 @@ Once it's up and running, you start to see the following logs:
 Starting loan worker...
 Worker started! Listening for events...
 Polling source chain from block 11073401
-Polling USC chain from block 4969438
+Polling ASC chain from block 4969438
 ```
 
 ## 3. Registering a loan
@@ -490,17 +490,17 @@ So the borrower ended up losing the 50 extra micro units of the interest and the
 
 ## Conclusion
 
-Congratulations! You've completed the Creditcoin Universal Smart Contracts tutorial series!
+Congratulations! You've completed the Creditcoin Attestcoin Smart Contracts tutorial series!
 You've learned:
 
 1. How to interact with the Creditcoin Oracle
-2. How to deploy your own custom Universal Smart Contracts
+2. How to deploy your own custom Attestcoin Smart Contracts
 3. How to run an offchain worker to support smooth cross-chain user experience
 4. How to run a more complex loan flow example which uses the Oracle to inform successive cross-chain state transitions
 
-If you haven't already, take a look at the [USC Gitbook] for more information.
+If you haven't already, take a look at the [ASC Gitbook] for more information.
 
 [Bridge Offchain Worker]: ../bridge-offchain-worker/README.md
 [Hello Bridge]: ../hello-bridge/README.md#11-generate-a-new-wallet-address
-[USC Gitbook]: https://docs.creditcoin.org/usc
+[ASC Gitbook]: https://docs.creditcoin.org/attestcoin-protocol
 [🚰 testnet faucet]: https://cloud.google.com/application/web3/faucet/ethereum/sepolia

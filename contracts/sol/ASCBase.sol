@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 import {INativeQueryVerifier, NativeQueryVerifierLib} from "./VerifierInterface.sol";
 
-abstract contract USCBase {
+abstract contract ASCBase {
     /// @notice The Native Query Verifier precompile instance
     /// @dev Address: 0x0000000000000000000000000000000000000FD2 (4050 decimal)
     INativeQueryVerifier public immutable VERIFIER;

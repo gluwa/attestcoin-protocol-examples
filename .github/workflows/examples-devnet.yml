@@ -19,7 +19,7 @@ jobs:
     uses: ./.github/workflows/hello-bridge.yml
     with:
       source_chain_kind: "sepolia"
-      usc_kind: "devnet"
+      asc_kind: "devnet"
     secrets: inherit
 
   custom-contracts-bridging:
@@ -29,7 +29,7 @@ jobs:
     uses: ./.github/workflows/custom-contracts-bridging.yml
     with:
       source_chain_kind: "sepolia"
-      usc_kind: "devnet"
+      asc_kind: "devnet"
     secrets: inherit
 
   bridge-offchain-worker:
@@ -39,7 +39,7 @@ jobs:
     uses: ./.github/workflows/bridge-offchain-worker.yml
     with:
       source_chain_kind: "sepolia"
-      usc_kind: "devnet"
+      asc_kind: "devnet"
     secrets: inherit
 
   loan-flow:
@@ -50,5 +50,5 @@ jobs:
     uses: ./.github/workflows/loan-flow.yml
     with:
       source_chain_kind: "sepolia"
-      usc_kind: "devnet"
+      asc_kind: "devnet"
     secrets: inherit

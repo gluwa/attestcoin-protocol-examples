@@ -106,7 +106,7 @@ export async function computeGasLimitForLoanManager(
   signerAddress: string,
   is_repayment: boolean
 ): Promise<bigint> {
-  const action = is_repayment ? 1 : 0; // See LoanManagerActions in USCLoanManager.sol
+  const action = is_repayment ? 1 : 0; // See LoanManagerActions in ASCLoanManager.sol
   const chainKey = proofData.chainKey;
   const height = proofData.headerNumber;
   const encodedTransaction = proofData.txBytes;
@@ -143,7 +143,7 @@ export async function computeGasLimitForMinter(
   proofData: proofProvider.ContinuityResponse,
   signerAddress: string
 ): Promise<bigint> {
-  const action = 0; // Mint action (see MinterActions in USCMinter)
+  const action = 0; // Mint action (see MinterActions in ASCMinter)
   const chainKey = proofData.chainKey;
   const height = proofData.headerNumber;
   const encodedTransaction = proofData.txBytes;
@@ -174,7 +174,7 @@ export async function computeGasLimitForMinter(
 }
 
 /**
- * Submits the proof of a LoanFunded event to the USCLoanManager contract
+ * Submits the proof of a LoanFunded event to the ASCLoanManager contract
  * @param contract The loan manager contract. Must have the function markLoanAsFunded.
  * @param proofData A proof data object obtained from the proof generation process.
  * @returns A promise that resolves to the transaction response of the markLoanAsFunded call.
@@ -207,7 +207,7 @@ export async function submitFundProofToLoanManager(
 }
 
 /**
- * Submits the proof of a LoanRepaid event to the USCLoanManager contract
+ * Submits the proof of a LoanRepaid event to the ASCLoanManager contract
  * @param contract The loan manager contract. Must have the function noteLoanRepayment.
  * @param proofData A proof data object obtained from the proof generation process.
  * @returns A promise that resolves to the transaction response of the noteLoanRepayment call.
@@ -240,7 +240,7 @@ export async function submitRepayProofToLoanManager(
 }
 
 /**
- * Submits the proof to the USC minter contract.
+ * Submits the proof to the ASC minter contract.
  * @param contract A minter contract instance, must have the mintFromQuery method with the correct signature.
  * @param proofData A proof data object obtained from the proof generation process.
  * @returns A promise that resolves to the transaction response of the mintFromQuery call.
@@ -250,7 +250,7 @@ export async function submitProofToMinter(
   proofData: proofProvider.ContinuityResponse,
   gasLimit: bigint
 ): Promise<any> {
-  const action = 0; // Mint action (see MinterActions in USCMinter)
+  const action = 0; // Mint action (see MinterActions in ASCMinter)
   const chainKey = proofData.chainKey;
   const height = proofData.headerNumber;
   const encodedTransaction = proofData.txBytes;
@@ -284,7 +284,7 @@ export interface MintResult {
 }
 
 /**
- * Submits the proof to the USC minter contract and awaits the TokensMinted event.
+ * Submits the proof to the ASC minter contract and awaits the TokensMinted event.
  * Uses transaction receipt to check for events instead of filter-based polling to avoid
  * "Filter id does not exist" errors from RPC nodes with filter expiration.
  * @param contract A minter contract instance, must have the mintFromQuery method with the correct signature.

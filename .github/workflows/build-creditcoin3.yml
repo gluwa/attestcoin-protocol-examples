@@ -33,6 +33,12 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      # The ubuntu-26.04 image does not ship libclang, which bindgen (a build
+      # dependency of librocksdb-sys and libsqlite3-sys) needs to generate FFI
+      # bindings. Without it clang-sys fails to find libclang.so and panics.
+      - name: Install libclang
+        run: sudo apt-get update && sudo apt-get install -y clang libclang-dev llvm-dev
+
       - name: Configure rustc version
         run: |
           RUSTC_VERSION=$(grep channel rust-toolchain.toml | tail -n1 | tr -d " " | cut -f2 -d'"')

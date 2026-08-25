@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { Contract, ethers } from 'ethers';
 
-import loanManagerAbi from '../contracts/abi/USCLoanManager.json';
+import loanManagerAbi from '../contracts/abi/ASCLoanManager.json';
 import { isValidContractAddress } from '../utils';
 
 dotenv.config({ override: true });
@@ -88,14 +88,14 @@ const main = async () => {
 
   // Environment Variables
   const ccNextRpcUrl = process.env.CREDITCOIN_RPC_URL;
-  const loanManagerContractAddress = process.env.USC_LOAN_MANAGER_CONTRACT_ADDRESS;
+  const loanManagerContractAddress = process.env.ASC_LOAN_MANAGER_CONTRACT_ADDRESS;
 
   if (!ccNextRpcUrl) {
     throw new Error('CREDITCOIN_RPC_URL environment variable is not configured or invalid');
   }
 
   if (!isValidContractAddress(loanManagerContractAddress)) {
-    throw new Error('USC_LOAN_MANAGER_CONTRACT_ADDRESS environment variable is not configured or invalid');
+    throw new Error('ASC_LOAN_MANAGER_CONTRACT_ADDRESS environment variable is not configured or invalid');
   }
 
   // 1. Connect to Creditcoin chain loan manager contract

@@ -67,45 +67,45 @@ source .env
 
 ## 3. Deploy Your Own Custom Bridging Contract
 
-In the next two steps we will be deploying our own bridging contract called `USCMinter.sol`
+In the next two steps we will be deploying our own bridging contract called `ASCMinter.sol`
 
-Universal smart contracts (USCs) such as `USCMinter` are intended to be deployed by DApp
-builders. Here, our USC is used only for bridging tokens. A USC exposes functions which
+Attestcoin smart contracts (ASCs) such as `ASCMinter` are intended to be deployed by DApp
+builders. Here, our ASC is used only for bridging tokens. A ASC exposes functions which
 internally make use of the Creditcoin Oracle to verify cross-chain data. It then interprets
 those data and uses them to trigger DApp business logic.
 
-For instance, our `USCMinter` looks for fields like `from`, `to`, and `amount` in the
+For instance, our `ASCMinter` looks for fields like `from`, `to`, and `amount` in the
 cross-chain data we submit to it. With those fields, the contract can verify whether or not a
 token burn took place, how many tokens it needs to mint on Creditcoin, and which address it
 should mint them to.
 
 ### 3.1 Modify The Bridge Smart Contract
 
-As an exercise, we will be modifying our `USCMinter` so that it mints _twice_ the amount
+As an exercise, we will be modifying our `ASCMinter` so that it mints _twice_ the amount
 of tokens which were burned on our _source chain_.
 
 > [!NOTE]
 > This is for demonstration purposes only, as bridging this way dilutes the value of our `TEST`
 > token each time we bridge it.
 
-Start by opening the file `contracts/sol/USCMinter.sol`. Next, navigate to the following line
+Start by opening the file `contracts/sol/ASCMinter.sol`. Next, navigate to the following line
 inside of the `_processMint` function:
 
 ```sol
-USCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue);
+ASCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue);
 ```
 
-Update it so that your `USCMinter` contract mints twice the `burntValue`
+Update it so that your `ASCMinter` contract mints twice the `burntValue`
 of tokens it should on Creditcoin. The resulting line should look something like:
 
 ```sol
-USCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue * 2);
+ASCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue * 2);
 ```
 
 ### 3.2 Deploy Your Decoder Library and Modified Contract
 
 First we need to deploy our `EvmV1Decoder` library so that we can reference it in our
-`USCMinter`. We do so like this:
+`ASCMinter`. We do so like this:
 
 ```bash
 forge create \
@@ -123,7 +123,7 @@ Deployed to: 0x128A6492F875Bd92C07D7F0050fc5c265dbc849B
 Transaction hash: 0x04e524d4578851b06bd2196710b0c9890fff6bf29d40999c5fb02dab0c428fca
 ```
 
-Use the contract address shown in `Deployed to:` to deploy your `USCMinter` using the following command:
+Use the contract address shown in `Deployed to:` to deploy your `ASCMinter` using the following command:
 
 ```bash
 forge create \
@@ -131,7 +131,7 @@ forge create \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
     --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/USCMinter.sol:USCMinter
+    contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
 > [!IMPORTANT]
@@ -147,13 +147,13 @@ Transaction hash: 0xe86e3c2f77fd050a4120dbd195668af2f3d94f3a41b5db21643c53c1ac3c
 
 If you have issues with deployment during this step, see the [Deployment Troubleshooting Guide]
 
-### 3.3 Update environment with your USC contract address
+### 3.3 Update environment with your ASC contract address
 
 Save the address of the contract. And modify the following entry in the `.env` file found at the root of the
 repository:
 
 ```env
-USC_CUSTOM_MINTER_CONTRACT_ADDRESS=<usc_address_from_step_3_2>
+ASC_CUSTOM_MINTER_CONTRACT_ADDRESS=<asc_address_from_step_3_2>
 ```
 
 Once again, reload your `.env` file with:
@@ -162,9 +162,9 @@ Once again, reload your `.env` file with:
 source .env
 ```
 
-### 3.4 Deploy Minter ERC20 Contract and register with USC Minter
+### 3.4 Deploy Minter ERC20 Contract and register with ASC Minter
 
-Now that we've deployed our USC which triggers the minting action, we need to connect the ERC20 contract in
+Now that we've deployed our ASC which triggers the minting action, we need to connect the ERC20 contract in
 which we will mint wrapped tokens!
 
 ```bash
@@ -173,7 +173,7 @@ forge create \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
     contracts/sol/BridgeTestToken.sol:BridgeTestToken \
-    --constructor-args "$USC_CUSTOM_MINTER_CONTRACT_ADDRESS"
+    --constructor-args "$ASC_CUSTOM_MINTER_CONTRACT_ADDRESS"
 ```
 
 You should get some output with the address of the ERC20 token you just deployed:
@@ -188,7 +188,7 @@ Modify the following entry in the `.env` file found at the root of the
 repository:
 
 ```env
-USC_CUSTOM_MINTABLE_TOKEN=<ERC20_address_from_step_3_4>
+ASC_CUSTOM_MINTABLE_TOKEN=<ERC20_address_from_step_3_4>
 ```
 
 Once again, reload your `.env` file with:
@@ -203,8 +203,8 @@ to bridge.
 ```bash
 cast send \
     --rpc-url $CREDITCOIN_RPC_URL \
-    $USC_CUSTOM_MINTER_CONTRACT_ADDRESS \
-    "wrapOriginToken(address, address)" $SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS $USC_CUSTOM_MINTABLE_TOKEN \
+    $ASC_CUSTOM_MINTER_CONTRACT_ADDRESS \
+    "wrapOriginToken(address, address)" $SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS $ASC_CUSTOM_MINTABLE_TOKEN \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY
 ```
 
@@ -234,9 +234,9 @@ transactionHash         0xbc1aefc42f7bc5897e7693e815831729dc401877df182b137ab3bf
 
 Save the transaction hash. You will be needing it in the next step.
 
-## 5. Submit a mint query to the USC contract
+## 5. Submit a mint query to the ASC contract
 
-Now that we've burnt funds on Sepolia, we can use that transaction to request a mint in our custom USC contract,
+Now that we've burnt funds on Sepolia, we can use that transaction to request a mint in our custom ASC contract,
 this also includes generating the proof for the Oracle using the Creditcoin proof generator library.
 
 ```sh
@@ -272,7 +272,7 @@ As a final check, verify that your tokens were successfully minted on Creditcoin
 
 ```bash
 WALLET_ADDRESS=$(cast wallet address --private-key $CREDITCOIN_WALLET_PRIVATE_KEY)
-yarn utils:check_balance $USC_CUSTOM_MINTABLE_TOKEN $WALLET_ADDRESS
+yarn utils:check_balance $ASC_CUSTOM_MINTABLE_TOKEN $WALLET_ADDRESS
 ```
 
 This will return your balance in whole (BTKT) token units.
@@ -306,6 +306,6 @@ order to ensure robustness and streamline UX.
 [setup]: ../hello-bridge/README.md#1-setup
 [step 2]: #2-deploy-a-test-erc20-contract-on-sepolia
 [step 3.2]: #32-deploy-your-modified-contract
-[step 5]: #5-submit-a-mint-query-to-the-usc-contract
+[step 5]: #5-submit-a-mint-query-to-the-asc-contract
 [Deployment Troubleshooting Guide]: ../contracts/DEPLOY.md
 [Bridge Offchain Worker]: ../bridge-offchain-worker/README.md

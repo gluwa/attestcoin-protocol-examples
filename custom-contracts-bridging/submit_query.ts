@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { Contract, ethers, InterfaceAbi } from 'ethers';
 
-import USCMinterABI from '../contracts/abi/USCMinter.json';
+import ASCMinterABI from '../contracts/abi/ASCMinter.json';
 import {
   generateProofFor,
   computeGasLimitForMinter,
@@ -55,9 +55,9 @@ async function main() {
     throw new Error('CREDITCOIN_RPC_URL environment variable is not configured or invalid');
   }
 
-  const minterContractAddress = process.env.USC_CUSTOM_MINTER_CONTRACT_ADDRESS;
+  const minterContractAddress = process.env.ASC_CUSTOM_MINTER_CONTRACT_ADDRESS;
   if (!isValidContractAddress(minterContractAddress)) {
-    throw new Error('USC_CUSTOM_MINTER_CONTRACT_ADDRESS is not configured or invalid');
+    throw new Error('ASC_CUSTOM_MINTER_CONTRACT_ADDRESS is not configured or invalid');
   }
   const sourceChainRpcUrl = process.env.SOURCE_CHAIN_RPC_URL;
   if (!sourceChainRpcUrl) {
@@ -77,11 +77,11 @@ async function main() {
     sourceChainProvider
   );
 
-  // 3. Using previously generated proof, submit to USC minter and await for the minted event
+  // 3. Using previously generated proof, submit to ASC minter and await for the minted event
   if (proofResult.success) {
-    // Establish link with the USC contract
+    // Establish link with the ASC contract
     const wallet = new ethers.Wallet(ccNextPrivateKey!, ccProvider);
-    const contractABI = USCMinterABI as unknown as InterfaceAbi;
+    const contractABI = ASCMinterABI as unknown as InterfaceAbi;
     const minterContract = new Contract(minterContractAddress!, contractABI, wallet);
 
     const proofData = proofResult.data!;

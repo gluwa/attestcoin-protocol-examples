@@ -86,7 +86,7 @@ contract AuxiliaryLoanContract is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @dev Register a loan for funding, can only be called by the owner (USC system) to avoid setting arbitrary amounts
+     * @dev Register a loan for funding, can only be called by the owner (ASC system) to avoid setting arbitrary amounts
      * @param loanId ID of the loan being registered
      * @param flow Flow structure for the loan funding
      * @param fundAmount Amount to be funded for the loan
@@ -153,7 +153,7 @@ contract AuxiliaryLoanContract is Ownable, ReentrancyGuard {
 
         // If fully funded, emit event and register the loan for repayment
         if (loanFundAmounts[loanId] == 0) {
-            // Emit event for USC worker to listen to
+            // Emit event for ASC worker to listen to
             emit LoanFunded(loanId);
 
             // Register repayment flow
