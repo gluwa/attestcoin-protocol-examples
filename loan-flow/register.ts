@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { Contract, ethers, EventLog } from 'ethers';
 
-import loanManagerAbi from '../contracts/abi/USCLoanManager.json';
+import loanManagerAbi from '../contracts/abi/ASCLoanManager.json';
 import { isValidContractAddress, isValidPrivateKey } from '../utils';
 
 dotenv.config({ override: true });
@@ -39,7 +39,7 @@ const main = async () => {
   }
 
   // Environment Variables
-  const loanManagerContractAddress = process.env.USC_LOAN_MANAGER_CONTRACT_ADDRESS;
+  const loanManagerContractAddress = process.env.ASC_LOAN_MANAGER_CONTRACT_ADDRESS;
   const sourceChainERC20ContractAddress = process.env.SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS;
   const lenderKey = process.env.LENDER_WALLET_PRIVATE_KEY;
   const borrowerKey = process.env.BORROWER_WALLET_PRIVATE_KEY;
@@ -51,7 +51,7 @@ const main = async () => {
   }
 
   if (!isValidContractAddress(loanManagerContractAddress)) {
-    throw new Error('USC_LOAN_MANAGER_CONTRACT_ADDRESS environment variable is not configured or invalid');
+    throw new Error('ASC_LOAN_MANAGER_CONTRACT_ADDRESS environment variable is not configured or invalid');
   }
   if (!isValidContractAddress(sourceChainERC20ContractAddress)) {
     throw new Error('SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS environment variable is not configured or invalid');

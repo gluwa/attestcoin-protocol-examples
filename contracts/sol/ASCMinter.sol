@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.23;
 
-import {USCMintableToken, USC_MINTER} from "./MintableToken.sol";
-import {USCBase} from "./USCBase.sol";
+import {ASCMintableToken, ASC_MINTER} from "./MintableToken.sol";
+import {ASCBase} from "./ASCBase.sol";
 import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol";
 
-contract USCMinter is USCBase {
+contract ASCMinter is ASCBase {
     enum MinterActions {
         Mint // 0
     }
@@ -23,8 +23,8 @@ contract USCMinter is USCBase {
         require(originToken != address(0), "Origin token cannot be the zero address");
         require(targetToken != address(0), "Target token cannot be the zero address");
         require(wrappedTokens[originToken] == address(0), "Origin token already wrapped");
-        require(USCMintableToken(targetToken).owner() == msg.sender, "Target token must be owned by the caller");
-        require(USCMintableToken(targetToken).hasRole(USC_MINTER, address(this)), "Target token must be USCMintableToken and support AccessControl");
+        require(ASCMintableToken(targetToken).owner() == msg.sender, "Target token must be owned by the caller");
+        require(ASCMintableToken(targetToken).hasRole(ASC_MINTER, address(this)), "Target token must be ASCMintableToken and support AccessControl");
 
         wrappedTokens[originToken] = targetToken;
     }
@@ -60,7 +60,7 @@ contract USCMinter is USCBase {
             "Origin token not registered in wrapped tokens!"
         );
 
-        USCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue);
+        ASCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue);
 
         emit TokensMinted(wrappedTokenAddress, burntFrom, burntValue, queryId);
     }

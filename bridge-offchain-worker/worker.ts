@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { Contract, ethers } from 'ethers';
 
 import burnerAbi from '../contracts/abi/TestERC20.json';
-import USCMinterABI from '../contracts/abi/USCMinter.json';
+import ASCMinterABI from '../contracts/abi/ASCMinter.json';
 import {
   generateProofFor,
   computeGasLimitForMinter,
@@ -44,8 +44,8 @@ const main = async () => {
   const sourceChainKey = Number(process.env.SOURCE_CHAIN_KEY);
   const sourceChainRpcUrl = process.env.SOURCE_CHAIN_RPC_URL;
 
-  // Minter USC contract address on Creditcoin
-  const uscMinterContractAddress = process.env.USC_CUSTOM_MINTER_CONTRACT_ADDRESS;
+  // Minter ASC contract address on Creditcoin
+  const ascMinterContractAddress = process.env.ASC_CUSTOM_MINTER_CONTRACT_ADDRESS;
   const ccNextRpcUrl = process.env.CREDITCOIN_RPC_URL;
   const ccNextWalletPrivateKey = process.env.CREDITCOIN_WALLET_PRIVATE_KEY;
 
@@ -53,8 +53,8 @@ const main = async () => {
     throw new Error('SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS environment variable is not configured or invalid');
   }
 
-  if (!isValidContractAddress(uscMinterContractAddress)) {
-    throw new Error('USC_CUSTOM_MINTER_CONTRACT_ADDRESS environment variable is not configured or invalid');
+  if (!isValidContractAddress(ascMinterContractAddress)) {
+    throw new Error('ASC_CUSTOM_MINTER_CONTRACT_ADDRESS environment variable is not configured or invalid');
   }
 
   if (!sourceChainRpcUrl) {
@@ -73,10 +73,10 @@ const main = async () => {
   const ethProvider = new ethers.JsonRpcProvider(sourceChainRpcUrl);
   const burnerContract = new Contract(sourceChainContractAddress!, burnerAbi, ethProvider);
 
-  // 2. Create connection to minter contract on Creditcoin USC chain
+  // 2. Create connection to minter contract on Creditcoin ASC chain
   const ccProvider = new ethers.JsonRpcProvider(ccNextRpcUrl);
   const wallet = new ethers.Wallet(ccNextWalletPrivateKey!, ccProvider);
-  const minterContract = new Contract(uscMinterContractAddress!, USCMinterABI, wallet);
+  const minterContract = new Contract(ascMinterContractAddress!, ASCMinterABI, wallet);
 
   // Get starting block numbers
   let burnerFromBlock = await ethProvider.getBlockNumber();
@@ -87,7 +87,7 @@ const main = async () => {
 
   console.log('Worker started! Listening for burn events...');
   console.log(`Polling source chain from block ${burnerFromBlock}`);
-  console.log(`Polling USC chain from block ${minterFromBlock}`);
+  console.log(`Polling ASC chain from block ${minterFromBlock}`);
 
   // Main polling loop
   while (!isShuttingDown) {

@@ -24,25 +24,25 @@ jobs:
     uses: ./.github/workflows/hello-bridge.yml
     with:
       source_chain_kind: "anvil"
-      usc_kind: "local"
+      asc_kind: "local"
 
   custom-contracts-bridging:
     needs: build
     uses: ./.github/workflows/custom-contracts-bridging.yml
     with:
       source_chain_kind: "anvil"
-      usc_kind: "local"
+      asc_kind: "local"
 
   bridge-offchain-worker:
     needs: build
     uses: ./.github/workflows/bridge-offchain-worker.yml
     with:
       source_chain_kind: "anvil"
-      usc_kind: "local"
+      asc_kind: "local"
 
   loan-flow:
     needs: build
     uses: ./.github/workflows/loan-flow.yml
     with:
       source_chain_kind: "anvil"
-      usc_kind: "local"
+      asc_kind: "local"

@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { Contract, ethers } from 'ethers';
 
-import loanManagerAbi from '../contracts/abi/USCLoanManager.json';
+import loanManagerAbi from '../contracts/abi/ASCLoanManager.json';
 import loanHelperAbi from '../contracts/abi/AuxiliaryLoanContract.json';
 import {
   computeGasLimitForLoanManager,
@@ -51,7 +51,7 @@ const main = async () => {
   const ccNextRpcUrl = process.env.CREDITCOIN_RPC_URL;
   const ccNextWalletPrivateKey = process.env.CREDITCOIN_WALLET_PRIVATE_KEY;
   // Contract Addresses
-  const loanManagerContractAddress = process.env.USC_LOAN_MANAGER_CONTRACT_ADDRESS;
+  const loanManagerContractAddress = process.env.ASC_LOAN_MANAGER_CONTRACT_ADDRESS;
   const sourceChainLoanContractAddress = process.env.SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS;
 
   if (!proofBuilderUrl) {
@@ -71,7 +71,7 @@ const main = async () => {
   }
 
   if (!isValidContractAddress(loanManagerContractAddress)) {
-    throw new Error('USC_LOAN_MANAGER_CONTRACT_ADDRESS environment variable is not configured or invalid');
+    throw new Error('ASC_LOAN_MANAGER_CONTRACT_ADDRESS environment variable is not configured or invalid');
   }
   if (!isValidContractAddress(sourceChainLoanContractAddress)) {
     throw new Error('SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS environment variable is not configured or invalid');
@@ -113,9 +113,9 @@ const main = async () => {
 
   console.log('Worker started! Listening for events...');
   console.log(`Polling source chain from block ${sourceFromBlock}`);
-  console.log(`Polling USC chain from block ${ccFromBlock}`);
+  console.log(`Polling ASC chain from block ${ccFromBlock}`);
 
-  // 4. List on block production on USC chain to track loan expiries
+  // 4. List on block production on ASC chain to track loan expiries
   const _ = ccProvider.on('block', (blockNumber: number) => {
     const expiringLoans = loanExpiriesAt[blockNumber];
 
@@ -125,7 +125,7 @@ const main = async () => {
         for (const loanId of expiringLoans) {
           const loanInfo = loanTracker[loanId];
           if (loanInfo && !loanInfo.repaid && !loanInfo.expired) {
-            console.log(`Loan ${loanId} has expired on USC chain at block ${blockNumber}`);
+            console.log(`Loan ${loanId} has expired on ASC chain at block ${blockNumber}`);
             loanInfo.expired = true;
 
             try {

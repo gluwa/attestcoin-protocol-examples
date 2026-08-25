@@ -11,13 +11,13 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {LoanFlow, LoanStatus, LoanOrder, LoanTerms} from "./LoanTypes.sol";
 import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol";
 import {NativeQueryVerifierLib} from "./VerifierInterface.sol";
-import {USCBase} from "./USCBase.sol";
+import {ASCBase} from "./ASCBase.sol";
 
 /**
- * @title USCLoanManager
- * @dev Main contract for managing cross-chain loan orders in the USC system
+ * @title ASCLoanManager
+ * @dev Main contract for managing cross-chain loan orders in the ASC system
  */
-contract USCLoanManager is Ownable, ReentrancyGuard, USCBase {
+contract ASCLoanManager is Ownable, ReentrancyGuard, ASCBase {
     using ECDSA for bytes32;
 
     enum LoanManagerActions {
@@ -153,7 +153,7 @@ contract USCLoanManager is Ownable, ReentrancyGuard, USCBase {
         emit SourceLoanContractRegistered(_sourceLoanContract);
     }
 
-    // Processes a USC action resulting from the `execute` function of the USCBase contract
+    // Processes a ASC action resulting from the `execute` function of the ASCBase contract
     function _processAndEmitEvent(
         uint8 action,
         bytes32, // queryId - unused

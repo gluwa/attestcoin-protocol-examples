@@ -1,6 +1,6 @@
 {
   "license": "MIT",
-  "name": "usc-testnet-bridge-examples",
+  "name": "asc-testnet-bridge-examples",
   "version": "0.2.0",
   "scripts": {
     "hello_bridge:submit_query": "tsx hello-bridge/submit_query.ts",
