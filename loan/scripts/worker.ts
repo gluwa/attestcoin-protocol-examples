@@ -13,7 +13,7 @@ import {
   POLLING_INTERVAL_MS,
   submitFundProofToLoanManager,
   submitRepayProofToLoanManager,
-} from '../utils';
+} from '../../shared/utils';
 
 dotenv.config({ override: true });
 

@@ -50,7 +50,7 @@ forge create \
     --broadcast \
     --rpc-url $SOURCE_CHAIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    contracts/sol/TestERC20.sol:TestERC20
+    loan/contracts/sol/TestERC20.sol:TestERC20
 ```
 
 This should display some output containing the address of your test `ERC20` contract:
@@ -75,7 +75,7 @@ forge create \
   --broadcast \
   --rpc-url $CREDITCOIN_RPC_URL \
   --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-  node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder
+  node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder
 ```
 
 You should get some output with the address of the library you just deployed:
@@ -93,8 +93,8 @@ forge create \
     --broadcast \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/ASCLoanManager.sol:ASCLoanManager
+    --libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
+    loan/contracts/sol/ASCLoanManager.sol:ASCLoanManager
 ```
 
 > [!IMPORTANT]
@@ -113,7 +113,7 @@ forge create \
     --broadcast \
     --rpc-url $SOURCE_CHAIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    contracts/sol/AuxiliaryLoanContract.sol:AuxiliaryLoanContract
+    loan/contracts/sol/AuxiliaryLoanContract.sol:AuxiliaryLoanContract
 ```
 
 Grab the address again (it gets repetitive huh?) and add it to the `.env` file, like so:
@@ -499,7 +499,7 @@ You've learned:
 
 If you haven't already, take a look at the [ASC Gitbook] for more information.
 
-[Bridge Offchain Worker]: ../bridge-offchain-worker/README.md
-[Hello Bridge]: ../hello-bridge/README.md#11-generate-a-new-wallet-address
+[Bridge Offchain Worker]: ../../bridge/bridge-offchain-worker/README.md
+[Hello Bridge]: ../../bridge/hello-bridge/README.md#11-generate-a-new-wallet-address
 [ASC Gitbook]: https://docs.attestcoin.org/
 [🚰 testnet faucet]: https://cloud.google.com/application/web3/faucet/ethereum/sepolia

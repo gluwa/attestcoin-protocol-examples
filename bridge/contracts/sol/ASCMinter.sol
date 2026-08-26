@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 import {ASCMintableToken, ASC_MINTER} from "./MintableToken.sol";
 import {ASCBase} from "./ASCBase.sol";
-import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol";
+import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol";
 
 contract ASCMinter is ASCBase {
     enum MinterActions {

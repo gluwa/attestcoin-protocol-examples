@@ -3,7 +3,7 @@ import { Contract, ethers } from 'ethers';
 
 import loanHelperAbi from '../contracts/abi/AuxiliaryLoanContract.json';
 import ERC20Abi from '../contracts/abi/TestERC20.json';
-import { isValidContractAddress, isValidPrivateKey } from '../utils';
+import { isValidContractAddress, isValidPrivateKey } from '../../shared/utils';
 
 dotenv.config({ override: true });
 
@@ -13,10 +13,10 @@ const main = async () => {
   if (args.length !== 2) {
     console.error(`
   Usage:
-    yarn loan_flow:fund_loan <LoanId> <Amount>
+    yarn loan_flow:repay_loan <LoanId> <Amount>
 
   Example:
-    yarn loan_flow:fund_loan 7 200
+    yarn loan_flow:repay_loan 7 200
   `);
     process.exit(1);
   }
@@ -24,13 +24,13 @@ const main = async () => {
   const [loanIdArg, amountArg] = args;
 
   const loanId = Number(loanIdArg);
-  const loanAmount = Number(amountArg);
+  const repayAmount = Number(amountArg);
 
   if (isNaN(loanId) || loanId < 0) {
     throw new Error('Invalid Loan ID provided');
   }
 
-  if (isNaN(loanAmount) || loanAmount <= 0) {
+  if (isNaN(repayAmount) || repayAmount <= 0) {
     throw new Error('Invalid Loan Amount provided');
   }
 
@@ -63,33 +63,34 @@ const main = async () => {
 
   // 1. Connect to source chain loan contract and ERC20 contract
   const sourceChainProvider = new ethers.JsonRpcProvider(sourceChainRpcUrl);
-  const lenderWallet = new ethers.Wallet(lenderPrivateKey!, sourceChainProvider);
-  const sourceChainLoanContract = new Contract(sourceChainLoanContractAddress!, loanHelperAbi, lenderWallet);
   const borrowerWallet = new ethers.Wallet(borrowerPrivateKey!, sourceChainProvider);
-  const sourceChainERC20Contract = new Contract(sourceChainERC20ContractAddress!, ERC20Abi, lenderWallet);
+  const sourceChainLoanContract = new Contract(sourceChainLoanContractAddress!, loanHelperAbi, borrowerWallet);
+  const lenderWallet = new ethers.Wallet(lenderPrivateKey!, sourceChainProvider);
+  const sourceChainERC20Contract = new Contract(sourceChainERC20ContractAddress!, ERC20Abi, borrowerWallet);
 
-  // 2. Approve the loan contract to transfer lender's tokens
+  // 2. Approve the loan contract to transfer borrower's tokens
   try {
-    const balance: bigint = await sourceChainERC20Contract.balanceOf(lenderWallet.address);
-    console.log(`Lender wallet balance: ${balance}, required: ${loanAmount}`);
-    if (balance < BigInt(loanAmount)) {
-      console.log('Insufficient balance to fund the loan.');
+    const balance: bigint = await sourceChainERC20Contract.balanceOf(borrowerWallet.address);
+    console.log(`Borrower balance: ${balance}, required: ${repayAmount}`);
+
+    if (balance < BigInt(repayAmount)) {
+      console.error('Insufficient balance to repay the loan');
       process.exit(0);
     }
 
     const approved: bigint = await sourceChainERC20Contract.allowance(
-      lenderWallet.address,
+      borrowerWallet.address,
       sourceChainLoanContractAddress
     );
 
     console.log(`Current allowance for loan contract: ${approved}`);
 
-    if (approved < BigInt(loanAmount)) {
+    if (approved < BigInt(repayAmount)) {
+      const allowanceAmount = BigInt(repayAmount) - approved;
       console.log(
-        `Source chain loan contract allowance (${approved}) is less than loan amount ${loanAmount}, requesting extra allowance from lender...`
+        `Source chain loan contract allowance (${approved}) is less than repayment amount ${repayAmount}, requesting extra allowance from borrower...`
       );
-
-      const approveTx = await sourceChainERC20Contract.approve(sourceChainLoanContractAddress, loanAmount);
+      const approveTx = await sourceChainERC20Contract.approve(sourceChainLoanContractAddress, allowanceAmount);
       console.log('Allowance granted: ', approveTx.hash);
 
       // Wait for the approval to actually be mined before we try to spend it
@@ -101,24 +102,23 @@ const main = async () => {
     process.exit(1);
   }
 
-  // 3. Fund the loan
+  // 3. Repay the loan
   try {
-    const tx = await sourceChainLoanContract.fundLoan(
+    const tx = await sourceChainLoanContract.repayLoan(
       loanId,
-      loanAmount,
-      lenderWallet.address,
+      repayAmount,
       borrowerWallet.address,
+      lenderWallet.address,
       sourceChainERC20ContractAddress
     );
-    // Wait for the funding tx to be mined. Without this the script exits while the tx
-    // is still pending, so a subsequent partial funding would read stale on-chain state
-    // (e.g. an allowance that hasn't been consumed yet) and the two fundings would
-    // collide, leaving the loan only partially funded.
-    console.log('Funding transaction submitted, waiting for it to be mined: ', tx.hash);
+    // Wait for the repayment tx to be mined before exiting, otherwise a subsequent
+    // partial repayment would read stale on-chain state and the two repayments could
+    // collide over the same allowance.
+    console.log('Repayment transaction submitted, waiting for it to be mined: ', tx.hash);
     await tx.wait();
-    console.log('Loan funded: ', tx.hash);
+    console.log('Loan repaid: ', tx.hash);
   } catch (error: any) {
-    console.error('Error funding loan: ', error.shortMessage);
+    console.error('Error repaying loan: ', error);
     process.exit(1);
   }
 

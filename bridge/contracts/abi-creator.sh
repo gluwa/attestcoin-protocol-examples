@@ -1,15 +1,14 @@
 #!/bin/bash
 
-# WARNING: execute this from the root directory of this repository !
+# WARNING: execute this from the repository root.
 
-sol_directory="contracts/sol"
-abi_directory="contracts/abi"
+sol_directory="bridge/contracts/sol"
+abi_directory="bridge/contracts/abi"
 
 for p in "$sol_directory"/*; do
     file=$(basename "$p")
     contract_name="${file//.sol/}"
     file_with_extension="$contract_name.json"
-    # Extract only the ABI from the combined JSON output
     solc --base-path . --include-path "node_modules" \
         "$sol_directory/$file" \
         --combined-json abi --overwrite --json-indent 2 | \

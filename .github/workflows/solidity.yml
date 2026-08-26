@@ -35,7 +35,8 @@ jobs:
         run: |
           yarn install
 
-          ~/.foundry/bin/forge build
+          ~/.foundry/bin/forge build --root bridge
+          ~/.foundry/bin/forge build --root loan
 
   check-abi-on-disk:
     runs-on: ubuntu-26.04
@@ -58,7 +59,8 @@ jobs:
           yarn install
 
           solc --version
-          ./contracts/abi-creator.sh
+          ./bridge/contracts/abi-creator.sh
+          ./loan/contracts/abi-creator.sh
 
       - name: Check for mismatch
         run: |

@@ -46,8 +46,8 @@ forge create \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
     --gas-price <higher_gas_price> \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/ASCMinter.sol:ASCMinter
+    --libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
+    bridge/contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
 **Solution 2: Wait and retry** (recommended)
@@ -60,8 +60,8 @@ forge create \
     --broadcast \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/ASCMinter.sol:ASCMinter
+    --libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
+    bridge/contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
 **Solution 3: Check current nonce and use next**
@@ -76,8 +76,8 @@ forge create \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
     --nonce X \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/ASCMinter.sol:ASCMinter
+    --libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
+    bridge/contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
 **Solution 4: Check if contract was already deployed**
@@ -137,8 +137,8 @@ forge create \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
     --nonce $((CURRENT_NONCE + 1)) \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/ASCMinter.sol:ASCMinter
+    --libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
+    bridge/contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
 ## Next Steps

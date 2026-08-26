@@ -198,7 +198,7 @@ jobs:
                 --broadcast                    \
                 --rpc-url "$SOURCE_CHAIN_RPC_URL"  \
                 --private-key "$WALLET_PK"   \
-                contracts/sol/TestERC20.sol:TestERC20 2>&1)
+loan/contracts/sol/TestERC20.sol:TestERC20 2>&1)
           echo "$OUTPUT"
           SOURCE_CHAIN_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "source_chain_contract_address=$SOURCE_CHAIN_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
@@ -208,12 +208,12 @@ jobs:
             --broadcast \
             --rpc-url "$CREDITCOIN_RPC_URL" \
             --private-key "$WALLET_PK" \
-            node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder 2>&1)
+node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder 2>&1)
           echo "$OUTPUT"
           DECODER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
 
           echo "INFO: Modify ASCMinter.sol to mint 2x"
-          sed -i "s/ASCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue);/ASCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue * 2);/" contracts/sol/ASCMinter.sol
+          sed -i "s/ASCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue);/ASCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue * 2);/" bridge/contracts/sol/ASCMinter.sol
           git diff
 
           echo "INFO: deploy ASCMinter.sol to Creditcoin chain"
@@ -221,8 +221,8 @@ jobs:
               --broadcast \
               --rpc-url "$CREDITCOIN_RPC_URL" \
               --private-key "$WALLET_PK" \
-              --libraries "node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:$DECODER_CONTRACT_ADDRESS" \
-              contracts/sol/ASCMinter.sol:ASCMinter 2>&1)
+--libraries "node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:$DECODER_CONTRACT_ADDRESS" \
+              bridge/contracts/sol/ASCMinter.sol:ASCMinter 2>&1)
           echo "$OUTPUT"
           ASC_MINTER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "asc_minter_contract_address=$ASC_MINTER_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
@@ -232,7 +232,7 @@ jobs:
               --broadcast \
               --rpc-url "$CREDITCOIN_RPC_URL" \
               --private-key "$WALLET_PK" \
-              contracts/sol/BridgeTestToken.sol:BridgeTestToken \
+bridge/contracts/sol/BridgeTestToken.sol:BridgeTestToken \
               --constructor-args "$ASC_MINTER_CONTRACT_ADDRESS" 2>&1)
           echo "$OUTPUT"
           ASC_MINTABLE_TOKEN=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")

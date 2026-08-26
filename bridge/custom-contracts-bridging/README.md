@@ -40,7 +40,7 @@ forge create \
     --broadcast \
     --rpc-url $SOURCE_CHAIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    contracts/sol/TestERC20.sol:TestERC20
+    loan/contracts/sol/TestERC20.sol:TestERC20
 ```
 
 This should display some output containing the address of your test `ERC20` contract:
@@ -88,7 +88,7 @@ of tokens which were burned on our _source chain_.
 > This is for demonstration purposes only, as bridging this way dilutes the value of our `TEST`
 > token each time we bridge it.
 
-Start by opening the file `contracts/sol/ASCMinter.sol`. Next, navigate to the following line
+Start by opening the file `bridge/contracts/sol/ASCMinter.sol`. Next, navigate to the following line
 inside of the `_processMint` function:
 
 ```sol
@@ -112,7 +112,7 @@ forge create \
   --broadcast \
   --rpc-url $CREDITCOIN_RPC_URL \
   --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-  node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder
+  node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder
 ```
 
 You should get some output with the address of the library you just deployed:
@@ -130,8 +130,8 @@ forge create \
     --broadcast \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
-    contracts/sol/ASCMinter.sol:ASCMinter
+    --libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
+    bridge/contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
 > [!IMPORTANT]
@@ -172,7 +172,7 @@ forge create \
     --broadcast \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    contracts/sol/BridgeTestToken.sol:BridgeTestToken \
+    bridge/contracts/sol/BridgeTestToken.sol:BridgeTestToken \
     --constructor-args "$ASC_CUSTOM_MINTER_CONTRACT_ADDRESS"
 ```
 

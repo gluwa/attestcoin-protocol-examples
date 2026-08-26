@@ -9,9 +9,8 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {LoanFlow, LoanStatus, LoanOrder, LoanTerms} from "./LoanTypes.sol";
-import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol";
-import {NativeQueryVerifierLib} from "./VerifierInterface.sol";
-import {ASCBase} from "./ASCBase.sol";
+import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol";
+import {ASCBase} from "@gluwa/usc-contracts/contracts/readability/ASCBase.sol";
 
 /**
  * @title ASCLoanManager
@@ -62,8 +61,6 @@ contract ASCLoanManager is Ownable, ReentrancyGuard, ASCBase {
 
     constructor() Ownable(msg.sender) {
         nextLoanId = 1;
-        // Get the precompile instance using the helper library
-        VERIFIER = NativeQueryVerifierLib.getVerifier();
     }
 
     /**

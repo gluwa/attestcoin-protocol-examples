@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import { Contract, ethers } from 'ethers';
 
-import burnerAbi from '../contracts/abi/TestERC20.json';
+import burnerAbi from '../../loan/contracts/abi/TestERC20.json';
 import ASCMinterABI from '../contracts/abi/ASCMinter.json';
 import {
   generateProofFor,
@@ -12,7 +12,7 @@ import {
   POLLING_INTERVAL_MS,
   isValidContractAddress,
   isValidPrivateKey,
-} from '../utils';
+} from '../../shared/utils';
 
 dotenv.config({ override: true });
 

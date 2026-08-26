@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { Contract, ethers } from 'ethers';
 
 import loanManagerAbi from '../contracts/abi/ASCLoanManager.json';
-import { isValidContractAddress } from '../utils';
+import { isValidContractAddress } from '../../shared/utils';
 
 dotenv.config({ override: true });
 
