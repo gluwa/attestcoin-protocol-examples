@@ -1,5 +1,8 @@
 # Custom Contract Bridging
 
+> [!NOTE]
+> Deploys the **simplified** local `ASCMinter` / `ASCBase` pair — direct `execute` minting, no relayer contracts. See [bridge/README.md](../README.md).
+
 > [!TIP]
 > This tutorial builds on the previous [Hello Bridge] example -make sure to check it out before
 > moving on!
@@ -65,47 +68,13 @@ Once again, reload your `.env` file with:
 source .env
 ```
 
-## 3. Deploy Your Own Custom Bridging Contract
+## 3. Deploy your bridging stack
 
-In the next two steps we will be deploying our own bridging contract called `ASCMinter.sol`
+You will deploy the stock `ASCMinter` from this repo — **no contract edits required** for the default path.
 
-Attestcoin smart contracts (ASCs) such as `ASCMinter` are intended to be deployed by DApp
-builders. Here, our ASC is used only for bridging tokens. A ASC exposes functions which
-internally make use of the Creditcoin Oracle to verify cross-chain data. It then interprets
-those data and uses them to trigger DApp business logic.
+### 3.1 Deploy `EvmV1Decoder` (once per Creditcoin network)
 
-For instance, our `ASCMinter` looks for fields like `from`, `to`, and `amount` in the
-cross-chain data we submit to it. With those fields, the contract can verify whether or not a
-token burn took place, how many tokens it needs to mint on Creditcoin, and which address it
-should mint them to.
-
-### 3.1 Modify The Bridge Smart Contract
-
-As an exercise, we will be modifying our `ASCMinter` so that it mints _twice_ the amount
-of tokens which were burned on our _source chain_.
-
-> [!NOTE]
-> This is for demonstration purposes only, as bridging this way dilutes the value of our `TEST`
-> token each time we bridge it.
-
-Start by opening the file `bridge/contracts/sol/ASCMinter.sol`. Next, navigate to the following line
-inside of the `_processMint` function:
-
-```sol
-ASCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue);
-```
-
-Update it so that your `ASCMinter` contract mints twice the `burntValue`
-of tokens it should on Creditcoin. The resulting line should look something like:
-
-```sol
-ASCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue * 2);
-```
-
-### 3.2 Deploy Your Decoder Library and Modified Contract
-
-First we need to deploy our `EvmV1Decoder` library so that we can reference it in our
-`ASCMinter`. We do so like this:
+Deploy the shared decoding library. **Save this address** — you can reuse it for the [Loan Flow](../../loan/scripts/README.md) without deploying again.
 
 ```bash
 forge create \
@@ -115,29 +84,34 @@ forge create \
   node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder
 ```
 
-You should get some output with the address of the library you just deployed:
+Add the library address to your root `.env` so later steps (and the loan tutorial) can reuse it:
 
-```bash
-Deployer: 0x20dB67795C2AEb4De075986b0D4217A109FEF2B5
-Deployed to: 0x128A6492F875Bd92C07D7F0050fc5c265dbc849B
-Transaction hash: 0x04e524d4578851b06bd2196710b0c9890fff6bf29d40999c5fb02dab0c428fca
+```env
+EVM_V1_DECODER_LIBRARY_ADDRESS=<decoder_library_address>
 ```
 
-Use the contract address shown in `Deployed to:` to deploy your `ASCMinter` using the following command:
+Reload:
+
+```sh
+source .env
+```
+
+> **Note:** The library lives under `write-ability/common/` in `@gluwa/usc-contracts` — that is only a shared decoder, not the Outbox/Relayer bridge stack.
+
+### 3.2 Deploy `ASCMinter`
 
 ```bash
 forge create \
     --broadcast \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
+    --libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:$EVM_V1_DECODER_LIBRARY_ADDRESS \
     bridge/contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
-> [!IMPORTANT]
-> Don't forget to replace `<decoder_library_address>` with the address of your deployed decoder contract!
+If deployment fails (nonce, gas, etc.), see [Contributor deploy notes](../contracts/CONTRIBUTING.md).
 
-You should get some output with the address of the contract you just deployed:
+You should get output with the contract address:
 
 ```bash
 Deployer: 0x20dB67795C2AEb4De075986b0D4217A109FEF2B5
@@ -145,27 +119,23 @@ Deployed to: 0xCDf3e9eC93015a1B3047d087296C1cE096f33f74
 Transaction hash: 0xe86e3c2f77fd050a4120dbd195668af2f3d94f3a41b5db21643c53c1ac3cc212
 ```
 
-If you have issues with deployment during this step, see the [Deployment Troubleshooting Guide]
-
 ### 3.3 Update environment with your ASC contract address
 
-Save the address of the contract. And modify the following entry in the `.env` file found at the root of the
-repository:
+Save the address and update the root `.env`:
 
 ```env
 ASC_CUSTOM_MINTER_CONTRACT_ADDRESS=<asc_address_from_step_3_2>
 ```
 
-Once again, reload your `.env` file with:
+Reload:
 
 ```sh
 source .env
 ```
 
-### 3.4 Deploy Minter ERC20 Contract and register with ASC Minter
+### 3.4 Deploy wrapped token and register the route
 
-Now that we've deployed our ASC which triggers the minting action, we need to connect the ERC20 contract in
-which we will mint wrapped tokens!
+Deploy the wrapped ERC20 owned by your minter:
 
 ```bash
 forge create \
@@ -176,29 +146,13 @@ forge create \
     --constructor-args "$ASC_CUSTOM_MINTER_CONTRACT_ADDRESS"
 ```
 
-You should get some output with the address of the ERC20 token you just deployed:
-
-```bash
-Deployer: 0x20dB67795C2AEb4De075986b0D4217A109FEF2B5
-Deployed to: 0xD1A5c57654636146417B589aED99C56b9c73C510
-Transaction hash: 0x07f87a00b117f9d16c5a20a461d00cbce87aa76994af727a02d73da3aca622f1
-```
-
-Modify the following entry in the `.env` file found at the root of the
-repository:
+Update `.env`:
 
 ```env
 ASC_CUSTOM_MINTABLE_TOKEN=<ERC20_address_from_step_3_4>
 ```
 
-Once again, reload your `.env` file with:
-
-```sh
-source .env
-```
-
-Our last step is to register the ERC20 token as the wrapped version of the source chain token we intend
-to bridge.
+Register the Sepolia source token → wrapped token mapping:
 
 ```bash
 cast send \
@@ -206,6 +160,12 @@ cast send \
     $ASC_CUSTOM_MINTER_CONTRACT_ADDRESS \
     "wrapOriginToken(address, address)" $SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS $ASC_CUSTOM_MINTABLE_TOKEN \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY
+```
+
+Optional preflight before burning:
+
+```sh
+yarn utils:check_setup bridge
 ```
 
 ## 4. Burning the tokens you want to bridge
@@ -275,37 +235,51 @@ WALLET_ADDRESS=$(cast wallet address --private-key $CREDITCOIN_WALLET_PRIVATE_KE
 yarn utils:check_balance $ASC_CUSTOM_MINTABLE_TOKEN $WALLET_ADDRESS
 ```
 
-This will return your balance in whole (BTKT) token units.
-
-Notice how you now have _twice_ the amount of tokens you originally burned on Sepolia!
+This will return your balance in whole (BTKT) token units. With the default `ASCMinter`, the minted amount should **match** the amount you burned on Sepolia.
 
 It should show something like this:
 
 ```bash
 🔗 Using RPC URL: https://rpc.cc3-testnet.creditcoin.network
 📦 Token: Bridge Test Token (BTKT)
-🧾 Raw Balance: 100000000000000000000
-💰 Formatted Balance: 100.0 BTKT
+🧾 Raw Balance: 50000000000000000000
+💰 Formatted Balance: 50.0 BTKT
 Decimals for token micro unit: 18
 ```
 
+## 7. Automate proof submission (optional)
+
+The same burn → proof → `execute` flow can run automatically so users only sign the **burn** on Sepolia. Start the worker (requires steps 2–3 complete):
+
+```sh
+yarn offchain:start_worker
+```
+
+In another terminal, burn tokens — the worker submits the mint proof when attestation completes:
+
+```sh
+cast send --rpc-url $SOURCE_CHAIN_RPC_URL \
+    $SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS \
+    "burn(uint256)" 2000 \
+    --private-key $CREDITCOIN_WALLET_PRIVATE_KEY
+```
+
+The worker is **UX-only** — anyone can still call `execute` manually with `yarn custom_bridge:submit_query`. Full worker walkthrough: [bridge-offchain-worker/README.md](../bridge-offchain-worker/README.md).
+
+## Optional challenge: mint 2× burned amount
+
+To experiment with customizing ASC logic, edit `bridge/contracts/sol/ASCMinter.sol` so `_processMint` mints `burntValue * 2`, redeploy the minter (reusing the same `EVM_V1_DECODER_LIBRARY_ADDRESS`), and repeat the burn + submit flow. This dilutes token supply and is for learning only.
+
 ## Conclusion
 
-Congratulations! You've set up your first custom smart contracts which make use of the Creditcoin
-Decentralized Oracle!
+Congratulations! You've deployed your own simplified ASC bridge (`ASCMinter` + wrapped token) and completed a trustless mint.
 
-The next tutorial: [Bridge Offchain Worker], will take another important step towards developing a mature, production ready
-cross-chain DApp. That step is automation! We automate using an **offchain worker** which submits
-queries automatically. This _vastly_ improves UX by making it so the
-end user only has to sign a _single_ transaction to initiate the bridging procedure.
-
-In practice, DApp builders will want to conduct all cross-chain queries via an offchain worker in
-order to ensure robustness and streamline UX.
+Next: [Loan Flow](../../loan/scripts/README.md) reuses your decoder library and extends the pattern with cross-chain loan state.
 
 [Hello Bridge]: ../hello-bridge/README.md
 [setup]: ../hello-bridge/README.md#1-setup
 [step 2]: #2-deploy-a-test-erc20-contract-on-sepolia
-[step 3.2]: #32-deploy-your-decoder-library-and-modified-contract
+[step 3.2]: #32-deploy-ascminter
 [step 5]: #5-submit-a-mint-query-to-the-asc-contract
-[Deployment Troubleshooting Guide]: ../contracts/DEPLOY.md
+[Contributor deploy notes]: ../contracts/CONTRIBUTING.md
 [Bridge Offchain Worker]: ../bridge-offchain-worker/README.md

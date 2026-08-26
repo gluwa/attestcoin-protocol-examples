@@ -7,4 +7,4 @@ yarn
 ./loan/contracts/abi-creator.sh
 ```
 
-Loan contracts import `ASCBase` and decoding libraries from `@gluwa/usc-contracts` (see `loan/foundry.toml` remappings).
+Loan contracts import readability `ASCBase` and `EvmV1Decoder` from `@gluwa/usc-contracts`. ABI regeneration: see [bridge/contracts/CONTRIBUTING.md](../../bridge/contracts/CONTRIBUTING.md).

@@ -1,8 +1,7 @@
 # Loan Flow
 
 > [!TIP]
-> This tutorial builds on the previous [Bridge Offchain Worker] example -make sure to check it out
-> before moving on!
+> Complete [Custom Contract Bridging](../../bridge/custom-contracts-bridging/README.md) (and optionally the offchain worker in §7) before this tutorial.
 
 Now that we know how to build an offchain worker to coordinate between two separate chains, we need
 a more advanced example that includes not only communication but also state tracking.
@@ -67,8 +66,12 @@ Grab the contract address and add it to the `.env` file at the root of the repos
 SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS=<erc20_contract_address>
 ```
 
-Now we need to deploy a `EvmV1Decoder` library so that we can reference it in our
-`ASCLoanManager`. We do so like this:
+Now we need to deploy `ASCLoanManager`. It links the same **`EvmV1Decoder`** library as the bridge tutorial.
+
+> [!TIP]
+> If you completed [Custom Contract Bridging](../../bridge/custom-contracts-bridging/README.md), reuse `EVM_V1_DECODER_LIBRARY_ADDRESS` from your `.env` — **skip redeploying the decoder**.
+
+If you have not deployed a decoder yet:
 
 ```bash
 forge create \
@@ -78,12 +81,10 @@ forge create \
   node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder
 ```
 
-You should get some output with the address of the library you just deployed:
+Save the address in `.env`:
 
-```bash
-Deployer: 0x20dB67795C2AEb4De075986b0D4217A109FEF2B5
-Deployed to: 0xfE119359B96Bb1A32c14d32dD6b7E2f977Cd1060
-Transaction hash: 0xd1689ff2d26fd9e271d8c03e7933ce98f2f38836dd18441f6240e86a5816ec8d
+```env
+EVM_V1_DECODER_LIBRARY_ADDRESS=<decoder_library_address>
 ```
 
 Use the contract address shown in `Deployed to:` to deploy your `ASCLoanManager` using the following command:
@@ -93,12 +94,11 @@ forge create \
     --broadcast \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address> \
+    --libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:$EVM_V1_DECODER_LIBRARY_ADDRESS \
     loan/contracts/sol/ASCLoanManager.sol:ASCLoanManager
 ```
 
-> [!IMPORTANT]
-> Don't forget to replace `<decoder_library_address>` with the address of your deployed decoder contract!
+You should get deployment output with your `ASCLoanManager` address.
 
 As before, grab the address and add it to the `.env` file, like so:
 

@@ -1,13 +1,37 @@
 # Hello Bridge
 
-This tutorial introduces you to one of the most common uses for a cross chain oracle, **cross chain
-bridging!** Cross-chain bridging on Creditcoin can be broken down into three broad steps:
+> [!NOTE]
+> This tutorial uses the **simplified ASC bridge** (`ASCMinter` + local `ASCBase`), not the write-ability Outbox/Relayer stack. Overview: [bridge/README.md](../README.md).
 
-1. To begin, the `ERC20` tokens to bridge are burned using a smart contract on our _source chain_
-   (in this case, Sepolia).
-2. Then, we generate merkle and continuity proofs corresponding to our source chain token burn
-3. Using the proofs we generated, we call our minter Attestcoin smart contract (ASC) which will internally call the Creditcoin oracle's native proof verifier
-4. After that the same contract will mint the tokens on Creditcoin
+This tutorial introduces you to one of the most common uses for a cross chain oracle, **cross chain
+bridging!** The flow is:
+
+1. **Burn** tokens on the source chain (Sepolia).
+2. **Submit proof + mint** on Creditcoin — steps 2 and 3 are combined in `yarn hello_bridge:submit_query` (proof generation, attestation wait, and `ASCMinter.execute`).
+
+## Pre-deployed contracts (no deploy step)
+
+Hello Bridge uses **shared tutorial contracts** already deployed on CC3 Testnet and Sepolia. The repository root [`.env`](../../.env) includes pre-filled values for:
+
+| Variable | Purpose |
+|----------|---------|
+| `SOURCE_CHAIN_KEY` | Sepolia chain key on CC3 Testnet (`1`) |
+| `PROOF_BUILDER_URL` | Proof builder for CC3 Testnet |
+| `CREDITCOIN_RPC_URL` | CC3 Testnet RPC |
+| `SOURCE_CHAIN_CONTRACT_ADDRESS` | Pre-deployed Sepolia burner ERC20 |
+| `ASC_MINTER_CONTRACT_ADDRESS` | Pre-deployed `ASCMinter` on CC3 Testnet |
+| `ASC_MINTABLE_TOKEN` | Pre-deployed wrapped token |
+
+Copy those lines into your own `.env` if starting fresh. Variable names are also listed in [bridge/.env.example](../.env.example).
+
+You only need to add **`CREDITCOIN_WALLET_PRIVATE_KEY`** and **`SOURCE_CHAIN_RPC_URL`** (Infura Sepolia), then run:
+
+```sh
+source .env
+yarn utils:check_setup hello
+```
+
+If all checks pass, continue with [Setup](#1-setup) below.
 
 ## 0. Install
 
