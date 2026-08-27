@@ -171,7 +171,7 @@ jobs:
           SOURCE_CHAIN_RPC_URL="${{ steps.env.outputs.source_chain_rpc_url }}"
 
           echo "INFO: generate a new wallet"
-          OUTPUT=$(~/.foundry/bin/cast wallet new)
+          OUTPUT=$(~/.foundry/bin/cast wallet new 2>&1)
           # WARNING: don't print b/c private key will be visible
           # echo "$OUTPUT"
           WALLET_ADDRESS=$(echo "$OUTPUT" | grep Address: | cut -f2 -d: | tr -d ' ')
@@ -198,7 +198,7 @@ jobs:
                 --broadcast                    \
                 --rpc-url "$SOURCE_CHAIN_RPC_URL"  \
                 --private-key "$WALLET_PK"   \
-                contracts/sol/TestERC20.sol:TestERC20)
+                contracts/sol/TestERC20.sol:TestERC20 2>&1)
           echo "$OUTPUT"
           SOURCE_CHAIN_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "source_chain_contract_address=$SOURCE_CHAIN_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
@@ -208,7 +208,7 @@ jobs:
             --broadcast \
             --rpc-url "$CREDITCOIN_RPC_URL" \
             --private-key "$WALLET_PK" \
-            node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder)
+            node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder 2>&1)
           echo "$OUTPUT"
           DECODER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
 
@@ -222,7 +222,7 @@ jobs:
               --rpc-url "$CREDITCOIN_RPC_URL" \
               --private-key "$WALLET_PK" \
               --libraries "node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:$DECODER_CONTRACT_ADDRESS" \
-              contracts/sol/ASCMinter.sol:ASCMinter)
+              contracts/sol/ASCMinter.sol:ASCMinter 2>&1)
           echo "$OUTPUT"
           ASC_MINTER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "asc_minter_contract_address=$ASC_MINTER_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
@@ -233,7 +233,7 @@ jobs:
               --rpc-url "$CREDITCOIN_RPC_URL" \
               --private-key "$WALLET_PK" \
               contracts/sol/BridgeTestToken.sol:BridgeTestToken \
-              --constructor-args "$ASC_MINTER_CONTRACT_ADDRESS")
+              --constructor-args "$ASC_MINTER_CONTRACT_ADDRESS" 2>&1)
           echo "$OUTPUT"
           ASC_MINTABLE_TOKEN=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "mintable_token_contract_address=$ASC_MINTABLE_TOKEN" >> "$GITHUB_OUTPUT"
@@ -242,7 +242,7 @@ jobs:
           OUTPUT=$(~/.foundry/bin/cast send --rpc-url "$CREDITCOIN_RPC_URL" \
             "$ASC_MINTER_CONTRACT_ADDRESS"  \
             "wrapOriginToken(address, address)" "$SOURCE_CHAIN_CONTRACT_ADDRESS" "$ASC_MINTABLE_TOKEN"   \
-            --private-key "$WALLET_PK")
+            --private-key "$WALLET_PK" 2>&1)
           echo "$OUTPUT"
 
           echo "INFO: NOT minting tokens on source chain. Should already have some minted"
@@ -251,7 +251,7 @@ jobs:
           OUTPUT=$(~/.foundry/bin/cast send --rpc-url "$SOURCE_CHAIN_RPC_URL" \
             "$SOURCE_CHAIN_CONTRACT_ADDRESS"  \
             "burn(uint256)" 5000000000000000000        \
-            --private-key "$WALLET_PK")
+            --private-key "$WALLET_PK" 2>&1)
           echo "$OUTPUT"
           BURN_TX_HASH=$(echo "$OUTPUT" | grep "transactionHash " | tr -s " " | cut -f2 -d" ")
           echo "burn_tx_hash=$BURN_TX_HASH" >> "$GITHUB_OUTPUT"
