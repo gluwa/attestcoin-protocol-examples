@@ -162,5 +162,5 @@ repayments truly happened.
 [Hello Bridge]: ../hello-bridge/README.md
 [setup]: ../hello-bridge/README.md#1-setup
 [Custom Contracts Bridging]: ../custom-contracts-bridging/README.md#33-update-environment-with-your-asc-contract-address
-[ASC Gitbook]: https://docs.attestcoin.org/attestcoin-protocol
+[ASC Gitbook]: https://docs.attestcoin.org/
 [Loan Flow]: ../loan-flow/README.md
