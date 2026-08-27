@@ -40,6 +40,9 @@ jobs:
 
           echo "$HOME/.foundry/bin" >> "$GITHUB_PATH"
 
+      - name: Install forge-std
+        run: git clone --depth 1 https://github.com/foundry-rs/forge-std lib/forge-std
+
       - name: Install dependencies
         run: |
           if [ -f yarn.lock ]; then

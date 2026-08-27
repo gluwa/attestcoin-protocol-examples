@@ -5,7 +5,7 @@ test = "test"
 libs = ["../node_modules", "../lib"]
 # Resolve @gluwa/usc-contracts from yarn-installed npm package (decoding/EvmV1Decoder).
 # ASCBase comes from the local bridge example contracts.
-allow_paths = ["../bridge"]
+allow_paths = ["../node_modules", "../lib", "../bridge"]
 remappings = [
   "@openzeppelin/=../node_modules/@openzeppelin/",
   "@gluwa/usc-contracts/=../node_modules/@gluwa/usc-contracts/",

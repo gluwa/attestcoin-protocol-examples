@@ -13,14 +13,14 @@ bridging!** The flow is:
 
 Hello Bridge uses **shared tutorial contracts** already deployed on CC3 Testnet and Sepolia. The repository root [`.env`](../../.env) includes pre-filled values for:
 
-| Variable | Purpose |
-|----------|---------|
-| `SOURCE_CHAIN_KEY` | Sepolia chain key on CC3 Testnet (`1`) |
-| `PROOF_BUILDER_URL` | Proof builder for CC3 Testnet |
-| `CREDITCOIN_RPC_URL` | CC3 Testnet RPC |
-| `SOURCE_CHAIN_CONTRACT_ADDRESS` | Pre-deployed Sepolia burner ERC20 |
-| `ASC_MINTER_CONTRACT_ADDRESS` | Pre-deployed `ASCMinter` on CC3 Testnet |
-| `ASC_MINTABLE_TOKEN` | Pre-deployed wrapped token |
+| Variable                        | Purpose                                 |
+| ------------------------------- | --------------------------------------- |
+| `SOURCE_CHAIN_KEY`              | Sepolia chain key on CC3 Testnet (`1`)  |
+| `PROOF_BUILDER_URL`             | Proof builder for CC3 Testnet           |
+| `CREDITCOIN_RPC_URL`            | CC3 Testnet RPC                         |
+| `SOURCE_CHAIN_CONTRACT_ADDRESS` | Pre-deployed Sepolia burner ERC20       |
+| `ASC_MINTER_CONTRACT_ADDRESS`   | Pre-deployed `ASCMinter` on CC3 Testnet |
+| `ASC_MINTABLE_TOKEN`            | Pre-deployed wrapped token              |
 
 Copy those lines into your own `.env` if starting fresh. Variable names are also listed in [bridge/.env.example](../.env.example).
 

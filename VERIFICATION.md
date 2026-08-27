@@ -14,12 +14,12 @@ yarn verify
 
 This runs:
 
-| Step | Command | What it checks |
-|------|---------|----------------|
-| TypeScript | `yarn typecheck` | Tutorial scripts compile |
-| Lint | `yarn eslint` | TS/JS style |
-| Contracts | `yarn build` | `forge build` for bridge + loan |
-| Unit tests | `forge test` | Loan source-contract binding + bridge burn-log parsing |
+| Step       | Command          | What it checks                                         |
+| ---------- | ---------------- | ------------------------------------------------------ |
+| TypeScript | `yarn typecheck` | Tutorial scripts compile                               |
+| Lint       | `yarn eslint`    | TS/JS style                                            |
+| Contracts  | `yarn build`     | `forge build` for bridge + loan                        |
+| Unit tests | `forge test`     | Loan source-contract binding + bridge burn-log parsing |
 
 ### CI (`solidity.yml`)
 

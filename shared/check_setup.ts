@@ -101,10 +101,7 @@ function printResults(results: CheckResult[]): boolean {
   return allOk;
 }
 
-async function checkChainKeyAttestation(
-  creditcoinRpc: string | undefined,
-  chainKey: number
-): Promise<CheckResult> {
+async function checkChainKeyAttestation(creditcoinRpc: string | undefined, chainKey: number): Promise<CheckResult> {
   if (!creditcoinRpc?.trim()) {
     return fail('Chain attestation: skipped (no CREDITCOIN_RPC_URL)');
   }
@@ -125,9 +122,7 @@ async function checkChainKeyAttestation(
 async function runNetworkChecks(): Promise<boolean> {
   const sourceChainKey = Number(process.env.SOURCE_CHAIN_KEY);
   const results: CheckResult[] = [
-    sourceChainKey > 0
-      ? pass(`SOURCE_CHAIN_KEY: ${sourceChainKey}`)
-      : fail('SOURCE_CHAIN_KEY: missing or invalid'),
+    sourceChainKey > 0 ? pass(`SOURCE_CHAIN_KEY: ${sourceChainKey}`) : fail('SOURCE_CHAIN_KEY: missing or invalid'),
     await checkRpc('CREDITCOIN_RPC_URL', process.env.CREDITCOIN_RPC_URL),
     await checkProofBuilder(process.env.PROOF_BUILDER_URL),
     await checkVerifierPrecompile(process.env.CREDITCOIN_RPC_URL),
@@ -141,9 +136,7 @@ async function runHelloBridgeChecks(): Promise<boolean> {
 
   const sourceChainKey = Number(process.env.SOURCE_CHAIN_KEY);
   results.push(
-    sourceChainKey > 0
-      ? pass(`SOURCE_CHAIN_KEY: ${sourceChainKey}`)
-      : fail('SOURCE_CHAIN_KEY: missing or invalid')
+    sourceChainKey > 0 ? pass(`SOURCE_CHAIN_KEY: ${sourceChainKey}`) : fail('SOURCE_CHAIN_KEY: missing or invalid')
   );
 
   results.push(
@@ -181,9 +174,7 @@ async function runBridgeChecks(): Promise<boolean> {
 
   const sourceChainKey = Number(process.env.SOURCE_CHAIN_KEY);
   results.push(
-    sourceChainKey > 0
-      ? pass(`SOURCE_CHAIN_KEY: ${sourceChainKey}`)
-      : fail('SOURCE_CHAIN_KEY: missing or invalid')
+    sourceChainKey > 0 ? pass(`SOURCE_CHAIN_KEY: ${sourceChainKey}`) : fail('SOURCE_CHAIN_KEY: missing or invalid')
   );
 
   results.push(await checkRpc('CREDITCOIN_RPC_URL', process.env.CREDITCOIN_RPC_URL));

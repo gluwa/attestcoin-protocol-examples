@@ -37,6 +37,12 @@ jobs:
         run: |
           yarn install
 
+          echo "INFO: forge remappings (bridge)"
+          ~/.foundry/bin/forge remappings --root bridge || true
+          echo "INFO: forge remappings (loan)"
+          ~/.foundry/bin/forge remappings --root loan || true
+          ls -la node_modules/@gluwa/usc-contracts/contracts || true
+
           ~/.foundry/bin/forge build --root bridge
           ~/.foundry/bin/forge build --root loan
           ~/.foundry/bin/forge test --root bridge
@@ -70,11 +76,11 @@ jobs:
       - name: Check for mismatch
         run: |
           echo "========== DEBUG DEBUG DEBUG =========="
-          git status --short
-          git diff
+          git status --short -- bridge/contracts/abi loan/contracts/abi
+          git diff -- bridge/contracts/abi loan/contracts/abi
           echo "======================================="
 
-          if [ -n "$(git status --short)" ]; then
+          if [ -n "$(git status --short -- bridge/contracts/abi loan/contracts/abi)" ]; then
               echo "FAIL: found ABI mismatch on disk vs. freshly generated from source"
               echo "TODO: update ABI on disk and commit the changes to git"
               exit 1

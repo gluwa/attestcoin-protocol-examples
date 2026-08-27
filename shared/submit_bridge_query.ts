@@ -28,10 +28,7 @@ export function printBridgeSubmitUsage(config: BridgeSubmitConfig): void {
   `);
 }
 
-export async function runBridgeSubmitQuery(
-  config: BridgeSubmitConfig,
-  transactionHash: string
-): Promise<void> {
+export async function runBridgeSubmitQuery(config: BridgeSubmitConfig, transactionHash: string): Promise<void> {
   if (!transactionHash.startsWith('0x') || transactionHash.length !== 66) {
     throw new Error('Invalid transaction hash provided');
   }
