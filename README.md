@@ -84,6 +84,6 @@ add the final touches of trust into the process.
 [Custom Contracts Bridging]: ./custom-contracts-bridging/README.md
 [Bridge Offchain Worker]: ./bridge-offchain-worker/README.md
 [Loan Flow]: ./loan-flow/README.md
-[ASC Architecture Overview]: https://docs.creditcoin.org/attestcoin-protocol/architecture
-[DApp Builder Infrastructure]: https://docs.creditcoin.org/attestcoin-protocol/dapp-builder-infrastructure
-[Attestcoin Readability Subsystems]: https://docs.creditcoin.org/attestcoin-protocol/attestcoin-readability
+[ASC Architecture Overview]: https://docs.attestcoin.org/attestcoin-protocol/architecture
+[DApp Builder Infrastructure]: https://docs.attestcoin.org/attestcoin-protocol/dapp-builder-infrastructure
+[Attestcoin Readability Subsystems]: https://docs.attestcoin.org/attestcoin-protocol/attestcoin-readability
