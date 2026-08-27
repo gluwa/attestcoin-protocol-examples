@@ -8,7 +8,7 @@ These tutorials implement a **simplified readability bridge** — not the produc
 |-------|------|
 | **`ASCBase`** (local) | Verify a source-chain transaction via the native verifier precompile (`0xFD2`), dedupe by `queryId`, delegate to app logic. |
 | **`ASCMinter`** (local) | Decode a `TokensBurnedForBridging` log and mint wrapped tokens once per proof. |
-| **`EvmV1Decoder`** (from `@gluwa/usc-contracts`) | Shared library for decoding proved EVM receipts/logs. The `write-ability/common/` path is **only** this decoder — not the messaging bridge. |
+| **`EvmV1Decoder`** (from `@gluwa/usc-contracts`) | Shared library for decoding proved EVM receipts/logs (deploy via `contracts/decoding/`). Not the messaging bridge. |
 | **Tutorial scripts** | Build proofs and call `ASCMinter.execute(...)` directly. No relayer contract. |
 
 Flow: **burn on source chain → wait for attestation → fetch proof → `execute` on ASC → mint**.

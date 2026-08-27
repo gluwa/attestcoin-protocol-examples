@@ -2,6 +2,7 @@
 **/dist/
 **/target/
 **/node_modules/
+lib/forge-std/
 **/*.rs.bk
 *.swp
 **/._*

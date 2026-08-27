@@ -19,6 +19,9 @@
     "eslint": "eslint -c .eslintrc.js --ignore-pattern .eslintrc.js --ignore-pattern check_balance.js --max-warnings 0 --ext .ts --ext .js .",
     "format": "prettier --write .",
     "build": "forge build --root bridge && forge build --root loan",
+    "test": "forge test --root bridge && forge test --root loan",
+    "test:contracts": "forge test --root bridge && forge test --root loan",
+    "verify": "yarn typecheck && yarn eslint && yarn build && yarn test:contracts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

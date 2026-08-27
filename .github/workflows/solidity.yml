@@ -17,12 +17,21 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Checkout usc-contracts (sibling for forge remappings)
+        uses: actions/checkout@v7
+        with:
+          repository: gluwa/usc-contracts
+          path: ../usc-contracts
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Install foundry
         run: |
           export FOUNDRY_DIR="$HOME/.foundry"
-          # first install it
           curl -L https://foundry.paradigm.xyz | bash
           ~/.foundry/bin/foundryup
+
+      - name: Install forge-std
+        run: git clone --depth 1 https://github.com/foundry-rs/forge-std lib/forge-std
 
       - name: Install Node.js
         uses: actions/setup-node@v6
@@ -31,12 +40,14 @@ jobs:
           cache: 'yarn'
       - run: npm install -g yarn
 
-      - name: Compile smart contracts
+      - name: Compile and test smart contracts
         run: |
           yarn install
 
           ~/.foundry/bin/forge build --root bridge
           ~/.foundry/bin/forge build --root loan
+          ~/.foundry/bin/forge test --root bridge
+          ~/.foundry/bin/forge test --root loan
 
   check-abi-on-disk:
     runs-on: ubuntu-26.04

@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { ethers } from 'ethers';
 
+import { chainInfo } from '@gluwa/usc-sdk';
 import { isValidContractAddress, isValidPrivateKey } from './utils';
 
 dotenv.config({ override: true });
@@ -100,6 +101,41 @@ function printResults(results: CheckResult[]): boolean {
   return allOk;
 }
 
+async function checkChainKeyAttestation(
+  creditcoinRpc: string | undefined,
+  chainKey: number
+): Promise<CheckResult> {
+  if (!creditcoinRpc?.trim()) {
+    return fail('Chain attestation: skipped (no CREDITCOIN_RPC_URL)');
+  }
+  if (!chainKey) {
+    return fail('Chain attestation: SOURCE_CHAIN_KEY missing');
+  }
+  try {
+    const provider = new ethers.JsonRpcProvider(creditcoinRpc);
+    const info = new chainInfo.PrecompileChainInfoProvider(provider);
+    const latest = await info.getLatestAttestedHeightAndHash(chainKey);
+    return pass(`Chain key ${chainKey} attestation: latest height ${latest.height}`);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return fail(`Chain attestation failed (${msg})`);
+  }
+}
+
+async function runNetworkChecks(): Promise<boolean> {
+  const sourceChainKey = Number(process.env.SOURCE_CHAIN_KEY);
+  const results: CheckResult[] = [
+    sourceChainKey > 0
+      ? pass(`SOURCE_CHAIN_KEY: ${sourceChainKey}`)
+      : fail('SOURCE_CHAIN_KEY: missing or invalid'),
+    await checkRpc('CREDITCOIN_RPC_URL', process.env.CREDITCOIN_RPC_URL),
+    await checkProofBuilder(process.env.PROOF_BUILDER_URL),
+    await checkVerifierPrecompile(process.env.CREDITCOIN_RPC_URL),
+    await checkChainKeyAttestation(process.env.CREDITCOIN_RPC_URL, sourceChainKey),
+  ];
+  return printResults(results);
+}
+
 async function runHelloBridgeChecks(): Promise<boolean> {
   const results: CheckResult[] = [];
 
@@ -135,16 +171,26 @@ async function runHelloBridgeChecks(): Promise<boolean> {
     )
   );
 
+  results.push(await checkChainKeyAttestation(process.env.CREDITCOIN_RPC_URL, sourceChainKey));
+
   return printResults(results);
 }
 
 async function runBridgeChecks(): Promise<boolean> {
   const results: CheckResult[] = [];
 
+  const sourceChainKey = Number(process.env.SOURCE_CHAIN_KEY);
+  results.push(
+    sourceChainKey > 0
+      ? pass(`SOURCE_CHAIN_KEY: ${sourceChainKey}`)
+      : fail('SOURCE_CHAIN_KEY: missing or invalid')
+  );
+
   results.push(await checkRpc('CREDITCOIN_RPC_URL', process.env.CREDITCOIN_RPC_URL));
   results.push(await checkRpc('SOURCE_CHAIN_RPC_URL', process.env.SOURCE_CHAIN_RPC_URL));
   results.push(await checkProofBuilder(process.env.PROOF_BUILDER_URL));
   results.push(await checkVerifierPrecompile(process.env.CREDITCOIN_RPC_URL));
+  results.push(await checkChainKeyAttestation(process.env.CREDITCOIN_RPC_URL, sourceChainKey));
 
   results.push(
     isValidPrivateKey(process.env.CREDITCOIN_WALLET_PRIVATE_KEY)
@@ -180,8 +226,11 @@ async function main(): Promise<void> {
     case 'custom':
       ok = await runBridgeChecks();
       break;
+    case 'network':
+      ok = await runNetworkChecks();
+      break;
     default:
-      console.error(`Unknown mode "${mode}". Use: hello | bridge`);
+      console.error(`Unknown mode "${mode}". Use: hello | bridge | network`);
       process.exit(1);
   }
 

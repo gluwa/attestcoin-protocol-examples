@@ -81,7 +81,7 @@ forge create \
   --broadcast \
   --rpc-url $CREDITCOIN_RPC_URL \
   --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-  node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder
+  node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder
 ```
 
 Add the library address to your root `.env` so later steps (and the loan tutorial) can reuse it:
@@ -96,7 +96,7 @@ Reload:
 source .env
 ```
 
-> **Note:** The library lives under `write-ability/common/` in `@gluwa/usc-contracts` — that is only a shared decoder, not the Outbox/Relayer bridge stack.
+> **Note:** Deploy from `contracts/decoding/EvmV1Decoder.sol` in the npm package. That library is a shared receipt decoder — not the Outbox/Relayer bridge stack.
 
 ### 3.2 Deploy `ASCMinter`
 
@@ -105,7 +105,7 @@ forge create \
     --broadcast \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:$EVM_V1_DECODER_LIBRARY_ADDRESS \
+    --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:$EVM_V1_DECODER_LIBRARY_ADDRESS \
     bridge/contracts/sol/ASCMinter.sol:ASCMinter
 ```
 

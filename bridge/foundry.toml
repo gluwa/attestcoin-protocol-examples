@@ -1,13 +1,19 @@
 [profile.default]
 out = "out"
 src = "contracts/sol"
-libs = ["../../node_modules"]
+test = "test"
+libs = ["../node_modules", "../lib"]
+# Forge remaps `@gluwa/usc-contracts` to a sibling checkout of gluwa/usc-contracts
+# (default branch: contracts/common + contracts/readability). CI checks this out at ../usc-contracts.
+allow_paths = ["../../usc-contracts"]
 remappings = [
-  "@gluwa/usc-contracts/=../../usc-contracts/contracts/",
+  "@openzeppelin/=../node_modules/@openzeppelin/",
+  "@gluwa/usc-contracts/=../../usc-contracts/",
+  "forge-std/=../lib/forge-std/src/",
 ]
 solc_version = "0.8.30"
 optimizer = true
 optimizer_runs = 200
-via_ir = false
+via_ir = true
 evm_version = "shanghai"
 verbosity = 2

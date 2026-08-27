@@ -42,9 +42,9 @@ cast balance <your_address> --rpc-url $CREDITCOIN_RPC_URL
 Ensure `--libraries` uses the deployed decoder address:
 
 ```bash
---libraries node_modules/@gluwa/usc-contracts/contracts/write-ability/common/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address>
+--libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address>
 ```
 
-The `write-ability/common/` path is the shared decoder library only — not the Outbox/Relayer stack.
+The library is published in npm at `contracts/decoding/EvmV1Decoder.sol` (deploy via `forge create` in tutorials). Solidity imports use `@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol` with a sibling `usc-contracts` checkout.
 
 After deploy, submit proofs with `yarn hello_bridge:submit_query` or `yarn custom_bridge:submit_query`.

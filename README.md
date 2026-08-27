@@ -60,6 +60,8 @@ yarn utils:check_setup bridge  # after custom-contracts deploy
 
 Deploy `EvmV1Decoder` once per Creditcoin network; save `EVM_V1_DECODER_LIBRARY_ADDRESS` in `.env` and reuse for the loan tutorial.
 
+Full verification checklist: [VERIFICATION.md](./VERIFICATION.md).
+
 ## Tutorials
 
 We recommend going through them in this order:
