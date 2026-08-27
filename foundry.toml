@@ -2,8 +2,11 @@
 out = "out"
 src = "bridge/contracts/sol"
 libs = ["node_modules"]
+# Used when forge create is run from the repo root (example CI workflows).
 remappings = [
-  "@gluwa/usc-contracts/=../usc-contracts/contracts/",
+  "@openzeppelin/=node_modules/@openzeppelin/",
+  "@gluwa/usc-contracts/=node_modules/@gluwa/usc-contracts/",
+  "@example/bridge/=bridge/contracts/sol/",
 ]
 solc_version = "0.8.30"
 optimizer = true

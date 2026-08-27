@@ -45,6 +45,6 @@ Ensure `--libraries` uses the deployed decoder address:
 --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address>
 ```
 
-The library is published in npm at `contracts/decoding/EvmV1Decoder.sol` (deploy via `forge create` in tutorials). Solidity imports use `@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol` with a sibling `usc-contracts` checkout.
+The library is published in npm at `contracts/decoding/EvmV1Decoder.sol`. Tutorials and Solidity imports both use that path via `@gluwa/usc-contracts` from `node_modules`.
 
 After deploy, submit proofs with `yarn hello_bridge:submit_query` or `yarn custom_bridge:submit_query`.

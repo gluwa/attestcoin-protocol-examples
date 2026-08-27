@@ -3,12 +3,13 @@ out = "out"
 src = "contracts/sol"
 test = "test"
 libs = ["../node_modules", "../lib"]
-# Forge remaps `@gluwa/usc-contracts` to a sibling checkout of gluwa/usc-contracts
-# (default branch: contracts/common + contracts/readability). CI checks this out at ../usc-contracts.
-allow_paths = ["../../usc-contracts"]
+# Resolve @gluwa/usc-contracts from yarn-installed npm package (decoding/EvmV1Decoder).
+# ASCBase comes from the local bridge example contracts.
+allow_paths = ["../bridge"]
 remappings = [
   "@openzeppelin/=../node_modules/@openzeppelin/",
-  "@gluwa/usc-contracts/=../../usc-contracts/",
+  "@gluwa/usc-contracts/=../node_modules/@gluwa/usc-contracts/",
+  "@example/bridge/=../bridge/contracts/sol/",
   "forge-std/=../lib/forge-std/src/",
 ]
 solc_version = "0.8.30"

@@ -3,7 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {ASCLoanManagerHarness} from "./harness/ASCLoanManagerHarness.sol";
-import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol";
+import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol";
 
 /// @notice Regression tests for loan source-contract binding — fund/repay logs must come from the registered source contract.
 contract ASCLoanManagerSourceBindingTest is Test {

@@ -4,11 +4,11 @@ Use this to validate the repository locally before release or deployment.
 
 ## Automated (CI + local)
 
-From the repository root (requires [Foundry](https://getfoundry.sh/) on your `PATH` and a sibling [`usc-contracts`](https://github.com/gluwa/usc-contracts) checkout at `../usc-contracts` on the **default branch**, which provides `contracts/common/EvmV1Decoder.sol` and `contracts/readability/ASCBase.sol`):
+From the repository root (requires [Foundry](https://getfoundry.sh/) on your `PATH`). Contracts resolve `EvmV1Decoder` from the yarn dependency `@gluwa/usc-contracts` (`contracts/decoding/`); loan `ASCBase` comes from the local bridge example:
 
 ```sh
+yarn
 git clone --depth 1 https://github.com/foundry-rs/forge-std lib/forge-std   # once
-# sibling: ../usc-contracts should track usc-contracts main (or CI default branch)
 yarn verify
 ```
 
@@ -25,7 +25,7 @@ This runs:
 
 - Compiles bridge and loan contracts
 - Regenerates ABIs and fails on drift
-- Runs `forge test` for bridge and loan (requires `usc-contracts` checkout + `forge-std`)
+- Runs `forge test` for bridge and loan (requires `yarn install` + `forge-std`)
 
 ## Network preflight (optional, needs `.env`)
 

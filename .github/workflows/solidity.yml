@@ -17,13 +17,6 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Checkout usc-contracts (sibling for forge remappings)
-        uses: actions/checkout@v7
-        with:
-          repository: gluwa/usc-contracts
-          path: ../usc-contracts
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Install foundry
         run: |
           export FOUNDRY_DIR="$HOME/.foundry"
@@ -70,6 +63,7 @@ jobs:
           yarn install
 
           solc --version
+          chmod +x ./bridge/contracts/abi-creator.sh ./loan/contracts/abi-creator.sh
           ./bridge/contracts/abi-creator.sh
           ./loan/contracts/abi-creator.sh
 

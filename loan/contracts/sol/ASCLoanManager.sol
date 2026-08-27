@@ -9,8 +9,8 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {LoanFlow, LoanStatus, LoanOrder, LoanTerms} from "./LoanTypes.sol";
-import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol";
-import {ASCBase} from "@gluwa/usc-contracts/contracts/readability/ASCBase.sol";
+import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol";
+import {ASCBase} from "@example/bridge/ASCBase.sol";
 
 /**
  * @title ASCLoanManager
