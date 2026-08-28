@@ -2,7 +2,7 @@
 
 This repository is a starting point for exploring Creditcoin cross-chain **readability** (Attestcoin Smart Contracts). The **bridge** tutorials use a **simplified ASC bridge** — local `ASCMinter` on shared package `ASCBase`, direct `execute` calls — **not** the full write-ability production stack (Outbox / Relayer / Inbox). See [bridge/README.md](./bridge/README.md).
 
-`@gluwa/usc-contracts` is resolved from [`asc-contracts`](https://github.com/gluwa/asc-contracts) (`git+https`), which provides one shared readability `ASCBase` for bridge and loan.
+`@gluwa/usc-contracts` resolves via `file:../usc-contracts` (sibling checkout of private [`asc-contracts`](https://github.com/gluwa/asc-contracts)). Locally clone that repo next to this one. CI uses secret `ASC_CONTRACTS_READ_TOKEN` (see [Option B setup](#ci-private-asc-contracts-option-b)).
 
 Learn how to use the Creditcoin Decentralized Oracle through guided tutorials where you set up and interact with your own decentralized bridge and loan examples.
 
@@ -32,9 +32,12 @@ Before attempting any of the tutorials, make sure the following are installed:
 - [yarn]
 - [foundry]
 
-Install dependencies from the repository root:
+Install dependencies from the repository root (requires sibling `../usc-contracts`):
 
 ```sh
+# from parent of this repo
+git clone https://github.com/gluwa/asc-contracts.git usc-contracts
+cd attestcoin-protocol-examples   # or usc-testnet-bridge-examples
 yarn
 ```
 
@@ -67,6 +70,15 @@ Deploy `EvmV1Decoder` once per Creditcoin network; save `EVM_V1_DECODER_LIBRARY_
 
 Full verification checklist: [VERIFICATION.md](./VERIFICATION.md).
 
+### CI: private `asc-contracts` (Option B)
+
+GitHub Actions cannot clone `gluwa/asc-contracts` anonymously. Add a repo/org secret:
+
+1. Create a fine-grained PAT (or GitHub App token) with **Contents: Read** on `gluwa/asc-contracts`.
+2. Add secret **`ASC_CONTRACTS_READ_TOKEN`** on this repository (Settings → Secrets and variables → Actions).
+3. Workflows check out `asc-contracts` to `../usc-contracts`, then `yarn` resolves `"@gluwa/usc-contracts": "file:../usc-contracts"`.
+
+Fork PRs will not receive this secret unless you use a trusted workflow pattern.
 ## Tutorials
 
 We recommend going through them in this order:

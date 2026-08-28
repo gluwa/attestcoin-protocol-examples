@@ -163,6 +163,17 @@ jobs:
           cache: 'yarn'
       - run: npm install -g yarn
 
+      - name: Checkout private ASC contracts (file:../usc-contracts)
+        env:
+          ASC_CONTRACTS_READ_TOKEN: ${{ secrets.ASC_CONTRACTS_READ_TOKEN }}
+        run: |
+          if [ -z "${ASC_CONTRACTS_READ_TOKEN}" ]; then
+            echo "Missing secret ASC_CONTRACTS_READ_TOKEN (Contents:Read on gluwa/asc-contracts)"
+            exit 1
+          fi
+          git clone --depth 1 \
+            "https://x-access-token:${ASC_CONTRACTS_READ_TOKEN}@github.com/gluwa/asc-contracts.git" \
+            "${GITHUB_WORKSPACE}/../usc-contracts"
       - name: Setup
         id: setup
         run: |
