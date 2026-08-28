@@ -1,9 +1,13 @@
 # Bridge Offchain Worker
 
+Optional UX automation for the custom bridge: users only burn on Sepolia; the worker finishes the mint on Creditcoin so they do not run `yarn custom_bridge:submit_query` by hand. It is not required for security — anyone with a valid proof can still call `ASCMinter.execute` manually, but the ASC still only mints for whitelisted source-chain emitters.
+
+**Flow:** poll Sepolia for `TokensBurnedForBridging` → wait for attestation and fetch a USC proof from the Proof Builder → submit that proof via `ASCMinter.execute` on CC3 Testnet → log `TokensMinted` on Creditcoin (requires the burn contract to already be registered with `wrapOriginToken`). Same burn → proof → mint path as the tutorial, without a write-ability Relayer.
+
 > [!NOTE]
 > **Start here:** [Custom Contract Bridging §7 — Automate proof submission](../custom-contracts-bridging/README.md#7-automate-proof-submission-optional) for the integrated tutorial step.
 
-This folder contains the worker implementation (`worker.ts`). It watches Sepolia for burns and calls `ASCMinter.execute` on CC3 Testnet — same simplified bridge as the manual `yarn custom_bridge:submit_query` path, with no write-ability Relayer.
+Implementation: `worker.ts`.
 
 ## Quick start
 

@@ -1,13 +1,13 @@
 # Hello Bridge
 
 > [!NOTE]
-> This tutorial uses the **simplified ASC bridge** (`ASCMinter` + local `ASCBase`), not the write-ability Outbox/Relayer stack. Overview: [bridge/README.md](../README.md).
+> This tutorial uses the **simplified ASC bridge** (`ASCMinter` on package `ASCBase`), not the write-ability Outbox/Relayer stack. Overview: [bridge/README.md](../README.md).
 
 This tutorial introduces you to one of the most common uses for a cross chain oracle, **cross chain
 bridging!** The flow is:
 
 1. **Burn** tokens on the source chain (Sepolia).
-2. **Submit proof + mint** on Creditcoin — steps 2 and 3 are combined in `yarn hello_bridge:submit_query` (proof generation, attestation wait, and `ASCMinter.execute`).
+2. **Submit proof + mint** on Creditcoin — steps 2 and 3 are combined in `yarn hello_bridge:submit_query` (proof generation, attestation wait, and `ASCMinter.execute`). The pre-deployed ASC already has the Sepolia burner whitelisted as an emitter; only burns from that contract mint.
 
 ## Pre-deployed contracts (no deploy step)
 

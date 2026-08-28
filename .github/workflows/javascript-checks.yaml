@@ -46,7 +46,7 @@ jobs:
       - name: Install dependencies
         run: |
           if [ -f yarn.lock ]; then
-              yarn install
+              yarn install --ignore-engines
           else
               npm clean-install
           fi

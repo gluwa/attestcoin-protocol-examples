@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { Contract, ethers } from 'ethers';
 
 import loanHelperAbi from '../contracts/abi/AuxiliaryLoanContract.json';
-import ERC20Abi from '../contracts/abi/TestERC20.json';
+import ERC20Abi from '../../shared/contracts/abi/TestERC20.json';
 import { isValidContractAddress, isValidPrivateKey } from '../../shared/utils';
 
 dotenv.config({ override: true });

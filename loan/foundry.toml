@@ -3,13 +3,12 @@ out = "out"
 src = "contracts/sol"
 test = "test"
 libs = ["../node_modules", "../lib"]
-# Resolve @gluwa/usc-contracts from yarn-installed npm package (decoding/EvmV1Decoder).
-# ASCBase comes from the local bridge example contracts.
-allow_paths = ["../node_modules", "../lib", "../bridge"]
+# Resolve @gluwa/usc-contracts from yarn (readability ASCBase + common/EvmV1Decoder).
+# Same package alias as bridge — one ASCBase for both examples.
+allow_paths = ["../node_modules", "../lib"]
 remappings = [
   "@openzeppelin/=../node_modules/@openzeppelin/",
   "@gluwa/usc-contracts/=../node_modules/@gluwa/usc-contracts/",
-  "@example/bridge/=../bridge/contracts/sol/",
   "forge-std/=../lib/forge-std/src/",
 ]
 solc_version = "0.8.30"
@@ -18,3 +17,8 @@ optimizer_runs = 200
 via_ir = true
 evm_version = "shanghai"
 verbosity = 2
+
+# CI Foundry enables lint-on-build by default; remapped ../node_modules imports
+# currently crash the lint engine after a successful compile.
+[lint]
+lint_on_build = false

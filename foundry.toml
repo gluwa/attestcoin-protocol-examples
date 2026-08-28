@@ -6,7 +6,6 @@ libs = ["node_modules"]
 remappings = [
   "@openzeppelin/=node_modules/@openzeppelin/",
   "@gluwa/usc-contracts/=node_modules/@gluwa/usc-contracts/",
-  "@example/bridge/=bridge/contracts/sol/",
 ]
 solc_version = "0.8.30"
 optimizer = true

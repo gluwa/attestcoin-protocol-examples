@@ -13,7 +13,9 @@ yarn
 
 For loan contracts: `./loan/contracts/abi-creator.sh`.
 
-Bridge contracts are local simplified readability contracts (`ASCBase`, `ASCMinter`). Only `EvmV1Decoder` is imported from `@gluwa/usc-contracts`.
+Bridge example contracts (`ASCMinter`, tokens) inherit shared readability `ASCBase` from `@gluwa/usc-contracts` (`contracts/readability/ASCBase.sol`). `EvmV1Decoder` comes from the same package (`contracts/common/`).
+
+`ASCMinter` mints only when the burn log’s emitting address is in `whitelistedEmitters` (set by `wrapOriginToken`). Regenerate ABIs after changing that surface.
 
 ## Deploy troubleshooting
 
@@ -42,9 +44,9 @@ cast balance <your_address> --rpc-url $CREDITCOIN_RPC_URL
 Ensure `--libraries` uses the deployed decoder address:
 
 ```bash
---libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address>
+--libraries node_modules/@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder:<decoder_library_address>
 ```
 
-The library is published in npm at `contracts/decoding/EvmV1Decoder.sol`. Tutorials and Solidity imports both use that path via `@gluwa/usc-contracts` from `node_modules`.
+The library is published in npm at `contracts/common/EvmV1Decoder.sol`. Tutorials and Solidity imports both use that path via `@gluwa/usc-contracts` from `node_modules`.
 
 After deploy, submit proofs with `yarn hello_bridge:submit_query` or `yarn custom_bridge:submit_query`.

@@ -3,7 +3,8 @@ out = "out"
 src = "contracts/sol"
 test = "test"
 libs = ["../node_modules", "../lib"]
-# Resolve @gluwa/usc-contracts from yarn-installed npm package (decoding/EvmV1Decoder).
+# Resolve @gluwa/usc-contracts from yarn (readability ASCBase + common/EvmV1Decoder).
+# Package source is @gluwa/asc-contracts (file:../usc-contracts or npm); remapped under this alias.
 allow_paths = ["../node_modules", "../lib"]
 remappings = [
   "@openzeppelin/=../node_modules/@openzeppelin/",
@@ -16,3 +17,8 @@ optimizer_runs = 200
 via_ir = true
 evm_version = "shanghai"
 verbosity = 2
+
+# CI Foundry enables lint-on-build by default; remapped ../node_modules imports
+# currently crash the lint engine after a successful compile.
+[lint]
+lint_on_build = false

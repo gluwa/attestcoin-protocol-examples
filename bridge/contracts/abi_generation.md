@@ -1,3 +1,3 @@
 # ABI generation
 
-Moved to [CONTRIBUTING.md](./CONTRIBUTING.md).
+Moved to [Contributor Notes.md](./Contributor%20Notes.md).

@@ -1,22 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import {LoanFlow, LoanStatus, LoanOrder, LoanTerms} from "./LoanTypes.sol";
-import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol";
-import {ASCBase} from "@example/bridge/ASCBase.sol";
+import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol";
+import {ASCBase} from "@gluwa/usc-contracts/contracts/readability/ASCBase.sol";
 
 /**
  * @title ASCLoanManager
  * @dev Main contract for managing cross-chain loan orders in the ASC system
  */
-contract ASCLoanManager is Ownable, ReentrancyGuard, ASCBase {
+contract ASCLoanManager is Ownable, ASCBase {
     using ECDSA for bytes32;
 
     enum LoanManagerActions {

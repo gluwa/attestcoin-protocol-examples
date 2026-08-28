@@ -3,8 +3,8 @@
 # WARNING: execute this from the repository root.
 set -euo pipefail
 
-sol_directory="loan/contracts/sol"
-abi_directory="loan/contracts/abi"
+sol_directory="shared/contracts/sol"
+abi_directory="shared/contracts/abi"
 
 extract_abi() {
     local path="$1"
@@ -17,13 +17,14 @@ extract_abi() {
     '
 }
 
+mkdir -p "$abi_directory"
+
 for p in "$sol_directory"/*.sol; do
     file=$(basename "$p")
     contract_name="${file%.sol}"
     file_with_extension="$contract_name.json"
     solc --base-path . --include-path "node_modules" \
         "@openzeppelin/=node_modules/@openzeppelin/" \
-        "@gluwa/usc-contracts/=node_modules/@gluwa/usc-contracts/" \
         "$p" \
         --combined-json abi --overwrite --json-indent 2 | \
         extract_abi "$p" "$contract_name" | jq --indent 2 . > "$abi_directory/$file_with_extension"

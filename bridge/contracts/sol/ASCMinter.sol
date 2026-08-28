@@ -2,12 +2,19 @@
 pragma solidity ^0.8.23;
 
 import {ASCMintableToken, ASC_MINTER} from "./MintableToken.sol";
-import {ASCBase} from "./ASCBase.sol";
-import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol";
+import {ASCBase} from "@gluwa/usc-contracts/contracts/readability/ASCBase.sol";
+import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol";
 
+/**
+ * @title ASCMinter
+ * @notice Simplified ASC that mints wrapped tokens after a proved source-chain burn.
+ * @dev Mints only when the burn log's emitting contract (source-chain token) is whitelisted
+ *      via {wrapOriginToken}. Unregistered emitters are rejected even if the proof is valid.
+ */
 contract ASCMinter is ASCBase {
     enum MinterActions {
-        Mint // 0
+        None, // 0 — holder
+        Mint // 1
     }
     error InvalidAction(uint8 action);
 
@@ -16,9 +23,19 @@ contract ASCMinter is ASCBase {
         0x17dc4d6f69d484e59be774c29b47d2fa4c14af2e01df42fc5643ac968f4d427e;
 
     event TokensMinted(address indexed wrappedTokenAddress, address indexed burntFrom, uint256 amount, bytes32 indexed queryId);
+    event EmitterWhitelisted(address indexed emitter, address indexed wrappedToken);
 
+    /// @notice Source-chain burn contracts allowed to trigger mints (log `address` / emitter).
+    mapping(address => bool) public whitelistedEmitters;
+
+    /// @notice Whitelisted emitter → wrapped ASCMintableToken on Creditcoin.
     mapping(address => address) public wrappedTokens;
 
+    /**
+     * @notice Whitelist a source-chain burn emitter and map it to a Creditcoin wrapped token.
+     * @param originToken Source-chain ERC20 that emits `TokensBurnedForBridging` (the emitter).
+     * @param targetToken Creditcoin ASCMintableToken that this ASC may mint.
+     */
     function wrapOriginToken(address originToken, address targetToken) external {
         require(originToken != address(0), "Origin token cannot be the zero address");
         require(targetToken != address(0), "Target token cannot be the zero address");
@@ -26,7 +43,10 @@ contract ASCMinter is ASCBase {
         require(ASCMintableToken(targetToken).owner() == msg.sender, "Target token must be owned by the caller");
         require(ASCMintableToken(targetToken).hasRole(ASC_MINTER, address(this)), "Target token must be ASCMintableToken and support AccessControl");
 
+        whitelistedEmitters[originToken] = true;
         wrappedTokens[originToken] = targetToken;
+
+        emit EmitterWhitelisted(originToken, targetToken);
     }
 
     function _processAndEmitEvent(uint8 action, bytes32 queryId, bytes memory encodedTransaction) internal override {
@@ -50,15 +70,13 @@ contract ASCMinter is ASCBase {
             EvmV1Decoder.getLogsByEventSignature(receipt, BURN_EVENT_SIGNATURE);
         require(burnLogs.length > 0, "No burn events found");
 
-        // Check if the burn is valid
-        (address originTokenAddress, address burntFrom, uint256 burntValue) = _processBurnLogs(burnLogs);
+        (address emitter, address burntFrom, uint256 burntValue) = _processBurnLogs(burnLogs);
 
-        address wrappedTokenAddress = wrappedTokens[originTokenAddress];
+        // Reject burns from contracts that were never whitelisted, even with a valid proof.
+        require(whitelistedEmitters[emitter], "Emitter not whitelisted");
 
-        require(
-            wrappedTokenAddress != address(0),
-            "Origin token not registered in wrapped tokens!"
-        );
+        address wrappedTokenAddress = wrappedTokens[emitter];
+        require(wrappedTokenAddress != address(0), "No wrapped token for emitter");
 
         ASCMintableToken(wrappedTokenAddress).mint(burntFrom, burntValue);
 
@@ -68,7 +86,7 @@ contract ASCMinter is ASCBase {
     function _processBurnLogs(EvmV1Decoder.LogEntry[] memory burnLogs)
         internal
         pure
-        returns (address originTokenAddress, address from, uint256 value)
+        returns (address emitter, address from, uint256 value)
     {
         // For this demonstration we only process the first burn log found within a transaction.
         // We only expect a single burn log per transaction in this demo anyways
@@ -78,13 +96,14 @@ contract ASCMinter is ASCBase {
         require(log.topics.length == 2, "Invalid TokensBurnedForBridging topics");
         require(log.topics[0] == BURN_EVENT_SIGNATURE, "Not TokensBurnedForBridging event");
 
-        originTokenAddress = log.address_;
+        // Log `address` is the source-chain contract that emitted the burn (the emitter).
+        emitter = log.address_;
         from = address(uint160(uint256(log.topics[1])));
 
         // data is a single uint256 (32 bytes)
         require(log.data.length == 32, "Not burn event: data len");
         value = abi.decode(log.data, (uint256));
 
-        return (originTokenAddress, from, value);
+        return (emitter, from, value);
     }
 }

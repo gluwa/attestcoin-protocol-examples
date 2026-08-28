@@ -4,7 +4,7 @@ Use this to validate the repository locally before release or deployment.
 
 ## Automated (CI + local)
 
-From the repository root (requires [Foundry](https://getfoundry.sh/) on your `PATH`). Contracts resolve `EvmV1Decoder` from the yarn dependency `@gluwa/usc-contracts` (`contracts/decoding/`); loan `ASCBase` comes from the local bridge example:
+From the repository root (requires [Foundry](https://getfoundry.sh/) on your `PATH`). Bridge and loan both inherit readability `ASCBase` and `EvmV1Decoder` from `@gluwa/usc-contracts` (`contracts/readability/`, `contracts/common/`):
 
 ```sh
 yarn
@@ -14,12 +14,12 @@ yarn verify
 
 This runs:
 
-| Step       | Command          | What it checks                                         |
-| ---------- | ---------------- | ------------------------------------------------------ |
-| TypeScript | `yarn typecheck` | Tutorial scripts compile                               |
-| Lint       | `yarn eslint`    | TS/JS style                                            |
-| Contracts  | `yarn build`     | `forge build` for bridge + loan                        |
-| Unit tests | `forge test`     | Loan source-contract binding + bridge burn-log parsing |
+| Step       | Command          | What it checks                                                                           |
+| ---------- | ---------------- | ---------------------------------------------------------------------------------------- |
+| TypeScript | `yarn typecheck` | Tutorial scripts compile                                                                 |
+| Lint       | `yarn eslint`    | TS/JS style                                                                              |
+| Contracts  | `yarn build`     | `forge build` for bridge + loan                                                          |
+| Unit tests | `forge test`     | Loan source-contract binding; bridge burn-log parsing + emitter whitelist / query dedupe |
 
 ### CI (`solidity.yml`)
 
@@ -36,6 +36,7 @@ source .env
 yarn utils:check_setup network   # RPC + attestation only
 yarn utils:check_setup hello     # + hello-bridge contract addresses
 yarn utils:check_setup bridge    # + wallet key for custom bridge
+yarn utils:check_setup loan      # + loan contracts and lender/borrower keys
 ```
 
 ## Manual end-to-end — Hello Bridge
@@ -58,9 +59,10 @@ Tokens minted! Contract: 0x..., To: 0x..., Amount: 50000000000000000000, QueryId
 ## Manual end-to-end — Custom bridge + loan
 
 - [ ] Deploy `EvmV1Decoder` once; set `EVM_V1_DECODER_LIBRARY_ADDRESS`
-- [ ] Deploy `ASCMinter`, wrapped token, `wrapOriginToken`
+- [ ] Deploy `ASCMinter`, wrapped token, `wrapOriginToken` (whitelists the Sepolia burn emitter)
 - [ ] Burn → `yarn custom_bridge:submit_query` → mint succeeds once
 - [ ] Second submit with same proof reverts (`Query already processed`)
+- [ ] Proof of a burn from a non-whitelisted emitter reverts (`Emitter not whitelisted`) — also covered by `forge test --root bridge` (`ASCMinterSecurity.t.sol`)
 - [ ] Deploy loan stack; `yarn loan_flow:register_source_contract`
 - [ ] Fund/repay on Sepolia; worker or manual proof updates loan status
 - [ ] Spoofed `LoanFunded` from unregistered contract cannot mark loan funded (covered by unit tests)

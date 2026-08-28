@@ -1,12 +1,54 @@
+import fs from 'fs';
+import path from 'path';
 import dotenv from 'dotenv';
 import { ethers } from 'ethers';
 
 import { chainInfo } from '@gluwa/usc-sdk';
 import { isValidContractAddress, isValidPrivateKey } from './utils';
 
-dotenv.config({ override: true });
-
+const REPO_ROOT = path.resolve(__dirname, '..');
 const VERIFIER_PRECOMPILE = '0x0000000000000000000000000000000000000FD2';
+
+type SetupMode = 'hello' | 'hello-bridge' | 'bridge' | 'custom' | 'loan' | 'network';
+
+/** Shell/sourced env wins; then tutorial split; then root `.env` fills remaining defaults. */
+function loadTutorialEnv(mode: SetupMode): void {
+  const snapshot = { ...process.env };
+  const files = [path.join(REPO_ROOT, '.env')];
+
+  if (mode === 'hello' || mode === 'hello-bridge' || mode === 'bridge' || mode === 'custom') {
+    files.push(path.join(REPO_ROOT, 'bridge', '.env'));
+  } else if (mode === 'loan') {
+    files.push(path.join(REPO_ROOT, 'loan', '.env'));
+  }
+
+  for (const file of files) {
+    if (fs.existsSync(file)) {
+      dotenv.config({ path: file, override: true });
+    }
+  }
+
+  for (const [key, value] of Object.entries(snapshot)) {
+    if (value !== undefined) {
+      process.env[key] = value;
+    }
+  }
+}
+
+function normalizeMode(raw: string | undefined): SetupMode {
+  const mode = (raw ?? 'hello').toLowerCase();
+  switch (mode) {
+    case 'hello':
+    case 'hello-bridge':
+    case 'bridge':
+    case 'custom':
+    case 'loan':
+    case 'network':
+      return mode;
+    default:
+      throw new Error(`Unknown mode "${mode}". Use: hello | bridge | loan | network`);
+  }
+}
 
 type CheckResult = { ok: boolean; message: string };
 
@@ -202,8 +244,94 @@ async function runBridgeChecks(): Promise<boolean> {
   return printResults(results);
 }
 
+async function runLoanChecks(): Promise<boolean> {
+  const results: CheckResult[] = [];
+
+  const sourceChainKey = Number(process.env.SOURCE_CHAIN_KEY);
+  results.push(
+    sourceChainKey > 0 ? pass(`SOURCE_CHAIN_KEY: ${sourceChainKey}`) : fail('SOURCE_CHAIN_KEY: missing or invalid')
+  );
+
+  results.push(await checkRpc('CREDITCOIN_RPC_URL', process.env.CREDITCOIN_RPC_URL));
+  results.push(await checkRpc('SOURCE_CHAIN_RPC_URL', process.env.SOURCE_CHAIN_RPC_URL));
+  results.push(await checkProofBuilder(process.env.PROOF_BUILDER_URL));
+  results.push(await checkVerifierPrecompile(process.env.CREDITCOIN_RPC_URL));
+  results.push(await checkChainKeyAttestation(process.env.CREDITCOIN_RPC_URL, sourceChainKey));
+
+  results.push(
+    isValidPrivateKey(process.env.CREDITCOIN_WALLET_PRIVATE_KEY)
+      ? pass('CREDITCOIN_WALLET_PRIVATE_KEY: set')
+      : fail('CREDITCOIN_WALLET_PRIVATE_KEY: missing or invalid')
+  );
+  results.push(
+    isValidPrivateKey(process.env.LENDER_WALLET_PRIVATE_KEY)
+      ? pass('LENDER_WALLET_PRIVATE_KEY: set')
+      : fail('LENDER_WALLET_PRIVATE_KEY: missing or invalid')
+  );
+  results.push(
+    isValidPrivateKey(process.env.BORROWER_WALLET_PRIVATE_KEY)
+      ? pass('BORROWER_WALLET_PRIVATE_KEY: set')
+      : fail('BORROWER_WALLET_PRIVATE_KEY: missing or invalid')
+  );
+
+  if (isValidContractAddress(process.env.EVM_V1_DECODER_LIBRARY_ADDRESS)) {
+    results.push(pass(`EVM_V1_DECODER_LIBRARY_ADDRESS: ${process.env.EVM_V1_DECODER_LIBRARY_ADDRESS}`));
+  } else {
+    results.push(
+      pass('EVM_V1_DECODER_LIBRARY_ADDRESS: not set (reuse from bridge tutorial or deploy once on Creditcoin)')
+    );
+  }
+
+  if (isValidContractAddress(process.env.ASC_LOAN_MANAGER_CONTRACT_ADDRESS)) {
+    results.push(
+      await checkContractCode(
+        'ASC_LOAN_MANAGER_CONTRACT_ADDRESS',
+        process.env.CREDITCOIN_RPC_URL,
+        process.env.ASC_LOAN_MANAGER_CONTRACT_ADDRESS
+      )
+    );
+  } else {
+    results.push(fail('ASC_LOAN_MANAGER_CONTRACT_ADDRESS: not configured'));
+  }
+
+  if (isValidContractAddress(process.env.SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS)) {
+    results.push(
+      await checkContractCode(
+        'SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS',
+        process.env.SOURCE_CHAIN_RPC_URL,
+        process.env.SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS
+      )
+    );
+  } else {
+    results.push(fail('SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS: not configured'));
+  }
+
+  if (isValidContractAddress(process.env.SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS)) {
+    results.push(
+      await checkContractCode(
+        'SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS',
+        process.env.SOURCE_CHAIN_RPC_URL,
+        process.env.SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS
+      )
+    );
+  } else {
+    results.push(fail('SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS: not configured'));
+  }
+
+  return printResults(results);
+}
+
 async function main(): Promise<void> {
-  const mode = (process.argv[2] ?? 'hello').toLowerCase();
+  let mode: SetupMode;
+  try {
+    mode = normalizeMode(process.argv[2]);
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error(msg);
+    process.exit(1);
+  }
+
+  loadTutorialEnv(mode);
 
   console.log(`Tutorial setup check (${mode})\n`);
 
@@ -217,16 +345,16 @@ async function main(): Promise<void> {
     case 'custom':
       ok = await runBridgeChecks();
       break;
+    case 'loan':
+      ok = await runLoanChecks();
+      break;
     case 'network':
       ok = await runNetworkChecks();
       break;
-    default:
-      console.error(`Unknown mode "${mode}". Use: hello | bridge | network`);
-      process.exit(1);
   }
 
   if (!ok) {
-    console.error('\nFix the items above, then re-run: yarn utils:check_setup');
+    console.error(`\nFix the items above, then re-run: yarn utils:check_setup ${mode}`);
     process.exit(1);
   }
 

@@ -35,13 +35,15 @@ jobs:
 
       - name: Compile and test smart contracts
         run: |
-          yarn install
+          yarn install --ignore-engines
 
           echo "INFO: forge remappings (bridge)"
           ~/.foundry/bin/forge remappings --root bridge || true
           echo "INFO: forge remappings (loan)"
           ~/.foundry/bin/forge remappings --root loan || true
           ls -la node_modules/@gluwa/usc-contracts/contracts || true
+          ls -la node_modules/@gluwa/usc-contracts/contracts/readability || true
+          ls -la node_modules/@gluwa/usc-contracts/contracts/common || true
 
           ~/.foundry/bin/forge build --root bridge
           ~/.foundry/bin/forge build --root loan
@@ -66,21 +68,22 @@ jobs:
 
       - name: Regenerate the ABI
         run: |
-          yarn install
+          yarn install --ignore-engines
 
           solc --version
-          chmod +x ./bridge/contracts/abi-creator.sh ./loan/contracts/abi-creator.sh
+          chmod +x ./bridge/contracts/abi-creator.sh ./loan/contracts/abi-creator.sh ./shared/contracts/abi-creator.sh
           ./bridge/contracts/abi-creator.sh
           ./loan/contracts/abi-creator.sh
+          ./shared/contracts/abi-creator.sh
 
       - name: Check for mismatch
         run: |
           echo "========== DEBUG DEBUG DEBUG =========="
-          git status --short -- bridge/contracts/abi loan/contracts/abi
-          git diff -- bridge/contracts/abi loan/contracts/abi
+          git status --short -- bridge/contracts/abi loan/contracts/abi shared/contracts/abi
+          git diff -- bridge/contracts/abi loan/contracts/abi shared/contracts/abi
           echo "======================================="
 
-          if [ -n "$(git status --short -- bridge/contracts/abi loan/contracts/abi)" ]; then
+          if [ -n "$(git status --short -- bridge/contracts/abi loan/contracts/abi shared/contracts/abi)" ]; then
               echo "FAIL: found ABI mismatch on disk vs. freshly generated from source"
               echo "TODO: update ABI on disk and commit the changes to git"
               exit 1

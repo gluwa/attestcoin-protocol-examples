@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
+/// @notice Minimal Sepolia burner ERC20 shared by bridge and loan tutorials.
 contract TestERC20 is ERC20 {
     address public constant BURN_ADDRESS = address(1); // 0x...01
 
@@ -12,7 +13,6 @@ contract TestERC20 is ERC20 {
     event TokensBurnedForBridging(address indexed from, uint256 value);
 
     constructor() ERC20("Burn Test", "TEST") {
-        // Mint sender initial supply
         _mint(msg.sender, 1_000_000 ether);
     }
 
@@ -24,8 +24,7 @@ contract TestERC20 is ERC20 {
         return true;
     }
 
-    /// @notice Mint new tokens to a specified address.
-    /// @param amount The amount of tokens to mint
+    /// @notice Mint new tokens to the caller.
     function mint(uint256 amount) external returns (bool) {
         _mint(msg.sender, amount);
         return true;

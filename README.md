@@ -1,6 +1,8 @@
 # 🌉 ASC Testnet Bridge Examples 🌉
 
-This repository is a starting point for exploring Creditcoin cross-chain **readability** (Attestcoin Smart Contracts). The **bridge** tutorials use a **simplified ASC bridge** — local `ASCBase` + `ASCMinter`, direct `execute` calls — **not** the full write-ability production stack (Outbox / Relayer / Inbox). See [bridge/README.md](./bridge/README.md).
+This repository is a starting point for exploring Creditcoin cross-chain **readability** (Attestcoin Smart Contracts). The **bridge** tutorials use a **simplified ASC bridge** — local `ASCMinter` on shared package `ASCBase`, direct `execute` calls — **not** the full write-ability production stack (Outbox / Relayer / Inbox). See [bridge/README.md](./bridge/README.md).
+
+`@gluwa/usc-contracts` is resolved from [`asc-contracts`](https://github.com/gluwa/asc-contracts) (`git+https`), which provides one shared readability `ASCBase` for bridge and loan.
 
 Learn how to use the Creditcoin Decentralized Oracle through guided tutorials where you set up and interact with your own decentralized bridge and loan examples.
 
@@ -8,15 +10,17 @@ Learn how to use the Creditcoin Decentralized Oracle through guided tutorials wh
 
 ```
 usc-testnet-bridge-examples/
-├── bridge/                 # Simplified ASC bridge tutorials + contracts (ASCBase, ASCMinter)
-│   ├── contracts/          # Local readability contracts; EvmV1Decoder lib from @gluwa/usc-contracts
+├── bridge/                 # Simplified ASC bridge tutorials + ASCMinter (ASCBase from @gluwa/usc-contracts)
+│   ├── contracts/          # Example ASC apps; ASCBase + EvmV1Decoder from @gluwa/usc-contracts
 │   ├── hello-bridge/
 │   ├── custom-contracts-bridging/
 │   └── bridge-offchain-worker/
 ├── loan/                   # Cross-chain loan tutorial + loan contracts
-│   ├── contracts/          # ASCLoanManager, AuxiliaryLoanContract, TestERC20, …
+│   ├── contracts/          # ASCLoanManager, AuxiliaryLoanContract, …
 │   └── scripts/            # Loan flow CLI scripts
-└── shared/utils/           # Proof builder + submit helpers shared by both examples
+├── shared/
+│   ├── contracts/          # TestERC20 (shared Sepolia burner for bridge + loan)
+│   └── utils/              # Proof builder + submit helpers shared by both examples
 ```
 
 Package overview: [bridge/README.md](./bridge/README.md) (simplified bridge model and what is out of scope).
@@ -56,6 +60,7 @@ Then source your env file and verify connectivity:
 source .env
 yarn utils:check_setup hello   # Hello Bridge
 yarn utils:check_setup bridge  # after custom-contracts deploy
+yarn utils:check_setup loan    # after loan stack deploy
 ```
 
 Deploy `EvmV1Decoder` once per Creditcoin network; save `EVM_V1_DECODER_LIBRARY_ADDRESS` in `.env` and reuse for the loan tutorial.

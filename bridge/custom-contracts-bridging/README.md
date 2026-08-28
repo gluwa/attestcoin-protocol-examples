@@ -1,7 +1,7 @@
 # Custom Contract Bridging
 
 > [!NOTE]
-> Deploys the **simplified** local `ASCMinter` / `ASCBase` pair — direct `execute` minting, no relayer contracts. See [bridge/README.md](../README.md).
+> Deploys the **simplified** `ASCMinter` on shared package `ASCBase` (`@gluwa/usc-contracts` readability) — direct `execute` minting, no relayer contracts. See [bridge/README.md](../README.md).
 
 > [!TIP]
 > This tutorial builds on the previous [Hello Bridge] example -make sure to check it out before
@@ -43,7 +43,7 @@ forge create \
     --broadcast \
     --rpc-url $SOURCE_CHAIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    loan/contracts/sol/TestERC20.sol:TestERC20
+    shared/contracts/sol/TestERC20.sol:TestERC20
 ```
 
 This should display some output containing the address of your test `ERC20` contract:
@@ -81,7 +81,7 @@ forge create \
   --broadcast \
   --rpc-url $CREDITCOIN_RPC_URL \
   --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-  node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder
+  node_modules/@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder
 ```
 
 Add the library address to your root `.env` so later steps (and the loan tutorial) can reuse it:
@@ -96,7 +96,7 @@ Reload:
 source .env
 ```
 
-> **Note:** Deploy from `contracts/decoding/EvmV1Decoder.sol` in the npm package. That library is a shared receipt decoder — not the Outbox/Relayer bridge stack.
+> **Note:** Deploy from `contracts/common/EvmV1Decoder.sol` in the npm package. That library is a shared receipt decoder — not the Outbox/Relayer bridge stack.
 
 ### 3.2 Deploy `ASCMinter`
 
@@ -105,11 +105,11 @@ forge create \
     --broadcast \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:$EVM_V1_DECODER_LIBRARY_ADDRESS \
+    --libraries node_modules/@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder:$EVM_V1_DECODER_LIBRARY_ADDRESS \
     bridge/contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
-If deployment fails (nonce, gas, etc.), see [Contributor deploy notes](../contracts/CONTRIBUTING.md).
+If deployment fails (nonce, gas, etc.), see [Contributor deploy notes](../contracts/Contributor%20Notes.md).
 
 You should get output with the contract address:
 
@@ -133,7 +133,7 @@ Reload:
 source .env
 ```
 
-### 3.4 Deploy wrapped token and register the route
+### 3.4 Deploy wrapped token and whitelist the source emitter
 
 Deploy the wrapped ERC20 owned by your minter:
 
@@ -152,7 +152,8 @@ Update `.env`:
 ASC_CUSTOM_MINTABLE_TOKEN=<ERC20_address_from_step_3_4>
 ```
 
-Register the Sepolia source token → wrapped token mapping:
+Register (whitelist) the Sepolia burn contract as an allowed emitter and map it to the wrapped token.
+`ASCMinter` mints **only** when the proved burn log’s emitting address is on this whitelist — a valid proof from any other contract is rejected:
 
 ```bash
 cast send \
@@ -272,7 +273,7 @@ To experiment with customizing ASC logic, edit `bridge/contracts/sol/ASCMinter.s
 
 ## Conclusion
 
-Congratulations! You've deployed your own simplified ASC bridge (`ASCMinter` + wrapped token) and completed a trustless mint.
+Congratulations! You've deployed your own simplified ASC bridge (`ASCMinter` + wrapped token), whitelisted the Sepolia burn emitter, and completed a trustless mint.
 
 Next: [Loan Flow](../../loan/scripts/README.md) reuses your decoder library and extends the pattern with cross-chain loan state.
 
@@ -281,5 +282,5 @@ Next: [Loan Flow](../../loan/scripts/README.md) reuses your decoder library and 
 [step 2]: #2-deploy-a-test-erc20-contract-on-sepolia
 [step 3.2]: #32-deploy-ascminter
 [step 5]: #5-submit-a-mint-query-to-the-asc-contract
-[Contributor deploy notes]: ../contracts/CONTRIBUTING.md
+[Contributor deploy notes]: ../contracts/Contributor%20Notes.md
 [Bridge Offchain Worker]: ../bridge-offchain-worker/README.md
