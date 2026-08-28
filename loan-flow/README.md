@@ -502,5 +502,5 @@ If you haven't already, take a look at the [ASC Gitbook] for more information.
 
 [Bridge Offchain Worker]: ../bridge-offchain-worker/README.md
 [Hello Bridge]: ../hello-bridge/README.md#11-generate-a-new-wallet-address
-[ASC Gitbook]: https://docs.creditcoin.org/attestcoin-protocol
+[ASC Gitbook]: https://docs.attestcoin.org/
 [🚰 testnet faucet]: https://cloud.google.com/application/web3/faucet/ethereum/sepolia

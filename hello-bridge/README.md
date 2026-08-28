@@ -235,5 +235,5 @@ be used by teams of DApp builders who will handle data provisioning on behalf of
 [step 1.1]: #11-generate-a-new-wallet-address
 [step 2]: #2-minting-some-tokens-on-sepolia
 [step 4]: #4-submit-a-mint-query-to-the-asc-contract
-[DApp Design Patterns]: https://docs.creditcoin.org/attestcoin-protocol/dapp-builder-infrastructure/dapp-design-patterns-readability
+[DApp Design Patterns]: https://docs.attestcoin.org/attestcoin-protocol/dapp-builder-infrastructure/dapp-design-patterns-readability
 [Custom Contracts Bridging]: ../custom-contracts-bridging/README.md
