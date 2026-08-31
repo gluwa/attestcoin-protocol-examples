@@ -82,8 +82,8 @@ account address from [step 1.1]:
 /faucet address: 0xBE7959cA1b19e159D8C0649860793dDcd125a2D5
 ```
 
-Note, that currently the faucet yields 100 test CTC every 24 hours. This balance is sufficient
-to submit 9 oracle queries, since testnet oracle fees are artificially high to prevent DOS.
+Note, that currently the faucet yields 100 test CTC every 24 hours. That is far more than these
+tutorials need: submitting an oracle query costs only gas, on the order of 0.0002 CTC per query.
 
 Now that your wallet is ready to make transactions on both networks, you will be needing a way
 to interact with it from the command line.
