@@ -109,7 +109,7 @@ forge create \
     bridge/contracts/sol/ASCMinter.sol:ASCMinter
 ```
 
-If deployment fails (nonce, gas, etc.), see [Contributor deploy notes](../contracts/Contributor%20Notes.md).
+If deployment fails (nonce, gas, etc.), see [Contributor deploy notes](../contracts/CONTRIBUTOR_NOTES.md).
 
 You should get output with the contract address:
 
@@ -282,5 +282,5 @@ Next: [Loan Flow](../../loan/scripts/README.md) reuses your decoder library and 
 [step 2]: #2-deploy-a-test-erc20-contract-on-sepolia
 [step 3.2]: #32-deploy-ascminter
 [step 5]: #5-submit-a-mint-query-to-the-asc-contract
-[Contributor deploy notes]: ../contracts/Contributor%20Notes.md
+[Contributor deploy notes]: ../contracts/CONTRIBUTOR_NOTES.md
 [Bridge Offchain Worker]: ../bridge-offchain-worker/README.md

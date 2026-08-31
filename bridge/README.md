@@ -41,7 +41,7 @@ bridge/
 2. [Custom Contracts Bridging](./custom-contracts-bridging/README.md)
 3. [Bridge Offchain Worker](./bridge-offchain-worker/README.md)
 
-Deployment troubleshooting: [contracts/Contributor Notes.md](./contracts/Contributor%20Notes.md).
+Deployment troubleshooting: [contracts/CONTRIBUTOR_NOTES.md](./contracts/CONTRIBUTOR_NOTES.md).
 
 ## Before you run tutorials
 
