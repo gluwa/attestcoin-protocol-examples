@@ -78,6 +78,7 @@ GitHub Actions cannot fetch `gluwa/asc-contracts` anonymously. Add a repo/org se
 3. Workflows run `.github/actions/install-js-deps`, which checkouts [`gluwa/asc-contracts`](https://github.com/gluwa/asc-contracts) `main` with that token into `vendor/asc-contracts`, then `yarn install` via `file:vendor/asc-contracts` (avoids yarn’s unauthenticated git fetch on private repos).
 
 Fork PRs will not receive this secret unless you use a trusted workflow pattern.
+
 ## Tutorials
 
 We recommend going through them in this order:

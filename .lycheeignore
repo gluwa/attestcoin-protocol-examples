@@ -25,4 +25,8 @@ https://developer.metamask.io(.*)
 https://(.*).creditcoin.network/
 https://blockchain.googleapis.com/v1/projects/(.*)
 https://github.com/gluwa/usc-contracts(.*)
+https://github.com/gluwa/asc-contracts(.*)
 https://docs.creditcoin.org/attestcoin-protocol(.*)
+https://docs.attestcoin.org(.*)
+https://www.npmjs.com/package/@gluwa/usc-contracts(.*)
+https://www.npmjs.com/package/@gluwa/asc-contracts(.*)

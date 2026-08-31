@@ -170,6 +170,8 @@ jobs:
 
       - name: Setup
         id: setup
+        env:
+          FOUNDRY_VIA_IR: "true"
         run: |
           SOURCE_CHAIN_RPC_URL="${{ steps.env.outputs.source_chain_rpc_url }}"
 
@@ -226,13 +228,20 @@ jobs:
           DECODER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
 
           echo "INFO: deploy ASCLoanManager.sol to Creditcoin"
+          set +e
           OUTPUT=$(~/.foundry/bin/forge create \
                 --broadcast                    \
                 --rpc-url "$CREDITCOIN_RPC_URL"  \
                 --private-key "$WALLET_PK"   \
                 --libraries "node_modules/@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder:$DECODER_CONTRACT_ADDRESS" \
                 loan/contracts/sol/ASCLoanManager.sol:ASCLoanManager 2>&1)
+          STATUS=$?
+          set -e
           echo "$OUTPUT"
+          if [ "$STATUS" -ne 0 ]; then
+            echo "ERROR: ASCLoanManager forge create failed (exit $STATUS)"
+            exit "$STATUS"
+          fi
           ASC_LOAN_MANAGER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "asc_loan_manager_contract_address=$ASC_LOAN_MANAGER_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 

@@ -51,7 +51,12 @@ runs:
 
         yarn install --ignore-engines
 
+        # Restore manifests so later jobs (prettier/check-format) do not see CI-only edits.
+        git checkout -- package.json yarn.lock 2>/dev/null || true
+
         echo "Installed @gluwa/usc-contracts from vendor/asc-contracts (gluwa/asc-contracts@main):"
         yarn list --pattern '@gluwa/usc-contracts' --depth=0 || true
         ls -la node_modules/@gluwa/usc-contracts/contracts/readability || true
         ls -la node_modules/@gluwa/usc-contracts/contracts/common || true
+        test -d node_modules/@gluwa/usc-contracts/contracts/readability
+        test -d node_modules/@gluwa/usc-contracts/contracts/common
