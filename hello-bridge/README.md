@@ -71,7 +71,7 @@ faucet here.
 
 ### 1.3 Get some test funds (`Creditcoin`)
 
-You will also need to fund your account on the Creditcoin Testnet v2, otherwise our oracle query
+You will also need to fund your account on the Creditcoin CC3 Testnet, otherwise our oracle query
 submission will fail due to lack of funds. Head to the [🚰 creditcoin discord faucet] to request
 some test tokens there.
 
