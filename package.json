@@ -16,7 +16,7 @@
     "utils:check_balance": "node shared/utils/check_balance.js",
     "utils:check_setup": "tsx shared/check_setup.ts",
     "check-format": "prettier --check .",
-    "eslint": "eslint -c .eslintrc.js --ignore-pattern .eslintrc.js --ignore-pattern check_balance.js --max-warnings 0 --ext .ts --ext .js .",
+    "eslint": "eslint -c .eslintrc.js --ignore-pattern .eslintrc.js --ignore-pattern check_balance.js --ignore-pattern vendor/** --max-warnings 0 --ext .ts --ext .js .",
     "format": "prettier --write .",
     "build": "forge build --root bridge && forge build --root loan",
     "test": "forge test --root bridge && forge test --root loan",

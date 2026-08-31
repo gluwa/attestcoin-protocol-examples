@@ -10,5 +10,8 @@ node_modules
 # Package-lock
 package-lock.json
 
+# CI checkout of gluwa/asc-contracts
+vendor
+
 # TS Config
 tsconfig.json

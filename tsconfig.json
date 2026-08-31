@@ -10,7 +10,7 @@
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true
     },
-    "exclude": ["node_modules", "**/__tests__/*", "dist"],
+    "exclude": ["node_modules", "**/__tests__/*", "dist", "vendor"],
 
     "ts-node": {
         "require": ["tsconfig-paths/register"],

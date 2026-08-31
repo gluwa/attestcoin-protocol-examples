@@ -27,6 +27,10 @@ runs:
         token: ${{ inputs.token }}
         path: vendor/asc-contracts
         persist-credentials: false
+        sparse-checkout: |
+          contracts
+          package.json
+        sparse-checkout-cone-mode: false
 
     - name: yarn install (file:vendor/asc-contracts)
       shell: bash
