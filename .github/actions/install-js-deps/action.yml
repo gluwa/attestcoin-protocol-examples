@@ -1,38 +1,57 @@
 name: Install JS deps
-description: yarn install with authenticated access to private gluwa/asc-contracts on main
+description: Install JS deps using gluwa/asc-contracts@main (private; ASC_CONTRACTS_READ_TOKEN)
 inputs:
   token:
     description: GitHub token with Contents:Read on gluwa/asc-contracts (ASC_CONTRACTS_READ_TOKEN)
     required: true
-  upgrade_asc_contracts:
-    description: Re-resolve git+...#main to the current tip (recommended for CI)
-    required: false
-    default: "true"
 runs:
   using: composite
   steps:
-    - name: Authenticate git for gluwa/asc-contracts
+    - name: Require ASC_CONTRACTS_READ_TOKEN
       shell: bash
       env:
         ASC_CONTRACTS_READ_TOKEN: ${{ inputs.token }}
       run: |
         if [ -z "${ASC_CONTRACTS_READ_TOKEN}" ]; then
-          echo "Missing secret ASC_CONTRACTS_READ_TOKEN (Contents:Read on gluwa/asc-contracts)"
+          echo "Missing secret ASC_CONTRACTS_READ_TOKEN (Contents:Read on https://github.com/gluwa/asc-contracts)"
           exit 1
         fi
-        # So yarn can resolve git+https://github.com/gluwa/asc-contracts.git#main
-        git config --global url."https://x-access-token:${ASC_CONTRACTS_READ_TOKEN}@github.com/".insteadOf "https://github.com/"
 
-    - name: yarn install
-      shell: bash
-      run: yarn install --ignore-engines
+    # yarn git+https + insteadOf often still hits unauthenticated ls-remote and gets
+    # GitHub's "Repository not found" for private repos. actions/checkout applies the PAT.
+    - name: Checkout gluwa/asc-contracts (main)
+      uses: actions/checkout@v7
+      with:
+        repository: gluwa/asc-contracts
+        ref: main
+        token: ${{ inputs.token }}
+        path: vendor/asc-contracts
+        persist-credentials: false
 
-    - name: Upgrade @gluwa/usc-contracts to latest main
-      if: inputs.upgrade_asc_contracts == 'true'
+    - name: yarn install (file:vendor/asc-contracts)
       shell: bash
       run: |
-        yarn upgrade @gluwa/usc-contracts --ignore-engines
-        echo "Resolved @gluwa/usc-contracts:"
+        if [ ! -f vendor/asc-contracts/package.json ]; then
+          echo "Checkout of gluwa/asc-contracts failed — verify ASC_CONTRACTS_READ_TOKEN has Contents:Read on that repo"
+          exit 1
+        fi
+
+        # package.json keeps git+https for local use; CI installs from the checked-out main tip.
+        node <<'NODE'
+        const fs = require('fs');
+        const pkgPath = 'package.json';
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        if (!pkg.dependencies || !pkg.dependencies['@gluwa/usc-contracts']) {
+          console.error('package.json missing @gluwa/usc-contracts dependency');
+          process.exit(1);
+        }
+        pkg.dependencies['@gluwa/usc-contracts'] = 'file:vendor/asc-contracts';
+        fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
+        NODE
+
+        yarn install --ignore-engines
+
+        echo "Installed @gluwa/usc-contracts from vendor/asc-contracts (gluwa/asc-contracts@main):"
         yarn list --pattern '@gluwa/usc-contracts' --depth=0 || true
         ls -la node_modules/@gluwa/usc-contracts/contracts/readability || true
         ls -la node_modules/@gluwa/usc-contracts/contracts/common || true

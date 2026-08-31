@@ -75,7 +75,7 @@ GitHub Actions cannot fetch `gluwa/asc-contracts` anonymously. Add a repo/org se
 
 1. Create a fine-grained PAT (or GitHub App token) with **Contents: Read** on `gluwa/asc-contracts`.
 2. Add secret **`ASC_CONTRACTS_READ_TOKEN`** on this repository (Settings → Secrets and variables → Actions).
-3. Workflows run `.github/actions/install-js-deps`, which rewrites `https://github.com/` git URLs with that token, runs `yarn install`, then `yarn upgrade @gluwa/usc-contracts` so CI always uses the current `main` tip (`git+https://github.com/gluwa/asc-contracts.git#main`).
+3. Workflows run `.github/actions/install-js-deps`, which checkouts [`gluwa/asc-contracts`](https://github.com/gluwa/asc-contracts) `main` with that token into `vendor/asc-contracts`, then `yarn install` via `file:vendor/asc-contracts` (avoids yarn’s unauthenticated git fetch on private repos).
 
 Fork PRs will not receive this secret unless you use a trusted workflow pattern.
 ## Tutorials
