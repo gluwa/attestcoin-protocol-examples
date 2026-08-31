@@ -194,8 +194,8 @@ yarn utils:check_balance $SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS $WALLET_ADDRESS $S
 
 ```bash
 📦 Token: Burn Test (TEST)
-🧾 Raw Balance: 5000000000
-💰 Formatted Balance: 0.000000005 TEST
+🧾 Raw Balance: 1000000000000005000000000
+💰 Formatted Balance: 1000000.000000005 TEST
 Decimals for token micro unit: 18
 ```
 
@@ -481,8 +481,8 @@ It should show something like this:
 ```sh
 🔗 Using RPC URL: https://sepolia.infura.io/v3/......
 📦 Token: Burn Test (TEST)
-🧾 Raw Balance: 5000000050
-💰 Formatted Balance: 0.00000000500000005 TEST
+🧾 Raw Balance: 1000000000000005000000050
+💰 Formatted Balance: 1000000.00000000500000005 TEST
 Decimals for token micro unit: 18
 ```
 
