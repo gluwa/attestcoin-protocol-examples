@@ -368,7 +368,7 @@ yarn loan_flow:fund_loan <your_loan_id> 500
 Now the worker seems to have noticed something:
 
 ```sh
-Detected LoanFunded event for loanId: 5 - tx hash: 0x2dd44ac7c92786dcc555aafdbf0ce0040c5844eeb4a8a0d45451c5972bf124bf
+Detected LoanFunded event for loanId: 5, tx hash: 0x2dd44ac7c92786dcc555aafdbf0ce0040c5844eeb4a8a0d45451c5972bf124bf
 Transaction 0x2dd44ac7c92786dcc555aafdbf0ce0040c5844eeb4a8a0d45451c5972bf124bf found in block 3193
 Waiting for block 3193 attestation on Creditcoin...
 Latest attested height for chain key 2: 3170
@@ -381,7 +381,6 @@ you will see something like that in the worker logs:
 Proof generation successful!
 ⏳ Estimating gas...
    Estimated gas: 445678, Gas limit with buffer: 601665
-Registered loan 5 for repayment on source chain, tx hash: 0x9ea075d13b1ef07d374b44eec68f2852d664220d2166f9f7cfe6e675c4aa7cc1
 Marked loan 5 as funded on Creditcoin, tx hash: 0x30bbaf08809e8c2b80626a971fd63c2070781cbe80c5e46d69561dfbe0a0f7c7
 Loan 5 has been marked as funded on Creditcoin.
 ```
@@ -405,7 +404,7 @@ Loan repaid:  0x33b6bb60b928407a6599c1803567ac24cb5bbd5c116351efd52ed434ff97516e
 And this time the worker does notice that the loan is being repaid:
 
 ```sh
-Detected LoanRepaid event for loanId: 5 - tx hash: 0x33b6bb60b928407a6599c1803567ac24cb5bbd5c116351efd52ed434ff97516e
+Detected LoanRepaid event for loanId: 5, tx hash: 0x33b6bb60b928407a6599c1803567ac24cb5bbd5c116351efd52ed434ff97516e
 Transaction 0x33b6bb60b928407a6599c1803567ac24cb5bbd5c116351efd52ed434ff97516e found in block 3236
 Waiting for block 3236 attestation on Creditcoin...
 Latest attested height for chain key 2: 3210
@@ -419,7 +418,7 @@ Block 3236 attested! Generating proof...
 Proof generation successful!
 ⏳ Estimating gas...
    Estimated gas: 445678, Gas limit with buffer: 601665
-Note loan 5 repayment, tx hash: 0xa1c22b43c37e51734d3d388fcd583afcb46fbe5bb682bc7622d4321722266df4
+Marked loan 5 as repaid on Creditcoin, tx hash: 0xa1c22b43c37e51734d3d388fcd583afcb46fbe5bb682bc7622d4321722266df4
 Loan 5 has been partially repaid on Creditcoin. Amount repaid: 1000
 ```
 
@@ -433,7 +432,7 @@ yarn loan_flow:repay_loan <your_loan_id> 50
 Now let's see...
 
 ```sh
-Detected LoanRepaid event for loanId: 5 - tx hash: 0xec0eeac975afad8fb3cd9cc453c3818006c7c063adb3d23bef1292d6266d476b
+Detected LoanRepaid event for loanId: 5, tx hash: 0xec0eeac975afad8fb3cd9cc453c3818006c7c063adb3d23bef1292d6266d476b
 Transaction 0xec0eeac975afad8fb3cd9cc453c3818006c7c063adb3d23bef1292d6266d476b found in block 3291
 Waiting for block 3291 attestation on Creditcoin...
 Latest attested height for chain key 2: 3270
@@ -446,7 +445,7 @@ Block 3291 attested! Generating proof...
 Proof generation successful!
 ⏳ Estimating gas...
    Estimated gas: 445678, Gas limit with buffer: 601665
-Note loan 5 repayment, tx hash: 0xb51ddfee000f3ccbd81b75f99fe39560afb425b0c75567b321f26a4cbbd70698
+Marked loan 5 as repaid on Creditcoin, tx hash: 0xb51ddfee000f3ccbd81b75f99fe39560afb425b0c75567b321f26a4cbbd70698
 Loan 5 has been marked as fully repaid on Creditcoin.
 ```
 

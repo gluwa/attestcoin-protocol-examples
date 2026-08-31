@@ -12,7 +12,7 @@ const main = async () => {
   if (args.length !== 3) {
     console.error(`
   Usage:
-    yarn loan_flow:register_loan <LoanAmount> <IntereseBasisPoints> <DurationInBlocks>
+    yarn loan_flow:register_loan <LoanAmount> <InterestBasisPoints> <DurationInBlocks>
 
   Example:
     yarn loan_flow:register_loan 1000 500 5000
