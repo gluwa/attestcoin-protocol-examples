@@ -2,8 +2,8 @@
 pragma solidity ^0.8.23;
 
 import {ASCMintableToken, ASC_MINTER} from "./MintableToken.sol";
-import {ASCBase} from "@gluwa/usc-contracts/contracts/readability/ASCBase.sol";
-import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol";
+import {ASCBase} from "@gluwa/asc-contracts/contracts/readability/ASCBase.sol";
+import {EvmV1Decoder} from "@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol";
 
 /**
  * @title ASCMinter

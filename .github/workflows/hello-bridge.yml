@@ -163,10 +163,8 @@ jobs:
           cache: 'yarn'
       - run: npm install -g yarn
 
-      - name: Install dependencies (asc-contracts from GitHub main)
-        uses: ./.github/actions/install-js-deps
-        with:
-          token: ${{ secrets.ASC_CONTRACTS_READ_TOKEN }}
+      - name: Install dependencies
+        run: yarn install --ignore-engines
 
       - name: Setup
         id: setup
@@ -214,7 +212,7 @@ jobs:
             --broadcast \
             --rpc-url "$CREDITCOIN_RPC_URL" \
             --private-key ${{ steps.env.outputs.execution_chain_private_key }} \
-            node_modules/@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder 2>&1)
+            node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder 2>&1)
           echo "$OUTPUT"
           DECODER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
 
@@ -224,7 +222,7 @@ jobs:
               --broadcast \
               --rpc-url "$CREDITCOIN_RPC_URL" \
               --private-key ${{ steps.env.outputs.execution_chain_private_key }} \
-              --libraries "node_modules/@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder:$DECODER_CONTRACT_ADDRESS" \
+              --libraries "node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder:$DECODER_CONTRACT_ADDRESS" \
               bridge/contracts/sol/ASCMinter.sol:ASCMinter 2>&1)
           STATUS=$?
           set -e

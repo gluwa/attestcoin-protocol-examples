@@ -3,13 +3,13 @@ out = "out"
 src = "contracts/sol"
 test = "test"
 libs = ["../node_modules", "../lib"]
-# Resolve @gluwa/usc-contracts from yarn (readability ASCBase + common/EvmV1Decoder).
-# Same package alias as bridge — one ASCBase for both examples.
+# Resolve @gluwa/asc-contracts from yarn/npm (readability ASCBase + common/EvmV1Decoder).
+# Same package as bridge — one ASCBase for both examples.
 allow_paths = ["../node_modules", "../lib"]
 remappings = [
-  "@openzeppelin/=../node_modules/@openzeppelin/",
-  "@gluwa/usc-contracts/=../node_modules/@gluwa/usc-contracts/",
-  "forge-std/=../lib/forge-std/src/",
+    "@openzeppelin/=../node_modules/@openzeppelin/",
+    "@gluwa/asc-contracts/=../node_modules/@gluwa/asc-contracts/",
+    "forge-std/=../lib/forge-std/src/",
 ]
 solc_version = "0.8.30"
 optimizer = true

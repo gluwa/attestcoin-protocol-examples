@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {ASCLoanManager} from "../../contracts/sol/ASCLoanManager.sol";
-import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol";
+import {EvmV1Decoder} from "@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol";
 
 /// @dev Test harness exposing internal log validators for source-contract binding tests.
 contract ASCLoanManagerHarness is ASCLoanManager {

@@ -78,7 +78,7 @@ forge create \
   --broadcast \
   --rpc-url $CREDITCOIN_RPC_URL \
   --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-  node_modules/@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder
+  node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder
 ```
 
 Save the address in `.env`:
@@ -94,7 +94,7 @@ forge create \
     --broadcast \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder:$EVM_V1_DECODER_LIBRARY_ADDRESS \
+    --libraries node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder:$EVM_V1_DECODER_LIBRARY_ADDRESS \
     loan/contracts/sol/ASCLoanManager.sol:ASCLoanManager
 ```
 
@@ -499,7 +499,6 @@ You've learned:
 
 If you haven't already, take a look at the [ASC Gitbook] for more information.
 
-[Bridge Offchain Worker]: ../../bridge/bridge-offchain-worker/README.md
 [Hello Bridge]: ../../bridge/hello-bridge/README.md#11-generate-a-new-wallet-address
 [ASC Gitbook]: https://docs.attestcoin.org/attestcoin-protocol
 [🚰 testnet faucet]: https://cloud.google.com/application/web3/faucet/ethereum/sepolia

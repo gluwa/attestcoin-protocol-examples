@@ -4,7 +4,7 @@ Use this to validate the repository locally before release or deployment.
 
 ## Automated (CI + local)
 
-From the repository root (requires [Foundry](https://getfoundry.sh/) on your `PATH`). Bridge and loan both inherit readability `ASCBase` and `EvmV1Decoder` from `@gluwa/usc-contracts` (`contracts/readability/`, `contracts/common/`):
+From the repository root (requires [Foundry](https://getfoundry.sh/) on your `PATH`). Bridge and loan both inherit readability `ASCBase` and `EvmV1Decoder` from `@gluwa/asc-contracts` (`contracts/readability/`, `contracts/common/`):
 
 ```sh
 yarn

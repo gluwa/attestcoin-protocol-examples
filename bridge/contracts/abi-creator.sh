@@ -23,7 +23,7 @@ for p in "$sol_directory"/*.sol; do
     file_with_extension="$contract_name.json"
     solc --base-path . --include-path "node_modules" \
         "@openzeppelin/=node_modules/@openzeppelin/" \
-        "@gluwa/usc-contracts/=node_modules/@gluwa/usc-contracts/" \
+        "@gluwa/asc-contracts/=node_modules/@gluwa/asc-contracts/" \
         "$p" \
         --combined-json abi --overwrite --json-indent 2 | \
         extract_abi "$p" "$contract_name" | jq --indent 2 . > "$abi_directory/$file_with_extension"

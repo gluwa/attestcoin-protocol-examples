@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 import {Test} from "forge-std/Test.sol";
 import {ASCMinterHarness} from "./harness/ASCMinterHarness.sol";
-import {EvmV1Decoder} from "@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol";
+import {EvmV1Decoder} from "@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol";
 
 contract ASCMinterBurnLogTest is Test {
     ASCMinterHarness internal minter;

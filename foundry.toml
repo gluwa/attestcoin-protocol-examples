@@ -6,7 +6,7 @@ libs = ["node_modules"]
 # via_ir required: ASCMinter + package ASCBase hit "stack too deep" without it.
 remappings = [
   "@openzeppelin/=node_modules/@openzeppelin/",
-  "@gluwa/usc-contracts/=node_modules/@gluwa/usc-contracts/",
+  "@gluwa/asc-contracts/=node_modules/@gluwa/asc-contracts/",
 ]
 solc_version = "0.8.30"
 optimizer = true

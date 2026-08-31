@@ -169,9 +169,10 @@
   resolved "https://registry.npmjs.org/@eslint/js/-/js-8.57.1.tgz"
   integrity sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==
 
-"@gluwa/usc-contracts@git+https://github.com/gluwa/asc-contracts.git#main":
-  version "0.2.0"
-  resolved "git+https://github.com/gluwa/asc-contracts.git#6d49d0833a87d09fdcc56cb932de672b90c29c12"
+"@gluwa/asc-contracts@0.2.1":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@gluwa/asc-contracts/-/asc-contracts-0.2.1.tgz#f88e9355c613f46073f626b7b04f8f3223480097"
+  integrity sha512-3/zVx8ElFewTB0Xy06xJ/uPYfvFI1usOe/ilxoM5SNT9Cf47ML/YW41Pq00NttxuOPLkh8HnRlPgD1n66ritLA==
   dependencies:
     "@openzeppelin/contracts" "5.1.0"
 

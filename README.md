@@ -2,16 +2,16 @@
 
 This repository is a starting point for exploring Creditcoin cross-chain **readability** (Attestcoin Smart Contracts). The **bridge** tutorials use a **simplified ASC bridge** — local `ASCMinter` on shared package `ASCBase`, direct `execute` calls — **not** the full write-ability production stack (Outbox / Relayer / Inbox). See [bridge/README.md](./bridge/README.md).
 
-`@gluwa/usc-contracts` is installed from GitHub [`gluwa/asc-contracts`](https://github.com/gluwa/asc-contracts) `main` (`git+https://github.com/gluwa/asc-contracts.git#main`). CI authenticates with secret `ASC_CONTRACTS_READ_TOKEN` (see [CI setup](#ci-private-asc-contracts)).
+`@gluwa/asc-contracts` is installed from npm ([`@gluwa/asc-contracts`](https://www.npmjs.com/package/@gluwa/asc-contracts)).
 
 Learn how to use the Creditcoin Decentralized Oracle through guided tutorials where you set up and interact with your own decentralized bridge and loan examples.
 
 ## Repository layout
 
-```
+```text
 usc-testnet-bridge-examples/
-├── bridge/                 # Simplified ASC bridge tutorials + ASCMinter (ASCBase from @gluwa/usc-contracts)
-│   ├── contracts/          # Example ASC apps; ASCBase + EvmV1Decoder from @gluwa/usc-contracts
+├── bridge/                 # Simplified ASC bridge tutorials + ASCMinter (ASCBase from @gluwa/asc-contracts)
+│   ├── contracts/          # Example ASC apps; ASCBase + EvmV1Decoder from @gluwa/asc-contracts
 │   ├── hello-bridge/
 │   ├── custom-contracts-bridging/
 │   └── bridge-offchain-worker/
@@ -32,11 +32,9 @@ Before attempting any of the tutorials, make sure the following are installed:
 - [yarn]
 - [foundry]
 
-Install dependencies from the repository root (needs read access to private `gluwa/asc-contracts`):
+Install dependencies from the repository root:
 
 ```sh
-# Optional if HTTPS clone of gluwa/asc-contracts fails without auth:
-#   git config --global url."https://x-access-token:${ASC_CONTRACTS_READ_TOKEN}@github.com/".insteadOf "https://github.com/"
 yarn
 ```
 
@@ -68,16 +66,6 @@ yarn utils:check_setup loan    # after loan stack deploy
 Deploy `EvmV1Decoder` once per Creditcoin network; save `EVM_V1_DECODER_LIBRARY_ADDRESS` in `.env` and reuse for the loan tutorial.
 
 Full verification checklist: [VERIFICATION.md](./VERIFICATION.md).
-
-### CI: private `asc-contracts`
-
-GitHub Actions cannot fetch `gluwa/asc-contracts` anonymously. Add a repo/org secret:
-
-1. Create a fine-grained PAT (or GitHub App token) with **Contents: Read** on `gluwa/asc-contracts`.
-2. Add secret **`ASC_CONTRACTS_READ_TOKEN`** on this repository (Settings → Secrets and variables → Actions).
-3. Workflows run `.github/actions/install-js-deps`, which checkouts [`gluwa/asc-contracts`](https://github.com/gluwa/asc-contracts) `main` with that token into `vendor/asc-contracts`, then `yarn install` via `file:vendor/asc-contracts` (avoids yarn’s unauthenticated git fetch on private repos).
-
-Fork PRs will not receive this secret unless you use a trusted workflow pattern.
 
 ## Tutorials
 

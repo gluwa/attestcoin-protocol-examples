@@ -1,7 +1,7 @@
 # Custom Contract Bridging
 
 > [!NOTE]
-> Deploys the **simplified** `ASCMinter` on shared package `ASCBase` (`@gluwa/usc-contracts` readability) — direct `execute` minting, no relayer contracts. See [bridge/README.md](../README.md).
+> Deploys the **simplified** `ASCMinter` on shared package `ASCBase` (`@gluwa/asc-contracts` readability) — direct `execute` minting, no relayer contracts. See [bridge/README.md](../README.md).
 
 > [!TIP]
 > This tutorial builds on the previous [Hello Bridge] example -make sure to check it out before
@@ -81,7 +81,7 @@ forge create \
   --broadcast \
   --rpc-url $CREDITCOIN_RPC_URL \
   --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-  node_modules/@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder
+  node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder
 ```
 
 Add the library address to your root `.env` so later steps (and the loan tutorial) can reuse it:
@@ -105,7 +105,7 @@ forge create \
     --broadcast \
     --rpc-url $CREDITCOIN_RPC_URL \
     --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-    --libraries node_modules/@gluwa/usc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder:$EVM_V1_DECODER_LIBRARY_ADDRESS \
+    --libraries node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder:$EVM_V1_DECODER_LIBRARY_ADDRESS \
     bridge/contracts/sol/ASCMinter.sol:ASCMinter
 ```
 

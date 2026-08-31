@@ -1,6 +1,6 @@
 # Bridge examples (simplified ASC bridge)
 
-These tutorials implement a **simplified readability bridge** — not the production write-ability stack (Outbox, Relayer, Inbox, liquidity operators, etc.) published as [`@gluwa/usc-contracts`](https://www.npmjs.com/package/@gluwa/usc-contracts).
+These tutorials implement a **simplified readability bridge** — not the production write-ability stack (Outbox, Relayer, Inbox, liquidity operators, etc.) published as [`@gluwa/asc-contracts`](https://www.npmjs.com/package/@gluwa/asc-contracts).
 
 This example follows **[Attestcoin Readability — Building a Bridge Minter (§6.4)](https://docs.attestcoin.org/attestcoin-protocol/attestcoin-readability)** (inherit `ASCBase`, prove a source-chain burn, mint wrapped tokens on Creditcoin).
 
@@ -8,9 +8,9 @@ This example follows **[Attestcoin Readability — Building a Bridge Minter (§6
 
 | Piece                                            | Role                                                                                                                                        |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`ASCBase`** (from `@gluwa/usc-contracts`)      | Shared readability base: verify via native precompile (`0xFD2`), dedupe by `queryId`, delegate to app logic. Same base as the loan example. |
+| **`ASCBase`** (from `@gluwa/asc-contracts`)      | Shared readability base: verify via native precompile (`0xFD2`), dedupe by `queryId`, delegate to app logic. Same base as the loan example. |
 | **`ASCMinter`** (local)                          | Decode a `TokensBurnedForBridging` log and mint wrapped tokens **only if the source-chain emitter is whitelisted** via `wrapOriginToken`.   |
-| **`EvmV1Decoder`** (from `@gluwa/usc-contracts`) | Shared library for decoding proved EVM receipts/logs (deploy via `contracts/common/`). Not the messaging bridge.                            |
+| **`EvmV1Decoder`** (from `@gluwa/asc-contracts`) | Shared library for decoding proved EVM receipts/logs (deploy via `contracts/common/`). Not the messaging bridge.                            |
 | **Tutorial scripts**                             | Build proofs and call `ASCMinter.execute(...)` directly. No relayer contract.                                                               |
 
 Flow: **burn on source chain → wait for attestation → fetch proof → `execute` on ASC → mint** (mint requires the burn contract address to be a whitelisted emitter).
@@ -23,7 +23,7 @@ Anyone with a valid proof can submit `execute`, but the ASC still rejects burns 
 - `ASCBridgeLiquidityOperator`, `ClientBridgeLiquidityOperator`, or other write-ability bridge contracts
 - Trusted relayers or operator-gated mint paths
 
-For the production bridge architecture, see [`@gluwa/usc-contracts`](https://www.npmjs.com/package/@gluwa/usc-contracts) and Creditcoin's write-ability documentation.
+For the production bridge architecture, see [`@gluwa/asc-contracts`](https://www.npmjs.com/package/@gluwa/asc-contracts) and Creditcoin's write-ability documentation.
 
 ## Layout
 
