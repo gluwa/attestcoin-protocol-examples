@@ -34,7 +34,7 @@
     "tsx": "^4.22.4"
   },
   "dependencies": {
-    "@gluwa/usc-contracts": "file:../usc-contracts",
+    "@gluwa/usc-contracts": "git+https://github.com/gluwa/asc-contracts.git#main",
     "@gluwa/usc-sdk": "0.18.0",
     "@openzeppelin/contracts": "5.4.0",
     "@types/node": "26.1.0",

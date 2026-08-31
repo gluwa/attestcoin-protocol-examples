@@ -25,6 +25,7 @@ jobs:
     with:
       source_chain_kind: "anvil"
       asc_kind: "local"
+    secrets: inherit
 
   custom-contracts-bridging:
     needs: build
@@ -32,6 +33,7 @@ jobs:
     with:
       source_chain_kind: "anvil"
       asc_kind: "local"
+    secrets: inherit
 
   bridge-offchain-worker:
     needs: build
@@ -39,6 +41,7 @@ jobs:
     with:
       source_chain_kind: "anvil"
       asc_kind: "local"
+    secrets: inherit
 
   loan-flow:
     needs: build
@@ -46,3 +49,4 @@ jobs:
     with:
       source_chain_kind: "anvil"
       asc_kind: "local"
+    secrets: inherit

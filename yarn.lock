@@ -169,11 +169,11 @@
   resolved "https://registry.npmjs.org/@eslint/js/-/js-8.57.1.tgz"
   integrity sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==
 
-"@gluwa/usc-contracts@file:../usc-contracts":
+"@gluwa/usc-contracts@git+https://github.com/gluwa/asc-contracts.git#main":
   version "0.2.0"
+  resolved "git+https://github.com/gluwa/asc-contracts.git#6d49d0833a87d09fdcc56cb932de672b90c29c12"
   dependencies:
     "@openzeppelin/contracts" "5.1.0"
-    "@openzeppelin/contracts-upgradeable" "5.1.0"
 
 "@gluwa/usc-sdk@0.18.0":
   version "0.18.0"
@@ -236,11 +236,6 @@
   dependencies:
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
-
-"@openzeppelin/contracts-upgradeable@5.1.0":
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-5.1.0.tgz#4d37648b7402929c53e2ff6e45749ecff91eb2b6"
-  integrity sha512-AIElwP5Ck+cslNE+Hkemf5SxjJoF4wBvvjxc27Rp+9jaPs/CLIaUBMYe1FNzhdiN0cYuwGRmYaRHmmntuiju4Q==
 
 "@openzeppelin/contracts@5.1.0":
   version "5.1.0"

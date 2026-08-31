@@ -1,0 +1,38 @@
+name: Install JS deps
+description: yarn install with authenticated access to private gluwa/asc-contracts on main
+inputs:
+  token:
+    description: GitHub token with Contents:Read on gluwa/asc-contracts (ASC_CONTRACTS_READ_TOKEN)
+    required: true
+  upgrade_asc_contracts:
+    description: Re-resolve git+...#main to the current tip (recommended for CI)
+    required: false
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - name: Authenticate git for gluwa/asc-contracts
+      shell: bash
+      env:
+        ASC_CONTRACTS_READ_TOKEN: ${{ inputs.token }}
+      run: |
+        if [ -z "${ASC_CONTRACTS_READ_TOKEN}" ]; then
+          echo "Missing secret ASC_CONTRACTS_READ_TOKEN (Contents:Read on gluwa/asc-contracts)"
+          exit 1
+        fi
+        # So yarn can resolve git+https://github.com/gluwa/asc-contracts.git#main
+        git config --global url."https://x-access-token:${ASC_CONTRACTS_READ_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+    - name: yarn install
+      shell: bash
+      run: yarn install --ignore-engines
+
+    - name: Upgrade @gluwa/usc-contracts to latest main
+      if: inputs.upgrade_asc_contracts == 'true'
+      shell: bash
+      run: |
+        yarn upgrade @gluwa/usc-contracts --ignore-engines
+        echo "Resolved @gluwa/usc-contracts:"
+        yarn list --pattern '@gluwa/usc-contracts' --depth=0 || true
+        ls -la node_modules/@gluwa/usc-contracts/contracts/readability || true
+        ls -la node_modules/@gluwa/usc-contracts/contracts/common || true

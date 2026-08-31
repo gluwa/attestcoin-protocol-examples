@@ -4,7 +4,7 @@ src = "contracts/sol"
 test = "test"
 libs = ["../node_modules", "../lib"]
 # Resolve @gluwa/usc-contracts from yarn (readability ASCBase + common/EvmV1Decoder).
-# Package source is @gluwa/asc-contracts (file:../usc-contracts or npm); remapped under this alias.
+# Package source is gluwa/asc-contracts (git #main via yarn); remapped under this alias.
 allow_paths = ["../node_modules", "../lib"]
 remappings = [
   "@openzeppelin/=../node_modules/@openzeppelin/",
