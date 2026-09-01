@@ -1,29 +1,8 @@
-# 🌉 ASC Testnet Bridge Examples 🌉
+# 🌉 Attestcoin Protocol Examples 🌉
 
-This repository is a starting point for exploring Creditcoin cross-chain **readability** (Attestcoin Smart Contracts). The **bridge** tutorials use a **simplified ASC bridge** — local `ASCMinter` on shared package `ASCBase`, direct `execute` calls — **not** the full write-ability production stack (Outbox / Relayer / Inbox). See [bridge/README.md](./bridge/README.md).
+This repository is a starting point for exploring cross-chain inter-operability using the Attestcoin protocol. Today, it contains several examples covering Attestcoin readability. Coming soon: examples using Attestcoin writability!
 
-`@gluwa/asc-contracts` is installed from npm ([`@gluwa/asc-contracts`](https://www.npmjs.com/package/@gluwa/asc-contracts)).
-
-Learn how to use the Creditcoin Decentralized Oracle through guided tutorials where you set up and interact with your own decentralized bridge and loan examples.
-
-## Repository layout
-
-```text
-usc-testnet-bridge-examples/
-├── bridge/                 # Simplified ASC bridge tutorials + ASCMinter (ASCBase from @gluwa/asc-contracts)
-│   ├── contracts/          # Example ASC apps; ASCBase + EvmV1Decoder from @gluwa/asc-contracts
-│   ├── hello-bridge/
-│   ├── custom-contracts-bridging/
-│   └── bridge-offchain-worker/
-├── loan/                   # Cross-chain loan tutorial + loan contracts
-│   ├── contracts/          # ASCLoanManager, AuxiliaryLoanContract, …
-│   └── scripts/            # Loan flow CLI scripts
-├── shared/
-│   ├── contracts/          # TestERC20 (shared Sepolia burner for bridge + loan)
-│   └── utils/              # Proof builder + submit helpers shared by both examples
-```
-
-Package overview: [bridge/README.md](./bridge/README.md) (simplified bridge model and what is out of scope).
+By running through the tutorials in this repository, you will set up and interact with your own decentralized bridge and loan examples.
 
 ## Before you start
 
@@ -43,29 +22,6 @@ Set up Foundry:
 ```bash
 foundryup --version v1.2.3
 ```
-
-Copy and fill in environment files for the examples you plan to run. `.env` holds your wallet
-private key, so it is git-ignored and never committed — `.env.example` is the tracked copy, which
-carries only public network defaults:
-
-- Bridge tutorials: `bridge/.env.example` → `bridge/.env` (or root `.env`)
-- Loan tutorial: `loan/.env.example` → `loan/.env` (or root `.env`)
-
-> [!CAUTION]
-> Keep your private key in `.env` only. Never put it in `.env.example`, which is tracked by git.
-
-Then source your env file and verify connectivity:
-
-```bash
-source .env
-yarn utils:check_setup hello   # Hello Bridge
-yarn utils:check_setup bridge  # after custom-contracts deploy
-yarn utils:check_setup loan    # after loan stack deploy
-```
-
-Deploy `EvmV1Decoder` once per Creditcoin network; save `EVM_V1_DECODER_LIBRARY_ADDRESS` in `.env` and reuse for the loan tutorial.
-
-Full verification checklist: [VERIFICATION.md](./VERIFICATION.md).
 
 ## Tutorials
 

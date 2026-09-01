@@ -1,37 +1,21 @@
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
 import { ethers } from 'ethers';
 
 import { chainInfo } from '@gluwa/usc-sdk';
 import { isValidContractAddress, isValidPrivateKey } from './utils';
+import { loadEnv } from './env';
 
-const REPO_ROOT = path.resolve(__dirname, '..');
 const VERIFIER_PRECOMPILE = '0x0000000000000000000000000000000000000FD2';
 
 type SetupMode = 'hello' | 'hello-bridge' | 'bridge' | 'custom' | 'loan' | 'network';
 
-/** Shell/sourced env wins; then tutorial split; then root `.env` fills remaining defaults. */
+/** Loads the same files the tutorial scripts do, so a passing check reflects what they will see. */
 function loadTutorialEnv(mode: SetupMode): void {
-  const snapshot = { ...process.env };
-  const files = [path.join(REPO_ROOT, '.env')];
-
-  if (mode === 'hello' || mode === 'hello-bridge' || mode === 'bridge' || mode === 'custom') {
-    files.push(path.join(REPO_ROOT, 'bridge', '.env'));
-  } else if (mode === 'loan') {
-    files.push(path.join(REPO_ROOT, 'loan', '.env'));
-  }
-
-  for (const file of files) {
-    if (fs.existsSync(file)) {
-      dotenv.config({ path: file, override: true });
-    }
-  }
-
-  for (const [key, value] of Object.entries(snapshot)) {
-    if (value !== undefined) {
-      process.env[key] = value;
-    }
+  if (mode === 'loan') {
+    loadEnv('loan');
+  } else if (mode === 'network') {
+    loadEnv();
+  } else {
+    loadEnv('bridge');
   }
 }
 
@@ -91,18 +75,27 @@ async function checkProofBuilder(url: string | undefined): Promise<CheckResult> 
   }
 }
 
+/** ethers surfaces an on-chain revert as CALL_EXCEPTION; anything else is a transport failure. */
+function isExecutionRevert(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'CALL_EXCEPTION';
+}
+
 async function checkVerifierPrecompile(creditcoinRpc: string | undefined): Promise<CheckResult> {
   if (!creditcoinRpc?.trim()) {
     return fail('Verifier precompile: skipped (no CREDITCOIN_RPC_URL)');
   }
   try {
     const provider = new ethers.JsonRpcProvider(creditcoinRpc);
-    const code = await provider.getCode(VERIFIER_PRECOMPILE);
-    if (code && code !== '0x') {
+    // Frontier precompiles are runtime PrecompileSet entries rather than accounts holding
+    // bytecode, so `getCode` returns '0x' for them even on Creditcoin. Probe instead: an
+    // empty call makes the precompile revert on the absent selector, while calling an
+    // address with nothing behind it succeeds and returns '0x'.
+    const result = await provider.call({ to: VERIFIER_PRECOMPILE, data: '0x' });
+    return fail(`Native verifier precompile (0xFD2): nothing at address, call returned ${result} (wrong network?)`);
+  } catch (error: unknown) {
+    if (isExecutionRevert(error)) {
       return pass('Native verifier precompile (0xFD2): present');
     }
-    return fail('Native verifier precompile (0xFD2): no code at address (wrong network?)');
-  } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error);
     return fail(`Verifier precompile check failed (${msg})`);
   }

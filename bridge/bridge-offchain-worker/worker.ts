@@ -1,4 +1,3 @@
-import dotenv from 'dotenv';
 import { Contract, ethers } from 'ethers';
 
 import burnerAbi from '../../shared/contracts/abi/TestERC20.json';
@@ -13,8 +12,9 @@ import {
   isValidContractAddress,
   isValidPrivateKey,
 } from '../../shared/utils';
+import { loadEnv } from '../../shared/env';
 
-dotenv.config({ override: true });
+loadEnv('bridge');
 
 // Graceful shutdown flag
 let isShuttingDown = false;

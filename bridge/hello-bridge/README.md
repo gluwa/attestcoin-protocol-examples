@@ -1,7 +1,7 @@
 # Hello Bridge
 
 > [!NOTE]
-> This tutorial uses the **simplified ASC bridge** (`ASCMinter` on package `ASCBase`), not the write-ability Outbox/Relayer stack. Overview: [bridge/README.md](../README.md).
+> This tutorial implements a simplified one-way bridge using Attestcoin readability. Tutorials implementing a full two-way bridge using both readability and writability will be added soon, after the writability core code passes 3rd party audit.
 
 This tutorial introduces you to one of the most common uses for a cross chain oracle, **cross chain
 bridging!** The flow is:
@@ -11,20 +11,14 @@ bridging!** The flow is:
 
 ## Pre-deployed contracts (no deploy step)
 
-Hello Bridge uses **shared tutorial contracts** already deployed on CC3 Testnet and Sepolia. The repository root [`.env`](../../.env) includes pre-filled values for:
+Hello Bridge uses **shared tutorial contracts** already deployed on CC3 Testnet and Sepolia. The /bridge [`.env.example`](../.env.example) includes pre-filled values for several contracts. Just copy the example env using:
 
-| Variable                        | Purpose                                 |
-| ------------------------------- | --------------------------------------- |
-| `SOURCE_CHAIN_KEY`              | Sepolia chain key on CC3 Testnet (`1`)  |
-| `PROOF_BUILDER_URL`             | Proof builder for CC3 Testnet           |
-| `CREDITCOIN_RPC_URL`            | CC3 Testnet RPC                         |
-| `SOURCE_CHAIN_CONTRACT_ADDRESS` | Pre-deployed Sepolia burner ERC20       |
-| `ASC_MINTER_CONTRACT_ADDRESS`   | Pre-deployed `ASCMinter` on CC3 Testnet |
-| `ASC_MINTABLE_TOKEN`            | Pre-deployed wrapped token              |
+```sh
+cd bridge
+cp .env.example .env.test
+```
 
-Copy those lines into your own `.env` if starting fresh. Variable names are also listed in [bridge/.env.example](../.env.example).
-
-You only need to add **`CREDITCOIN_WALLET_PRIVATE_KEY`** and **`SOURCE_CHAIN_RPC_URL`** (Infura Sepolia), then run:
+Then you only need to add **`CREDITCOIN_WALLET_PRIVATE_KEY`** and **`SOURCE_CHAIN_RPC_URL`** (Infura Sepolia), then run:
 
 ```sh
 source .env
@@ -73,14 +67,6 @@ Save the resulting wallet address and private key for future use. They should lo
 ```bash
 Address:     0xBE7959cA1b19e159D8C0649860793dDcd125a2D5
 Private key: 0xb9c179ed56514accb60c23a862194fa2a6db8bdeb815d16e2c21aa4d7dc2845d # betterleaks:allow
-```
-
-Save this private key on the `.env` file in the root of the repository. If you have not created
-it yet, copy it from the tracked template first — `.env` is git-ignored, so your key stays out
-of version control:
-
-```bash
-cp .env.example .env
 ```
 
 ```env

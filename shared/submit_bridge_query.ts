@@ -1,4 +1,3 @@
-import dotenv from 'dotenv';
 import { Contract, ethers, InterfaceAbi } from 'ethers';
 
 import ASCMinterABI from '../bridge/contracts/abi/ASCMinter.json';
@@ -9,8 +8,9 @@ import {
   isValidPrivateKey,
   isValidContractAddress,
 } from './utils';
+import { loadEnv } from './env';
 
-dotenv.config({ override: true });
+loadEnv('bridge');
 
 export type BridgeSubmitConfig = {
   usageCommand: string;

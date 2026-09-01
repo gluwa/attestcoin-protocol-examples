@@ -1,10 +1,10 @@
-import dotenv from 'dotenv';
 import { Contract, ethers } from 'ethers';
 
 import loanManagerAbi from '../contracts/abi/ASCLoanManager.json';
 import { isValidContractAddress } from '../../shared/utils';
+import { loadEnv } from '../../shared/env';
 
-dotenv.config({ override: true });
+loadEnv('loan');
 
 interface LoanFlow {
   from: string;
