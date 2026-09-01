@@ -28,6 +28,16 @@ yarn install
 
 The setup of this example is a bit more complex than previous ones. So let's go slowly:
 
+## 1.0 .env fields
+
+First, we need to fill in our loan/.env with some fields used in prior tutorials:
+
+```env
+## User-provided
+SOURCE_CHAIN_RPC_URL="<your_source_chain_rpc_url>"
+CREDITCOIN_WALLET_PRIVATE_KEY="<your_creditcoin_wallet_private_key>"
+```
+
 ## 1.1 Smart contracts
 
 Our system will have three contracts:
@@ -60,34 +70,13 @@ Deployed to: 0x814Fd6EfA5E1cb49B623599Fd63Ab74142762A46
 Transaction hash: 0xb234238d0da392063395ef59195b25827cdaf2009fe773fed1f8f7eda99fab7b
 ```
 
-Grab the contract address and add it to the `.env` file at the root of the repository with the address, like so:
+Grab the contract address and add it to the `loan/.env` file at the root of the repository with the address, like so:
 
 ```env
 SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS=<erc20_contract_address>
 ```
 
-Now we need to deploy `ASCLoanManager`. It links the same **`EvmV1Decoder`** library as the bridge tutorial.
-
-> [!TIP]
-> If you completed [Custom Contract Bridging](../../bridge/custom-contracts-bridging/README.md), reuse `EVM_V1_DECODER_LIBRARY_ADDRESS` from your `.env` — **skip redeploying the decoder**.
-
-If you have not deployed a decoder yet:
-
-```bash
-forge create \
-  --broadcast \
-  --rpc-url $CREDITCOIN_RPC_URL \
-  --private-key $CREDITCOIN_WALLET_PRIVATE_KEY \
-  node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder
-```
-
-Save the address in `.env`:
-
-```env
-EVM_V1_DECODER_LIBRARY_ADDRESS=<decoder_library_address>
-```
-
-Use the contract address shown in `Deployed to:` to deploy your `ASCLoanManager` using the following command:
+Now deploy your `ASCLoanManager` using the following command:
 
 ```sh
 forge create \
@@ -100,7 +89,7 @@ forge create \
 
 You should get deployment output with your `ASCLoanManager` address.
 
-As before, grab the address and add it to the `.env` file, like so:
+As before, grab the address and add it to the `loan/.env` file, like so:
 
 ```env
 ASC_LOAN_MANAGER_CONTRACT_ADDRESS=<asc_loan_manager_contract_address>
@@ -116,7 +105,7 @@ forge create \
     loan/contracts/sol/AuxiliaryLoanContract.sol:AuxiliaryLoanContract
 ```
 
-Grab the address again (it gets repetitive huh?) and add it to the `.env` file, like so:
+Grab the address again (it gets repetitive huh?) and add it to the `loan/.env` file, like so:
 
 ```env
 SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS=<loan_helper_contract_address>
@@ -126,7 +115,7 @@ Now that we have all three contracts we can move on to the actual participants.
 
 ## 1.2 Lender and borrower
 
-Our system has both the lender account and the borrower fixed, much like before they are set in the `.env` file.
+Our system has both the lender account and the borrower fixed, much like before they are set in the `loan/.env` file.
 
 But of course, you only have one account at this point, you can reuse the account in `CREDITCOIN_WALLET_PRIVATE_KEY` for the
 lender, for the borrower you can just create a new one like we did in [Hello Bridge], like so:
@@ -161,7 +150,7 @@ Now that we've populated our .env file with all necessary variables, let's
 load those variables into our terminal.
 
 ```sh
-source .env
+source loan/.env
 ```
 
 ## 1.3 Funding accounts
@@ -266,7 +255,7 @@ Now that our worker is up and running, let's register a loan!
 Open a new terminal window and source the `.env` file once again
 
 ```sh
-source .env
+source loan/.env
 ```
 
 Then run the following command to register a loan:
