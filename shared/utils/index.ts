@@ -21,18 +21,14 @@ export async function generateProofFor(
   creditcoinRpc: JsonRpcApiProvider,
   sourceChainRpc: JsonRpcApiProvider
 ): Promise<proofProvider.ProofResult> {
-  // First, we need to ensure that the transaction exists on the source chain
-  const transaction = await sourceChainRpc.getTransaction(txHash);
-  if (!transaction) {
-    throw new Error(`Transaction ${txHash} does not exist on source chain`);
-  }
-
-  // Next, we need to ensure that the block is mined
-  const blockNumber = transaction.blockNumber;
-  if (!blockNumber) {
+  // Wait until the burn tx is mined (CI submits immediately after cast send).
+  console.log(`Waiting for transaction ${txHash} to be mined on source chain...`);
+  const receipt = await sourceChainRpc.waitForTransaction(txHash, 1, 120_000);
+  if (!receipt || receipt.blockNumber == null) {
     throw new Error(`Transaction ${txHash} is not yet mined on source chain`);
   }
 
+  const blockNumber = receipt.blockNumber;
   console.log(`Transaction ${txHash} found in block ${blockNumber}`);
 
   // Now that we have the block number, we can listen for the required attestation

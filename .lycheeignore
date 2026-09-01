@@ -27,6 +27,6 @@ https://blockchain.googleapis.com/v1/projects/(.*)
 https://github.com/gluwa/usc-contracts(.*)
 https://github.com/gluwa/asc-contracts(.*)
 https://docs.creditcoin.org/attestcoin-protocol(.*)
-https://docs.attestcoin.org(.*)
-https://www\.npmjs\.com/package/@gluwa/asc-contracts
-https://cloud\.google\.com/application/web3/faucet/ethereum/sepolia
+^https://www\.npmjs\.com/package/@gluwa/asc-contracts(.*)
+^https://cloud\.google\.com/application/web3/faucet/ethereum/sepolia(.*)
+^https://docs\.attestcoin\.org(.*)

@@ -30,3 +30,6 @@ DISABLE_LINTERS:
   - MARKDOWN_MARKDOWN_TABLE_FORMATTER
 
 SHOW_ELAPSED_TIME: true
+
+# Bot-blocked or flaky doc/npm links (also listed in .lycheeignore).
+SPELL_LYCHEE_ARGUMENTS: "--exclude '^https://www\\.npmjs\\.com/package/@gluwa/asc-contracts' --exclude '^https://cloud\\.google\\.com/application/web3/faucet/ethereum/sepolia' --exclude '^https://docs\\.attestcoin\\.org'"
