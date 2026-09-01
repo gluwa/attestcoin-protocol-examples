@@ -4,23 +4,24 @@ This guide explains how to deploy the `ASCMinter` contract to Creditcoin ASC net
 
 ## Verify Deployment
 
-After deployment, verify the contract was deployed correctly by checking the contract on the block explorer at https://explorer.usc-testnet2.creditcoin.network
+After deployment, verify the contract was deployed correctly by checking the contract on the block explorer at https://creditcoin-testnet.blockscout.com
 
 Search for your contract address to see deployment details and transaction history.
 
 ## Contract Details
 
 - **Contract Name**: `ASCMinter`
-- **Token Name**: "Mintable (BTKT)"
-- **Token Symbol**: "BTKT"
-- **Decimals**: 18 (inherited from OpenZeppelin ERC20)
-- **Mint Amount**: 5 tokens per successful query (\* 10^18 for micro units)
 - **Constructor**: No parameters required
+- **Mint Amount**: the amount burned on the source chain, taken from the proven burn event
+- **Wrapped token**: `ASCMinter` is not itself a token. It mints through a separate
+  `ASCMintableToken`, registered with `wrapOriginToken`. The one used by these tutorials is
+  `BridgeTestToken`, name "Bridge Test Token", symbol "BTKT", 18 decimals (inherited from
+  OpenZeppelin ERC20).
 
 ## Network Information
 
-- **RPC URL**: `https://rpc.usc-testnet2.creditcoin.network`
-- **Explorer**: https://explorer.usc-testnet2.creditcoin.network
+- **RPC URL**: `https://rpc.cc3-testnet.creditcoin.network`
+- **Explorer**: https://creditcoin-testnet.blockscout.com
 - **Purpose**: Development and testing
 
 ## Troubleshooting
