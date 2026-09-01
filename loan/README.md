@@ -39,7 +39,7 @@ Our system will have three contracts:
 Make sure to first load your `.env` file with:
 
 ```sh
-source .env
+source loan/.env
 ```
 
 So, first of all we start with deploying our ERC20 contract:

@@ -14,7 +14,7 @@ Implementation: `worker.ts`.
 Prerequisites: complete [Custom Contract Bridging](../custom-contracts-bridging/README.md) (deployed `ASCMinter`, wrapped token, and `.env` vars).
 
 ```sh
-source .env
+source bridge/.env
 yarn offchain:start_worker
 ```
 

@@ -16,15 +16,17 @@ export type Tutorial = 'bridge' | 'loan';
  *
  * Precedence, highest first: shell/exported env, the tutorial's `.env`, the root `.env`.
  *
- * @param tutorial Which tutorial's `.env` to layer on top of the root one; omit to load only the root.
+ * CI writes only the root `.env` and never creates the per-tutorial files, so passing a
+ * tutorial stays correct there — the missing file is skipped.
+ *
+ * @param tutorials Which tutorials' `.env` to layer on top of the root one, lowest precedence
+ *                  first. Omit to load only the root; pass several for utilities shared by
+ *                  more than one tutorial.
  */
-export function loadEnv(tutorial?: Tutorial): void {
+export function loadEnv(...tutorials: Tutorial[]): void {
   const shellEnv = { ...process.env };
 
-  const files = [path.join(REPO_ROOT, '.env')];
-  if (tutorial) {
-    files.push(path.join(REPO_ROOT, tutorial, '.env'));
-  }
+  const files = [path.join(REPO_ROOT, '.env'), ...tutorials.map((t) => path.join(REPO_ROOT, t, '.env'))];
 
   for (const file of files) {
     if (fs.existsSync(file)) {

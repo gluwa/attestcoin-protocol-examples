@@ -1,6 +1,9 @@
 const { ethers } = require('ethers');
 
-require('dotenv').config({ override: true });
+const { loadEnv } = require('../env');
+
+// Shared by both tutorials, so read whichever per-tutorial .env files exist.
+loadEnv('bridge', 'loan');
 
 // === Check for arguments ===
 if (process.argv.length < 4 || process.argv.length > 5) {

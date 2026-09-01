@@ -1,7 +1,7 @@
 # Custom Contract Bridging
 
 > [!NOTE]
-> Deploys the **simplified** `ASCMinter` on shared package `ASCBase` (`@gluwa/asc-contracts` readability) — direct `execute` minting, no relayer contracts. See [bridge/README.md](../README.md).
+> This tutorial implements a simplified one-way bridge using Attestcoin readability. Tutorials implementing a full two-way bridge using both readability and writability will be added soon, after the writability core code passes 3rd party audit.
 
 > [!TIP]
 > This tutorial builds on the previous [Hello Bridge] example -make sure to check it out before
@@ -33,7 +33,7 @@ address with 1,000,000 `TEST` coins, so we won't have to mint `TEST` tokens manu
 Make sure to first load your `.env` file with:
 
 ```sh
-source .env
+source bridge/.env
 ```
 
 After, run the following command to deploy the contract:
@@ -56,7 +56,7 @@ Transaction hash: 0xfb0aaf396684bf0727019e5271d7e0dedee1dea9e5a4a1ef7456662d0ac0
 
 Save the contract address shown in `Deployed to:`. You will be needing it in the next step.
 
-Additionally update the `.env` file at the root of the repository with the address, like so:
+Additionally update the `.env` file at `bridge/.env` with the address, like so:
 
 ```env
 SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS=<test_erc20_contract_address_from_step_2>
@@ -65,7 +65,7 @@ SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS=<test_erc20_contract_address_from_step_2>
 Once again, reload your `.env` file with:
 
 ```sh
-source .env
+source bridge/.env
 ```
 
 ## 3. Deploy your bridging stack
@@ -74,7 +74,8 @@ You will deploy the stock `ASCMinter` from this repo — **no contract edits req
 
 ### 3.1 Deploy `EvmV1Decoder` (once per Creditcoin network)
 
-Deploy the shared decoding library. **Save this address** — you can reuse it for the [Loan Flow](../../loan/scripts/README.md) without deploying again.
+> [!NOTE]
+> This contract should be pre-deployed and already stored under EVM_V1_DECODER_LIBRARY_ADDRESS in `bridge/.env.example`. So it should already be present in your `bridge/.env` as well. We include how to deploy a new one in case the existing decoder isn't available for your tutorial run.
 
 ```bash
 forge create \
@@ -84,7 +85,7 @@ forge create \
   node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder
 ```
 
-Add the library address to your root `.env` so later steps (and the loan tutorial) can reuse it:
+Add the library address to your `.env` file at `bridge/.env`:
 
 ```env
 EVM_V1_DECODER_LIBRARY_ADDRESS=<decoder_library_address>
@@ -93,10 +94,8 @@ EVM_V1_DECODER_LIBRARY_ADDRESS=<decoder_library_address>
 Reload:
 
 ```sh
-source .env
+source bridge/.env
 ```
-
-> **Note:** Deploy from `contracts/common/EvmV1Decoder.sol` in the npm package. That library is a shared receipt decoder — not the Outbox/Relayer bridge stack.
 
 ### 3.2 Deploy `ASCMinter`
 
@@ -121,7 +120,7 @@ Transaction hash: 0xe86e3c2f77fd050a4120dbd195668af2f3d94f3a41b5db21643c53c1ac3c
 
 ### 3.3 Update environment with your ASC contract address
 
-Save the address and update the root `.env`:
+Add the address to your `.env` file at `bridge/.env`:
 
 ```env
 ASC_CUSTOM_MINTER_CONTRACT_ADDRESS=<asc_address_from_step_3_2>
@@ -130,7 +129,7 @@ ASC_CUSTOM_MINTER_CONTRACT_ADDRESS=<asc_address_from_step_3_2>
 Reload:
 
 ```sh
-source .env
+source bridge/.env
 ```
 
 ### 3.4 Deploy wrapped token and register the source emitter
@@ -146,7 +145,7 @@ forge create \
     --constructor-args "$ASC_CUSTOM_MINTER_CONTRACT_ADDRESS"
 ```
 
-Update `.env`:
+Add the address to your `.env` file at `bridge/.env`:
 
 ```env
 ASC_CUSTOM_MINTABLE_TOKEN=<ERC20_address_from_step_3_4>
@@ -156,6 +155,7 @@ Register the Sepolia burn contract as an allowed emitter and map it to the wrapp
 `ASCMinter` mints **only** when the proved burn log’s emitting address was registered with `wrapOriginToken` — a valid proof from any other contract is rejected:
 
 ```bash
+source bridge/.env
 cast send \
     --rpc-url $CREDITCOIN_RPC_URL \
     $ASC_CUSTOM_MINTER_CONTRACT_ADDRESS \
@@ -259,6 +259,7 @@ yarn offchain:start_worker
 In another terminal, burn tokens — the worker submits the mint proof when attestation completes:
 
 ```sh
+source bridge/.env
 cast send --rpc-url $SOURCE_CHAIN_RPC_URL \
     $SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS \
     "burn(uint256)" 2000 \

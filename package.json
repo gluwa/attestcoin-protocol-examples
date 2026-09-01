@@ -13,7 +13,7 @@
     "loan_flow:repay_loan": "tsx loan/scripts/repay_loan.ts",
     "loan_flow:inspect_loan": "tsx loan/scripts/inspect.ts",
     "loan_flow:start_worker": "tsx loan/scripts/worker.ts",
-    "utils:check_balance": "node shared/utils/check_balance.js",
+    "utils:check_balance": "tsx shared/utils/check_balance.js",
     "utils:check_setup": "tsx shared/check_setup.ts",
     "check-format": "prettier --check .",
     "eslint": "eslint -c .eslintrc.js --ignore-pattern .eslintrc.js --ignore-pattern check_balance.js --ignore-pattern vendor/** --max-warnings 0 --ext .ts --ext .js .",

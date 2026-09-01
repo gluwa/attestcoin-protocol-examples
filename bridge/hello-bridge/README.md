@@ -14,14 +14,13 @@ bridging!** The flow is:
 Hello Bridge uses **shared tutorial contracts** already deployed on CC3 Testnet and Sepolia. The /bridge [`.env.example`](../.env.example) includes pre-filled values for several contracts. Just copy the example env using:
 
 ```sh
-cd bridge
-cp .env.example .env.test
+cp bridge/.env.example bridge/.env
 ```
 
 Then you only need to add **`CREDITCOIN_WALLET_PRIVATE_KEY`** and **`SOURCE_CHAIN_RPC_URL`** (Infura Sepolia), then run:
 
 ```sh
-source .env
+source bridge/.env
 yarn utils:check_setup hello
 ```
 
@@ -76,7 +75,7 @@ CREDITCOIN_WALLET_PRIVATE_KEY=<your_private_key>
 And load into your terminal session with:
 
 ```sh
-source .env
+source bridge/.env
 ```
 
 ### 1.2 Get some test funds (`Sepolia`)
@@ -122,7 +121,7 @@ SOURCE_CHAIN_RPC_URL="https://sepolia.infura.io/v3/<your_infura_api_key>"
 And load into your terminal session with:
 
 ```sh
-source .env
+source bridge/.env
 ```
 
 ## 2. Minting some tokens on Sepolia
