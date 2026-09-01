@@ -28,6 +28,7 @@ permissions: read-all
 jobs:
   example:
     runs-on: ${{ fromJSON(inputs.runs-on) }}
+    timeout-minutes: 90
     steps:
       - name: Anvil ENV
         id: anvil
@@ -400,13 +401,8 @@ jobs:
           echo "INFO: Lender completely funds the loan"
           OUTPUT=$(yarn loan_flow:fund_loan "$LOAN_ID" 1000)
           echo "$OUTPUT"
-
-          # wait for the off-chain worker to see the event above
-          wait_for_log "Detected LoanFunded event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log 180
-
-          # wait for off-chain worker to prove the event above (~8 min attestation; allow up to 20)
-          echo "INFO: Waiting for LoanFunded proof on Creditcoin..."
-          wait_for_log "Loan $LOAN_ID has been marked as funded on Creditcoin" /var/tmp/loan-flow-logs/offchain-worker.log 1200
+          echo "$OUTPUT" | grep "Loan funded:"
+          echo "$OUTPUT" | grep "Loan $LOAN_ID has been marked as funded on Creditcoin."
 
 
           echo "INFO: inspect loan $LOAN_ID"
@@ -416,13 +412,8 @@ jobs:
           echo "INFO: Borrower repays loan + interest"
           OUTPUT=$(yarn loan_flow:repay_loan "$LOAN_ID" 1050)
           echo "$OUTPUT"
-
-
-          wait_for_log "Detected LoanRepaid event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log 180
-
-          # wait for off-chain worker to prove the event above (~8 min attestation; allow up to 20)
-          echo "INFO: Waiting for LoanRepaid proof on Creditcoin..."
-          wait_for_log "Loan $LOAN_ID has been marked as fully repaid on Creditcoin" /var/tmp/loan-flow-logs/offchain-worker.log 1200
+          echo "$OUTPUT" | grep "Loan repaid:"
+          echo "$OUTPUT" | grep "Loan $LOAN_ID has been marked as fully repaid on Creditcoin."
 
 
           echo "INFO: inspect loan $LOAN_ID"

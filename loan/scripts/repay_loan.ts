@@ -4,6 +4,7 @@ import loanHelperAbi from '../contracts/abi/AuxiliaryLoanContract.json';
 import ERC20Abi from '../../shared/contracts/abi/TestERC20.json';
 import { isValidContractAddress, isValidPrivateKey } from '../../shared/utils';
 import { loadEnv } from '../../shared/env';
+import { submitLoanProofAfterTx } from './loan_proof';
 
 loadEnv('loan');
 
@@ -117,6 +118,8 @@ const main = async () => {
     console.log('Repayment transaction submitted, waiting for it to be mined: ', tx.hash);
     await tx.wait();
     console.log('Loan repaid: ', tx.hash);
+
+    await submitLoanProofAfterTx(loanId, tx.hash, 'repay');
   } catch (error: any) {
     console.error('Error repaying loan: ', error);
     process.exit(1);

@@ -332,8 +332,8 @@ export const POLLING_INTERVAL_MS = 5000;
 export const ERROR_BACKOFF_MS = 10000;
 // Maximum number of processed transactions to track before clearing
 export const MAX_PROCESSED_TXS = 1000;
-// Sepolia and other hosted RPCs reject wide eth_getLogs ranges (400 Bad Request).
-export const MAX_LOG_BLOCK_RANGE = 2000;
+// Hosted Sepolia RPCs often cap eth_getLogs (Google 400, others ~50 blocks).
+export const MAX_LOG_BLOCK_RANGE = 50;
 
 // Helper function to poll for events using queryFilter (avoids filter expiration issues)
 export async function pollEvents(
@@ -349,24 +349,40 @@ export async function pollEvents(
     }
 
     let start = fromBlock;
+    let chunkSize = MAX_LOG_BLOCK_RANGE;
+
     while (start <= currentBlock) {
-      const end = Math.min(start + MAX_LOG_BLOCK_RANGE - 1, currentBlock);
-      const events = await contract.queryFilter(eventName, start, end);
-      for (const event of events) {
-        if (event instanceof EventLog) {
-          await handler(event);
+      const end = Math.min(start + chunkSize - 1, currentBlock);
+      try {
+        const events = await contract.queryFilter(eventName, start, end);
+        for (const event of events) {
+          if (event instanceof EventLog) {
+            await handler(event);
+          }
+        }
+        start = end + 1;
+        chunkSize = MAX_LOG_BLOCK_RANGE;
+      } catch (chunkError: any) {
+        const message = chunkError.shortMessage ?? chunkError.message ?? String(chunkError);
+        console.error(`Error polling ${eventName} events (blocks ${start}-${end}):`, message);
+
+        if (chunkSize > 1) {
+          chunkSize = Math.max(1, Math.floor(chunkSize / 2));
+          await new Promise((resolve) => setTimeout(resolve, ERROR_BACKOFF_MS));
+        } else {
+          // Skip a bad block instead of retrying forever on the same range.
+          start = end + 1;
+          chunkSize = MAX_LOG_BLOCK_RANGE;
+          await new Promise((resolve) => setTimeout(resolve, ERROR_BACKOFF_MS));
         }
       }
-      start = end + 1;
     }
 
-    // Return next block to query from
     return currentBlock + 1;
   } catch (error: any) {
     console.error(`Error polling ${eventName} events:`, error.shortMessage ?? error.message);
-    // Add backoff delay on error to avoid hammering the RPC
     await new Promise((resolve) => setTimeout(resolve, ERROR_BACKOFF_MS));
-    return fromBlock; // Retry from same block on error
+    return fromBlock;
   }
 }
 

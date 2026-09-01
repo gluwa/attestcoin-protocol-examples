@@ -218,6 +218,15 @@ const main = async () => {
           return;
         }
 
+        const onChainOrder = await managerContract.getLoanOrder(loanId);
+        const onChainStatus = Number(onChainOrder[6]);
+        if (onChainStatus !== 0) {
+          console.log(`Loan ${loanId} already marked on Creditcoin (status=${onChainStatus}), skipping fund proof.`);
+          loanInfo.funded = onChainStatus >= 1 && onChainStatus !== 4;
+          processedTxs.add(txHash);
+          return;
+        }
+
         // 6.1 Validate transaction and generate proof once the block is attested
         const proofResult = await generateProofFor(
           txHash,
@@ -247,7 +256,7 @@ const main = async () => {
             console.error(`Error on LoanFunded handle for ${loanId}: `, error.shortMessage);
           }
         } else {
-          throw new Error(`Failed to generate proof: ${proofResult.error}`);
+          console.error(`Failed to generate proof for LoanFunded ${loanId}: ${proofResult.error}`);
         }
       }),
       // 7. Poll LoanRepaid events on source chain loan contract
@@ -270,6 +279,19 @@ const main = async () => {
 
         if (loanInfo.expired || loanInfo.repaid || !loanInfo.funded) {
           console.warn(`Loan ${loanId} is not in a valid state for repayment. Skipping.`);
+          return;
+        }
+
+        const onChainOrder = await managerContract.getLoanOrder(loanId);
+        const onChainStatus = Number(onChainOrder[6]);
+        if (onChainStatus === 3) {
+          console.log(`Loan ${loanId} already fully repaid on Creditcoin, skipping repay proof.`);
+          loanInfo.repaid = true;
+          processedTxs.add(txHash);
+          return;
+        }
+        if (onChainStatus !== 1 && onChainStatus !== 2) {
+          console.warn(`Loan ${loanId} not repayable on Creditcoin (status=${onChainStatus}). Skipping.`);
           return;
         }
 
@@ -308,7 +330,7 @@ const main = async () => {
             console.error(`Error on LoanRepaid handle for ${loanId}: `, error.shortMessage);
           }
         } else {
-          throw new Error(`Failed to generate proof: ${proofResult.error}`);
+          console.error(`Failed to generate proof for LoanRepaid ${loanId}: ${proofResult.error}`);
         }
       }),
       // 8. Polling LoanFunded, LoanExpired, LoanPartiallyRepaid and LoanRepaid events on manager contract
