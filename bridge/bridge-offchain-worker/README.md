@@ -28,7 +28,6 @@ Burn on Sepolia in another terminal; the worker handles attestation, proof fetch
 
 ## Next
 
-[Loan Flow](../../loan/scripts/README.md) — cross-chain loan state with a similar worker pattern.
+[Loan Flow](../../loan/README.md) — cross-chain loan state with a similar worker pattern.
 
 [Custom Contract Bridging]: ../custom-contracts-bridging/README.md
-[Loan Flow]: ../../loan/scripts/README.md

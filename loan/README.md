@@ -1,7 +1,7 @@
 # Loan Flow
 
 > [!TIP]
-> Complete [Custom Contract Bridging](../../bridge/custom-contracts-bridging/README.md) (and optionally the offchain worker in §7) before this tutorial.
+> Complete [Custom Contract Bridging](../bridge/custom-contracts-bridging/README.md) (and optionally the offchain worker in §7) before this tutorial.
 
 Now that we know how to build an offchain worker to coordinate between two separate chains, we need
 a more advanced example that includes not only communication but also state tracking.
@@ -488,6 +488,6 @@ You've learned:
 
 If you haven't already, take a look at the [ASC Gitbook] for more information.
 
-[Hello Bridge]: ../../bridge/hello-bridge/README.md#11-generate-a-new-wallet-address
+[Hello Bridge]: ../bridge/hello-bridge/README.md#11-generate-a-new-wallet-address
 [ASC Gitbook]: https://docs.attestcoin.org/attestcoin-protocol
 [🚰 testnet faucet]: https://cloud.google.com/application/web3/faucet/ethereum/sepolia
