@@ -143,7 +143,7 @@ export async function computeGasLimitForMinter(
   proofData: proofProvider.ContinuityResponse,
   signerAddress: string
 ): Promise<bigint> {
-  const action = 1; // Mint action (see MinterActions in ASCMinter: None=0, Mint=1)
+  const action = 0; // Mint action (see MinterActions in ASCMinter: Mint=0)
   const chainKey = proofData.chainKey;
   const height = proofData.headerNumber;
   const encodedTransaction = proofData.txBytes;
@@ -250,7 +250,7 @@ export async function submitProofToMinter(
   proofData: proofProvider.ContinuityResponse,
   gasLimit: bigint
 ): Promise<any> {
-  const action = 1; // Mint action (see MinterActions in ASCMinter: None=0, Mint=1)
+  const action = 0; // Mint action (see MinterActions in ASCMinter: Mint=0)
   const chainKey = proofData.chainKey;
   const height = proofData.headerNumber;
   const encodedTransaction = proofData.txBytes;

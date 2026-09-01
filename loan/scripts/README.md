@@ -320,7 +320,7 @@ Which will output something like this:
 
 ```sh
 Loan Details:
- Loan ID: 1
+ Loan ID: 5
  From: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
  To: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
  With Token: 0x5FbDB2315678afecb367f032d93F642f64180aa3 # betterleaks:allow
@@ -422,7 +422,7 @@ Marked loan 5 as repaid on Creditcoin, tx hash: 0xa1c22b43c37e51734d3d388fcd583a
 Loan 5 has been partially repaid on Creditcoin. Amount repaid: 1000
 ```
 
-Wait a minute... what do you mean partially repaid!? The loan was for 1000 tokens, this is not fair!
+Wait a minute... what do you mean partially repaid!? The expected repayment was 1050 tokens, this is not fair!
 Hmm... oh! The interest! I forgot about that!
 
 ```sh

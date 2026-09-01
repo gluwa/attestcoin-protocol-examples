@@ -8,13 +8,11 @@ import {EvmV1Decoder} from "@gluwa/asc-contracts/contracts/common/EvmV1Decoder.s
 /**
  * @title ASCMinter
  * @notice Simplified ASC that mints wrapped tokens after a proved source-chain burn.
- * @dev Mints only when the burn log's emitting contract (source-chain token) is whitelisted
- *      via {wrapOriginToken}. Unregistered emitters are rejected even if the proof is valid.
+ * @dev Mints only when the burn log's emitting contract is registered via {wrapOriginToken}.
  */
 contract ASCMinter is ASCBase {
     enum MinterActions {
-        None, // 0 — holder
-        Mint // 1
+        Mint // 0 — matches pre-deployed stock minter used by hello-bridge
     }
     error InvalidAction(uint8 action);
 
@@ -23,16 +21,13 @@ contract ASCMinter is ASCBase {
         0x17dc4d6f69d484e59be774c29b47d2fa4c14af2e01df42fc5643ac968f4d427e;
 
     event TokensMinted(address indexed wrappedTokenAddress, address indexed burntFrom, uint256 amount, bytes32 indexed queryId);
-    event EmitterWhitelisted(address indexed emitter, address indexed wrappedToken);
+    event EmitterRegistered(address indexed emitter, address indexed wrappedToken);
 
-    /// @notice Source-chain burn contracts allowed to trigger mints (log `address` / emitter).
-    mapping(address => bool) public whitelistedEmitters;
-
-    /// @notice Whitelisted emitter → wrapped ASCMintableToken on Creditcoin.
+    /// @notice Source-chain burn emitter → wrapped ASCMintableToken on Creditcoin.
     mapping(address => address) public wrappedTokens;
 
     /**
-     * @notice Whitelist a source-chain burn emitter and map it to a Creditcoin wrapped token.
+     * @notice Register a source-chain burn emitter and map it to a Creditcoin wrapped token.
      * @param originToken Source-chain ERC20 that emits `TokensBurnedForBridging` (the emitter).
      * @param targetToken Creditcoin ASCMintableToken that this ASC may mint.
      */
@@ -43,10 +38,9 @@ contract ASCMinter is ASCBase {
         require(ASCMintableToken(targetToken).owner() == msg.sender, "Target token must be owned by the caller");
         require(ASCMintableToken(targetToken).hasRole(ASC_MINTER, address(this)), "Target token must be ASCMintableToken and support AccessControl");
 
-        whitelistedEmitters[originToken] = true;
         wrappedTokens[originToken] = targetToken;
 
-        emit EmitterWhitelisted(originToken, targetToken);
+        emit EmitterRegistered(originToken, targetToken);
     }
 
     function _processAndEmitEvent(uint8 action, bytes32 queryId, bytes memory encodedTransaction) internal override {
@@ -71,9 +65,6 @@ contract ASCMinter is ASCBase {
         require(burnLogs.length > 0, "No burn events found");
 
         (address emitter, address burntFrom, uint256 burntValue) = _processBurnLogs(burnLogs);
-
-        // Reject burns from contracts that were never whitelisted, even with a valid proof.
-        require(whitelistedEmitters[emitter], "Emitter not whitelisted");
 
         address wrappedTokenAddress = wrappedTokens[emitter];
         require(wrappedTokenAddress != address(0), "No wrapped token for emitter");

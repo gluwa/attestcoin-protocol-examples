@@ -15,7 +15,7 @@ For loan contracts: `./loan/contracts/abi-creator.sh`.
 
 Bridge example contracts (`ASCMinter`, tokens) inherit shared readability `ASCBase` from `@gluwa/asc-contracts` (`contracts/readability/ASCBase.sol`). `EvmV1Decoder` comes from the same package (`contracts/common/`).
 
-`ASCMinter` mints only when the burn log’s emitting address is in `whitelistedEmitters` (set by `wrapOriginToken`). Regenerate ABIs after changing that surface.
+`ASCMinter` mints only when the burn log’s emitting contract is registered via `wrapOriginToken` (`wrappedTokens`). Regenerate ABIs after changing that surface.
 
 ## Deploy troubleshooting
 

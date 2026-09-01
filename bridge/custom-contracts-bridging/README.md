@@ -133,7 +133,7 @@ Reload:
 source .env
 ```
 
-### 3.4 Deploy wrapped token and whitelist the source emitter
+### 3.4 Deploy wrapped token and register the source emitter
 
 Deploy the wrapped ERC20 owned by your minter:
 
@@ -152,8 +152,8 @@ Update `.env`:
 ASC_CUSTOM_MINTABLE_TOKEN=<ERC20_address_from_step_3_4>
 ```
 
-Register (whitelist) the Sepolia burn contract as an allowed emitter and map it to the wrapped token.
-`ASCMinter` mints **only** when the proved burn log’s emitting address is on this whitelist — a valid proof from any other contract is rejected:
+Register the Sepolia burn contract as an allowed emitter and map it to the wrapped token.
+`ASCMinter` mints **only** when the proved burn log’s emitting address was registered with `wrapOriginToken` — a valid proof from any other contract is rejected:
 
 ```bash
 cast send \
@@ -273,7 +273,7 @@ To experiment with customizing ASC logic, edit `bridge/contracts/sol/ASCMinter.s
 
 ## Conclusion
 
-Congratulations! You've deployed your own simplified ASC bridge (`ASCMinter` + wrapped token), whitelisted the Sepolia burn emitter, and completed a trustless mint.
+Congratulations! You've deployed your own simplified ASC bridge (`ASCMinter` + wrapped token), registered the Sepolia burn emitter, and completed a trustless mint.
 
 Next: [Loan Flow](../../loan/scripts/README.md) reuses your decoder library and extends the pattern with cross-chain loan state.
 

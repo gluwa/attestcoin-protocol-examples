@@ -9,11 +9,11 @@ This example follows **[Attestcoin Readability — Building a Bridge Minter (§6
 | Piece                                            | Role                                                                                                                                        |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`ASCBase`** (from `@gluwa/asc-contracts`)      | Shared readability base: verify via native precompile (`0xFD2`), dedupe by `queryId`, delegate to app logic. Same base as the loan example. |
-| **`ASCMinter`** (local)                          | Decode a `TokensBurnedForBridging` log and mint wrapped tokens **only if the source-chain emitter is whitelisted** via `wrapOriginToken`.   |
+| **`ASCMinter`** (local)                          | Decode a `TokensBurnedForBridging` log and mint wrapped tokens **only if the source-chain emitter is registered** via `wrapOriginToken`.    |
 | **`EvmV1Decoder`** (from `@gluwa/asc-contracts`) | Shared library for decoding proved EVM receipts/logs (deploy via `contracts/common/`). Not the messaging bridge.                            |
 | **Tutorial scripts**                             | Build proofs and call `ASCMinter.execute(...)` directly. No relayer contract.                                                               |
 
-Flow: **burn on source chain → wait for attestation → fetch proof → `execute` on ASC → mint** (mint requires the burn contract address to be a whitelisted emitter).
+Flow: **burn on source chain → wait for attestation → fetch proof → `execute` on ASC → mint** (mint requires the burn contract address to be registered via `wrapOriginToken`).
 
 Anyone with a valid proof can submit `execute`, but the ASC still rejects burns from emitters that were never registered; the offchain worker is optional UX automation.
 

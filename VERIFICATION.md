@@ -14,12 +14,12 @@ yarn verify
 
 This runs:
 
-| Step       | Command          | What it checks                                                                           |
-| ---------- | ---------------- | ---------------------------------------------------------------------------------------- |
-| TypeScript | `yarn typecheck` | Tutorial scripts compile                                                                 |
-| Lint       | `yarn eslint`    | TS/JS style                                                                              |
-| Contracts  | `yarn build`     | `forge build` for bridge + loan                                                          |
-| Unit tests | `forge test`     | Loan source-contract binding; bridge burn-log parsing + emitter whitelist / query dedupe |
+| Step       | Command          | What it checks                                                                              |
+| ---------- | ---------------- | ------------------------------------------------------------------------------------------- |
+| TypeScript | `yarn typecheck` | Tutorial scripts compile                                                                    |
+| Lint       | `yarn eslint`    | TS/JS style                                                                                 |
+| Contracts  | `yarn build`     | `forge build` for bridge + loan                                                             |
+| Unit tests | `forge test`     | Loan source-contract binding; bridge burn-log parsing + emitter registration / query dedupe |
 
 ### CI (`solidity.yml`)
 
@@ -59,10 +59,10 @@ Tokens minted! Contract: 0x..., To: 0x..., Amount: 50000000000000000000, QueryId
 ## Manual end-to-end — Custom bridge + loan
 
 - [ ] Deploy `EvmV1Decoder` once; set `EVM_V1_DECODER_LIBRARY_ADDRESS`
-- [ ] Deploy `ASCMinter`, wrapped token, `wrapOriginToken` (whitelists the Sepolia burn emitter)
+- [ ] Deploy `ASCMinter`, wrapped token, `wrapOriginToken` (registers the Sepolia burn emitter)
 - [ ] Burn → `yarn custom_bridge:submit_query` → mint succeeds once
 - [ ] Second submit with same proof reverts (`Query already processed`)
-- [ ] Proof of a burn from a non-whitelisted emitter reverts (`Emitter not whitelisted`) — also covered by `forge test --root bridge` (`ASCMinterSecurity.t.sol`)
+- [ ] Proof of a burn from an unregistered emitter reverts (`No wrapped token for emitter`) — also covered by `forge test --root bridge` (`ASCMinterSecurity.t.sol`)
 - [ ] Deploy loan stack; `yarn loan_flow:register_source_contract`
 - [ ] Fund/repay on Sepolia; worker or manual proof updates loan status
 - [ ] Spoofed `LoanFunded` from unregistered contract cannot mark loan funded (covered by unit tests)
