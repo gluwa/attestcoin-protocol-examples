@@ -25,7 +25,7 @@ steps in the [setup] section there before continuing.
 
 Let's start by deploying our own `ERC20` contract on Sepolia. The contract contains logic for
 tracking the balances of a coin called `TEST`. The contract also automatically funds its creator's
-address with 1000 `TEST` coins, so we won't have to mint `TEST` tokens manually.
+address with 1,000,000 `TEST` coins, so we won't have to mint `TEST` tokens manually.
 
 Make sure to first load your `.env` file with:
 
@@ -305,7 +305,7 @@ order to ensure robustness and streamline UX.
 [Hello Bridge]: ../hello-bridge/README.md
 [setup]: ../hello-bridge/README.md#1-setup
 [step 2]: #2-deploy-a-test-erc20-contract-on-sepolia
-[step 3.2]: #32-deploy-your-modified-contract
+[step 3.2]: #32-deploy-your-decoder-library-and-modified-contract
 [step 5]: #5-submit-a-mint-query-to-the-asc-contract
 [Deployment Troubleshooting Guide]: ../contracts/DEPLOY.md
 [Bridge Offchain Worker]: ../bridge-offchain-worker/README.md

@@ -86,7 +86,7 @@ Deployed to: 0xfE119359B96Bb1A32c14d32dD6b7E2f977Cd1060
 Transaction hash: 0xd1689ff2d26fd9e271d8c03e7933ce98f2f38836dd18441f6240e86a5816ec8d
 ```
 
-Use the contract address shown in `Deployed to:` to deploy your `ASCMinter` using the following command:
+Use the contract address shown in `Deployed to:` to deploy your `ASCLoanManager` using the following command:
 
 ```sh
 forge create \
@@ -193,9 +193,9 @@ yarn utils:check_balance $SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS $WALLET_ADDRESS $S
 ```
 
 ```bash
-📦 Token: Mintable (TEST)
-🧾 Raw Balance: 5000000000
-💰 Formatted Balance: 0.000000005 TEST
+📦 Token: Burn Test (TEST)
+🧾 Raw Balance: 1000000000000005000000000
+💰 Formatted Balance: 1000000.000000005 TEST
 Decimals for token micro unit: 18
 ```
 
@@ -481,8 +481,8 @@ It should show something like this:
 ```sh
 🔗 Using RPC URL: https://sepolia.infura.io/v3/......
 📦 Token: Burn Test (TEST)
-🧾 Raw Balance: 5000000050
-💰 Formatted Balance: 0.00000000500000005 TEST
+🧾 Raw Balance: 1000000000000005000000050
+💰 Formatted Balance: 1000000.00000000500000005 TEST
 Decimals for token micro unit: 18
 ```
 

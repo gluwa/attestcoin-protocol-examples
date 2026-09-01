@@ -22,7 +22,7 @@ yarn
 You will also need to set up the right version of foundry with `foundryup`:
 
 ```bash
-foundryup --version v1.2.3 # Skip this command if you are using nix!
+foundryup --version v1.2.3
 
 ```
 
