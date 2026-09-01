@@ -169,10 +169,12 @@
   resolved "https://registry.yarnpkg.com/@eslint/js/-/js-8.57.1.tgz#de633db3ec2ef6a3c89e2f19038063e8a122e2c2"
   integrity sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==
 
-"@gluwa/usc-contracts@0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@gluwa/usc-contracts/-/usc-contracts-0.1.2.tgz#480ba30d2eb6f2b96f884ee6f20963c677b94d64"
-  integrity sha512-6GbBApjqhb6uWGzo6mLOZxH2RNq8iCOoRuYXn97gIQIaIHMk/pjQdDk2vJolX11TnhQbcrtoE/em/RDQyrJJdQ==
+"@gluwa/usc-contracts@0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@gluwa/usc-contracts/-/usc-contracts-0.2.0.tgz#95d0f152621e20ccd4f75dca758944db6aa539d2"
+  integrity sha512-oqUsx0QWl6lbs7SdBxuSEEYXRm86r8F6MlX03t6Cpq7phHjc1zhi25/McBP3lqShnx1XYEBe8KT164SIbnQLTA==
+  dependencies:
+    "@openzeppelin/contracts" "5.1.0"
 
 "@gluwa/usc-sdk@0.18.0":
   version "0.18.0"
@@ -236,10 +238,15 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@openzeppelin/contracts@5.4.0":
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-5.4.0.tgz#177594bdb2d86c71f5d1052fe40cb4edb95fb20f"
-  integrity sha512-eCYgWnLg6WO+X52I16TZt8uEjbtdkgLC0SUX/xnAksjjrQI4Xfn4iBRoI5j55dmlOhDv1Y7BoR3cU7e3WWhC6A==
+"@openzeppelin/contracts@5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-5.1.0.tgz#4e61162f2a2bf414c4e10c45eca98ce5f1aadbd4"
+  integrity sha512-p1ULhl7BXzjjbha5aqst+QMLY+4/LCWADXOCsmLHRM77AqiPjnd9vvUN9sosUfhL9JGKpZ0TjEGxgvnizmWGSA==
+
+"@openzeppelin/contracts@5.7.0":
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-5.7.0.tgz#3b13b3e6fe8d426c2af247975ddf6ab2a5bf148e"
+  integrity sha512-IL2AZpI+7THMzt1u6Cxmc1zLwVnudtUGvrqXQ/HnbLKfQ/8dIWMMQPDwPIjRQzNrlAo4cxZaCGRB/XvwPo9ILA==
 
 "@types/node@22.7.5":
   version "22.7.5"
@@ -248,10 +255,10 @@
   dependencies:
     undici-types "~6.19.2"
 
-"@types/node@26.1.0":
-  version "26.1.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-26.1.0.tgz#aa85f0727fc5611347091c478341c63650903439"
-  integrity sha512-O0A1G3xPGy4w7AgQdAQYUlQ+BKk2Oovw8eRpofyp5KdBZULnbe+WqaOVNrm705SHphCiG4XHsACrSmPu1f+Kgw==
+"@types/node@26.4.0":
+  version "26.4.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-26.4.0.tgz#4c4ca071c42241fe602741d02999f16b4e64c468"
+  integrity sha512-faiGnoIrLH/V8cibOMEAZ8pMw6oXqSukl29ra4mN8GdaB2ZewzeaLj+INpV5N+Z1eKWzY+IzaIZH2EIR6YZRNQ==
   dependencies:
     undici-types "~8.3.0"
 
