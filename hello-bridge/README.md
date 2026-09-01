@@ -51,7 +51,13 @@ Address:     0xBE7959cA1b19e159D8C0649860793dDcd125a2D5
 Private key: 0xb9c179ed56514accb60c23a862194fa2a6db8bdeb815d16e2c21aa4d7dc2845d # betterleaks:allow
 ```
 
-Save this private key on the `.env` file in the root of the repository:
+Save this private key on the `.env` file in the root of the repository. If you have not created
+it yet, copy it from the tracked template first — `.env` is git-ignored, so your key stays out
+of version control:
+
+```bash
+cp .env.example .env
+```
 
 ```env
 CREDITCOIN_WALLET_PRIVATE_KEY=<your_private_key>

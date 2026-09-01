@@ -26,6 +26,17 @@ foundryup --version v1.2.3
 
 ```
 
+Next, create your own `.env` from the template. `.env` holds your wallet private key, so it is
+git-ignored and never committed — `.env.example` is the tracked copy, which carries only public
+network defaults:
+
+```bash
+cp .env.example .env
+```
+
+> [!CAUTION]
+> Keep your private key in `.env` only. Never put it in `.env.example`, which is tracked by git.
+
 Finally, source the `.env` file to load your configuration globally for all examples:
 
 ```bash
