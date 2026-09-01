@@ -43,7 +43,7 @@ We recommend going through them in this order:
 [Hello Bridge]: ./bridge/hello-bridge/README.md
 [Custom Contracts Bridging]: ./bridge/custom-contracts-bridging/README.md
 [Bridge Offchain Worker]: ./bridge/bridge-offchain-worker/README.md
-[Loan Flow]: ./loan/scripts/README.md
+[Loan Flow]: ./loan/README.md
 [ASC Architecture Overview]: https://docs.attestcoin.org/attestcoin-protocol/architecture
 [DApp Builder Infrastructure]: https://docs.attestcoin.org/attestcoin-protocol/dapp-builder-infrastructure
 [Attestcoin Readability Subsystems]: https://docs.attestcoin.org/attestcoin-protocol/attestcoin-readability

@@ -276,7 +276,7 @@ To experiment with customizing ASC logic, edit `bridge/contracts/sol/ASCMinter.s
 
 Congratulations! You've deployed your own simplified ASC bridge (`ASCMinter` + wrapped token), registered the Sepolia burn emitter, and completed a trustless mint.
 
-Next: [Loan Flow](../../loan/scripts/README.md) reuses your decoder library and extends the pattern with cross-chain loan state.
+Next: [Loan Flow](../../loan/README.md) reuses your decoder library and extends the pattern with cross-chain loan state.
 
 [Hello Bridge]: ../hello-bridge/README.md
 [setup]: ../hello-bridge/README.md#1-setup
