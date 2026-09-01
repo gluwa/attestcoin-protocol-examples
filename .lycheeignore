@@ -2,6 +2,7 @@
 http://localhost(.*)
 ws|wss://(.*)
 bzz-raw://(.*)
+file://.*\.env
 rpc\.(.*)\.creditcoin\.network/
 staticsitellvmhtml.z13.web.core.windows.net
 thedoctor0/zip-release@(.*)
@@ -27,6 +28,6 @@ https://blockchain.googleapis.com/v1/projects/(.*)
 https://github.com/gluwa/usc-contracts(.*)
 https://github.com/gluwa/asc-contracts(.*)
 https://docs.creditcoin.org/attestcoin-protocol(.*)
-https://docs.attestcoin.org(.*)
+https://docs\.attestcoin\.org
 https://www\.npmjs\.com/package/@gluwa/asc-contracts
 https://cloud\.google\.com/application/web3/faucet/ethereum/sepolia

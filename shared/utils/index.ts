@@ -21,18 +21,14 @@ export async function generateProofFor(
   creditcoinRpc: JsonRpcApiProvider,
   sourceChainRpc: JsonRpcApiProvider
 ): Promise<proofProvider.ProofResult> {
-  // First, we need to ensure that the transaction exists on the source chain
-  const transaction = await sourceChainRpc.getTransaction(txHash);
-  if (!transaction) {
-    throw new Error(`Transaction ${txHash} does not exist on source chain`);
-  }
-
-  // Next, we need to ensure that the block is mined
-  const blockNumber = transaction.blockNumber;
-  if (!blockNumber) {
+  // Wait until the burn tx is mined (CI submits immediately after cast send).
+  console.log(`Waiting for transaction ${txHash} to be mined on source chain...`);
+  const receipt = await sourceChainRpc.waitForTransaction(txHash, 1, 120_000);
+  if (!receipt || receipt.blockNumber == null) {
     throw new Error(`Transaction ${txHash} is not yet mined on source chain`);
   }
 
+  const blockNumber = receipt.blockNumber;
   console.log(`Transaction ${txHash} found in block ${blockNumber}`);
 
   // Now that we have the block number, we can listen for the required attestation
@@ -336,6 +332,8 @@ export const POLLING_INTERVAL_MS = 5000;
 export const ERROR_BACKOFF_MS = 10000;
 // Maximum number of processed transactions to track before clearing
 export const MAX_PROCESSED_TXS = 1000;
+// Sepolia and other hosted RPCs reject wide eth_getLogs ranges (400 Bad Request).
+export const MAX_LOG_BLOCK_RANGE = 2000;
 
 // Helper function to poll for events using queryFilter (avoids filter expiration issues)
 export async function pollEvents(
@@ -350,17 +348,22 @@ export async function pollEvents(
       return fromBlock;
     }
 
-    const events = await contract.queryFilter(eventName, fromBlock, currentBlock);
-    for (const event of events) {
-      if (event instanceof EventLog) {
-        await handler(event);
+    let start = fromBlock;
+    while (start <= currentBlock) {
+      const end = Math.min(start + MAX_LOG_BLOCK_RANGE - 1, currentBlock);
+      const events = await contract.queryFilter(eventName, start, end);
+      for (const event of events) {
+        if (event instanceof EventLog) {
+          await handler(event);
+        }
       }
+      start = end + 1;
     }
 
     // Return next block to query from
     return currentBlock + 1;
   } catch (error: any) {
-    console.error(`Error polling ${eventName} events:`, error.shortMessage);
+    console.error(`Error polling ${eventName} events:`, error.shortMessage ?? error.message);
     // Add backoff delay on error to avoid hammering the RPC
     await new Promise((resolve) => setTimeout(resolve, ERROR_BACKOFF_MS));
     return fromBlock; // Retry from same block on error

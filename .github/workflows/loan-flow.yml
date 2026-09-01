@@ -166,6 +166,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --ignore-engines
 
+      - name: Install forge-std
+        run: git clone --depth 1 https://github.com/foundry-rs/forge-std lib/forge-std
+
       - name: Setup
         id: setup
         env:
@@ -182,9 +185,9 @@ jobs:
           WALLET_PK=$(echo "$OUTPUT" | grep "Private key:" | cut -f2 -d: | tr -d ' ')
           echo "creditcoin_wallet_pk=$WALLET_PK" >> "$GITHUB_OUTPUT"
 
-          echo "INFO: get 0.001 ETH on source chain"
+          echo "INFO: get 0.01 ETH on source chain"
           ~/.foundry/bin/cast send "$WALLET_ADDRESS" "0x" \
-            --value 1000000000000000 \
+            --value 10000000000000000 \
             --private-key ${{ steps.env.outputs.source_chain_private_key }} \
             --rpc-url "$SOURCE_CHAIN_RPC_URL"
 
@@ -197,22 +200,36 @@ jobs:
             --rpc-url "$CREDITCOIN_RPC_URL"
 
           echo "INFO: deploy TestERC20.sol to source chain"
+          set +e
           OUTPUT=$(~/.foundry/bin/forge create \
                 --broadcast                    \
                 --rpc-url "$SOURCE_CHAIN_RPC_URL"  \
-                --private-key "$WALLET_PK"   \
+                --private-key ${{ steps.env.outputs.source_chain_private_key }}   \
                 shared/contracts/sol/TestERC20.sol:TestERC20 2>&1)
+          STATUS=$?
+          set -e
           echo "$OUTPUT"
+          if [ "$STATUS" -ne 0 ]; then
+            echo "ERROR: TestERC20 forge create failed (exit $STATUS)"
+            exit "$STATUS"
+          fi
           SOURCE_CHAIN_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "source_chain_contract_address=$SOURCE_CHAIN_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 
           echo "INFO: deploy AuxiliaryLoanContract.sol to source chain"
+          set +e
           OUTPUT=$(~/.foundry/bin/forge create \
                 --broadcast                    \
                 --rpc-url "$SOURCE_CHAIN_RPC_URL"  \
                 --private-key "$WALLET_PK"   \
                 loan/contracts/sol/AuxiliaryLoanContract.sol:AuxiliaryLoanContract 2>&1)
+          STATUS=$?
+          set -e
           echo "$OUTPUT"
+          if [ "$STATUS" -ne 0 ]; then
+            echo "ERROR: AuxiliaryLoanContract forge create failed (exit $STATUS)"
+            exit "$STATUS"
+          fi
           AUX_LOAN_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "aux_loan_contract_address=$AUX_LOAN_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 
@@ -315,16 +332,34 @@ jobs:
         run: |
           source .env
 
+          wait_for_log() {
+            local pattern="$1"
+            local file="$2"
+            local timeout_secs="$3"
+            local elapsed=0
+            while [ "$elapsed" -lt "$timeout_secs" ]; do
+              if grep -F -q "$pattern" "$file"; then
+                grep -F "$pattern" "$file"
+                return 0
+              fi
+              sleep 15
+              elapsed=$((elapsed + 15))
+            done
+            echo "ERROR: timed out after ${timeout_secs}s waiting for log line: $pattern"
+            tail -n 30 "$file"
+            return 1
+          }
+
           echo "INFO: Lender should have 5 tokens initially"
           OUTPUT=$(yarn utils:check_balance "$SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS" "${{ steps.setup.outputs.lender_wallet_address }}" "$SOURCE_CHAIN_RPC_URL")
           echo "$OUTPUT"
-          echo "$OUTPUT" | grep "Raw Balance: 5000000000"
+          echo "$OUTPUT" | grep "Raw Balance: 5000000000000000000"
           echo "$OUTPUT" | grep "Formatted Balance: 5.0"
 
           echo "INFO: Borrower should have 3 tokens initially"
           OUTPUT=$(yarn utils:check_balance "$SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS" "${{ steps.setup.outputs.borrower_wallet_address }}" "$SOURCE_CHAIN_RPC_URL")
           echo "$OUTPUT"
-          echo "$OUTPUT" | grep "Raw Balance: 3000000000"
+          echo "$OUTPUT" | grep "Raw Balance: 3000000000000000000"
           echo "$OUTPUT" | grep "Formatted Balance: 3.0"
 
 
@@ -354,10 +389,8 @@ jobs:
 
 
           # wait for the off-chain worker to see the event above
-          # in particular for the source block to be attested to
-          sleep 90
-          grep "Detected LoanRegistered event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log
-          grep "Registered loan $LOAN_ID for funding on source chain" /var/tmp/loan-flow-logs/offchain-worker.log
+          wait_for_log "Detected LoanRegistered event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log 180
+          wait_for_log "Registered loan $LOAN_ID for funding on source chain" /var/tmp/loan-flow-logs/offchain-worker.log 180
 
 
           echo "INFO: inspect loan $LOAN_ID"
@@ -369,17 +402,11 @@ jobs:
           echo "$OUTPUT"
 
           # wait for the off-chain worker to see the event above
-          # in particular for the source block to be attested to
-          sleep 90
-          grep "Detected LoanFunded event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log
+          wait_for_log "Detected LoanFunded event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log 180
 
-
-          # wait for off-chain worker to prove the event above
-          sleep 600
-          echo "---- last 3 lines of offchain-worker.log for debugging ----"
-          tail -n 3 /var/tmp/loan-flow-logs/offchain-worker.log
-          echo "INFO: Printing LoanFunded result:"
-          grep "Loan $LOAN_ID has been marked as funded on Creditcoin" /var/tmp/loan-flow-logs/offchain-worker.log
+          # wait for off-chain worker to prove the event above (~8 min attestation; allow up to 20)
+          echo "INFO: Waiting for LoanFunded proof on Creditcoin..."
+          wait_for_log "Loan $LOAN_ID has been marked as funded on Creditcoin" /var/tmp/loan-flow-logs/offchain-worker.log 1200
 
 
           echo "INFO: inspect loan $LOAN_ID"
@@ -391,16 +418,11 @@ jobs:
           echo "$OUTPUT"
 
 
-          sleep 90
-          grep "Detected LoanRepaid event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log
+          wait_for_log "Detected LoanRepaid event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log 180
 
-
-          # wait for off-chain worker to prove the event above
-          sleep 600
-          echo "---- last 3 lines of offchain-worker.log for debugging ----"
-          tail -n 3 /var/tmp/loan-flow-logs/offchain-worker.log
-          echo "INFO: Printing LoanRepaid result:"
-          grep "Loan $LOAN_ID has been marked as fully repaid on Creditcoin" /var/tmp/loan-flow-logs/offchain-worker.log
+          # wait for off-chain worker to prove the event above (~8 min attestation; allow up to 20)
+          echo "INFO: Waiting for LoanRepaid proof on Creditcoin..."
+          wait_for_log "Loan $LOAN_ID has been marked as fully repaid on Creditcoin" /var/tmp/loan-flow-logs/offchain-worker.log 1200
 
 
           echo "INFO: inspect loan $LOAN_ID"

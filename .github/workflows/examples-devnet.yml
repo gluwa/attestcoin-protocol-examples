@@ -43,9 +43,7 @@ jobs:
     secrets: inherit
 
   loan-flow:
-    if: false
-    # chain examples b/c they use the same wallet and we get
-    # replacement transaction underpriced and/or nonce errors
+    # Run after other devnet examples (shared wallet) to avoid nonce collisions.
     needs: bridge-offchain-worker
     uses: ./.github/workflows/loan-flow.yml
     with:
