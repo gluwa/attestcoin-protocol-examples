@@ -91,6 +91,27 @@ export async function submitLoanProofAfterTx(loanId: number, txHash: string, kin
     throw new Error(`Failed to generate proof: ${proofResult.error}`);
   }
 
+  // Attestation can take several minutes; the off-chain worker may have submitted the proof while we waited.
+  const statusAfterProof = await getLoanStatus(managerContract, loanId);
+
+  if (kind === 'fund') {
+    if (statusAfterProof !== LOAN_STATUS_CREATED) {
+      if (statusAfterProof === LOAN_STATUS_FUNDED || statusAfterProof === LOAN_STATUS_PARTLY_REPAID) {
+        console.log(`Loan ${loanId} has been marked as funded on Creditcoin.`);
+      } else {
+        console.log(
+          `Loan ${loanId} is no longer in Created status on Creditcoin after proof wait (status=${statusAfterProof}).`
+        );
+      }
+      return;
+    }
+  } else if (statusAfterProof === LOAN_STATUS_REPAID) {
+    console.log(`Loan ${loanId} has been marked as fully repaid on Creditcoin.`);
+    return;
+  } else if (statusAfterProof !== LOAN_STATUS_FUNDED && statusAfterProof !== LOAN_STATUS_PARTLY_REPAID) {
+    throw new Error(`Loan ${loanId} is not in a repayable status after proof wait (status=${statusAfterProof})`);
+  }
+
   const isRepayment = kind === 'repay';
   const gasLimit = await computeGasLimitForLoanManager(
     ccProvider,

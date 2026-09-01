@@ -121,7 +121,7 @@ const main = async () => {
 
     await submitLoanProofAfterTx(loanId, tx.hash, 'fund');
   } catch (error: any) {
-    console.error('Error funding loan: ', error.shortMessage);
+    console.error('Error funding loan: ', error.shortMessage ?? error.message ?? error);
     process.exit(1);
   }
 

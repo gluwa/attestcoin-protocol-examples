@@ -121,7 +121,7 @@ const main = async () => {
 
     await submitLoanProofAfterTx(loanId, tx.hash, 'repay');
   } catch (error: any) {
-    console.error('Error repaying loan: ', error);
+    console.error('Error repaying loan: ', error.shortMessage ?? error.message ?? error);
     process.exit(1);
   }
 

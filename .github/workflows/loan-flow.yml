@@ -328,6 +328,7 @@ jobs:
           echo "CREDITCOIN_WALLET_PRIVATE_KEY='${{ steps.setup.outputs.creditcoin_wallet_pk }}'" >> .env
           echo "LENDER_WALLET_PRIVATE_KEY='${{ steps.setup.outputs.lender_wallet_pk }}'" >> .env
           echo "BORROWER_WALLET_PRIVATE_KEY='${{ steps.setup.outputs.borrower_wallet_pk }}'" >> .env
+          echo "LOAN_WORKER_SKIP_FUND_REPAY_PROOF=1" >> .env
 
       - name: Exercise example
         run: |

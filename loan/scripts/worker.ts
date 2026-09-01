@@ -228,6 +228,13 @@ const main = async () => {
         }
 
         // 6.1 Validate transaction and generate proof once the block is attested
+        if (process.env.LOAN_WORKER_SKIP_FUND_REPAY_PROOF === '1') {
+          console.log(`Skipping fund proof in worker (scripts submit proofs); loan ${loanId} funded on source chain.`);
+          loanInfo.funded = true;
+          processedTxs.add(txHash);
+          return;
+        }
+
         const proofResult = await generateProofFor(
           txHash,
           sourceChainKey,
@@ -237,6 +244,16 @@ const main = async () => {
         );
 
         if (proofResult.success) {
+          const statusAfterProof = Number((await managerContract.getLoanOrder(loanId))[6]);
+          if (statusAfterProof !== 0) {
+            console.log(
+              `Loan ${loanId} already marked on Creditcoin after proof wait (status=${statusAfterProof}), skipping fund proof.`
+            );
+            loanInfo.funded = statusAfterProof >= 1 && statusAfterProof !== 4;
+            processedTxs.add(txHash);
+            return;
+          }
+
           try {
             // 6.2 Mark loan as funded on Creditcoin
             const gasLimit = await computeGasLimitForLoanManager(
@@ -277,13 +294,23 @@ const main = async () => {
           return;
         }
 
-        if (loanInfo.expired || loanInfo.repaid || !loanInfo.funded) {
+        const onChainOrder = await managerContract.getLoanOrder(loanId);
+        const onChainStatus = Number(onChainOrder[6]);
+
+        if (loanInfo.expired || loanInfo.repaid) {
           console.warn(`Loan ${loanId} is not in a valid state for repayment. Skipping.`);
           return;
         }
 
-        const onChainOrder = await managerContract.getLoanOrder(loanId);
-        const onChainStatus = Number(onChainOrder[6]);
+        if (!loanInfo.funded && onChainStatus >= 1 && onChainStatus !== 4) {
+          loanInfo.funded = true;
+        }
+
+        if (!loanInfo.funded) {
+          console.warn(`Loan ${loanId} is not funded in worker tracker yet. Skipping repay proof.`);
+          return;
+        }
+
         if (onChainStatus === 3) {
           console.log(`Loan ${loanId} already fully repaid on Creditcoin, skipping repay proof.`);
           loanInfo.repaid = true;
@@ -292,6 +319,12 @@ const main = async () => {
         }
         if (onChainStatus !== 1 && onChainStatus !== 2) {
           console.warn(`Loan ${loanId} not repayable on Creditcoin (status=${onChainStatus}). Skipping.`);
+          return;
+        }
+
+        if (process.env.LOAN_WORKER_SKIP_FUND_REPAY_PROOF === '1') {
+          console.log(`Skipping repay proof in worker (scripts submit proofs); loan ${loanId} repaid on source chain.`);
+          processedTxs.add(txHash);
           return;
         }
 
@@ -305,6 +338,20 @@ const main = async () => {
         );
 
         if (proofResult.success) {
+          const statusAfterProof = Number((await managerContract.getLoanOrder(loanId))[6]);
+          if (statusAfterProof === 3) {
+            console.log(`Loan ${loanId} already fully repaid on Creditcoin after proof wait, skipping repay proof.`);
+            loanInfo.repaid = true;
+            processedTxs.add(txHash);
+            return;
+          }
+          if (statusAfterProof !== 1 && statusAfterProof !== 2) {
+            console.warn(
+              `Loan ${loanId} not repayable on Creditcoin after proof wait (status=${statusAfterProof}). Skipping.`
+            );
+            return;
+          }
+
           try {
             // 7.2 Note loan repayment on Creditcoin, depending on whether the loan is fully repaid or not
             // will trigger either partial or full repayment events
