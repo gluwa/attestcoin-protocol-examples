@@ -115,13 +115,13 @@ At this point, you should see the worker picking up the event.
 ```bash
 Detected burn of 2000 tokens from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 at 0xb5f8f1000432f92521021642a915999407c61ed1a9f13c2e6c37f6ac9b6eb6f0
 Transaction 0xb5f8f1000432f92521021642a915999407c61ed1a9f13c2e6c37f6ac9b6eb6f0 found in block 418
-Waiting for block attestation on Creditcoin...
+Waiting for block 418 attestation on Creditcoin...
 ```
 
 Eventually, you should see a message like this one:
 
 ```bash
-Tokens minted! Contract: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512, To: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, Amount: 4000, QueryId: 0x3bfcf46c80011ef4280b7212e4fa11e5be314b12c9ddd56a74e83c2964b3e9be
+Tokens minted! Contract: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512, To: 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266, Amount: 2000, QueryId: 0x3bfcf46c80011ef4280b7212e4fa11e5be314b12c9ddd56a74e83c2964b3e9be
 ```
 
 That's it! All it took was a single transaction on your end to initiate the bridging process,
