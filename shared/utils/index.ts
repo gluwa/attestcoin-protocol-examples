@@ -332,6 +332,8 @@ export const POLLING_INTERVAL_MS = 5000;
 export const ERROR_BACKOFF_MS = 10000;
 // Maximum number of processed transactions to track before clearing
 export const MAX_PROCESSED_TXS = 1000;
+// Sepolia and other hosted RPCs reject wide eth_getLogs ranges (400 Bad Request).
+export const MAX_LOG_BLOCK_RANGE = 2000;
 
 // Helper function to poll for events using queryFilter (avoids filter expiration issues)
 export async function pollEvents(
@@ -346,17 +348,22 @@ export async function pollEvents(
       return fromBlock;
     }
 
-    const events = await contract.queryFilter(eventName, fromBlock, currentBlock);
-    for (const event of events) {
-      if (event instanceof EventLog) {
-        await handler(event);
+    let start = fromBlock;
+    while (start <= currentBlock) {
+      const end = Math.min(start + MAX_LOG_BLOCK_RANGE - 1, currentBlock);
+      const events = await contract.queryFilter(eventName, start, end);
+      for (const event of events) {
+        if (event instanceof EventLog) {
+          await handler(event);
+        }
       }
+      start = end + 1;
     }
 
     // Return next block to query from
     return currentBlock + 1;
   } catch (error: any) {
-    console.error(`Error polling ${eventName} events:`, error.shortMessage);
+    console.error(`Error polling ${eventName} events:`, error.shortMessage ?? error.message);
     // Add backoff delay on error to avoid hammering the RPC
     await new Promise((resolve) => setTimeout(resolve, ERROR_BACKOFF_MS));
     return fromBlock; // Retry from same block on error
