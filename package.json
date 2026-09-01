@@ -12,6 +12,7 @@
     "loan_flow:fund_loan": "tsx loan/scripts/fund_loan.ts",
     "loan_flow:repay_loan": "tsx loan/scripts/repay_loan.ts",
     "loan_flow:inspect_loan": "tsx loan/scripts/inspect.ts",
+    "loan_flow:wait_loan_status": "tsx loan/scripts/wait_loan_status.ts",
     "loan_flow:start_worker": "tsx loan/scripts/worker.ts",
     "utils:check_balance": "tsx shared/utils/check_balance.js",
     "utils:check_setup": "tsx shared/check_setup.ts",

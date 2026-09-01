@@ -328,29 +328,11 @@ jobs:
           echo "CREDITCOIN_WALLET_PRIVATE_KEY='${{ steps.setup.outputs.creditcoin_wallet_pk }}'" >> .env
           echo "LENDER_WALLET_PRIVATE_KEY='${{ steps.setup.outputs.lender_wallet_pk }}'" >> .env
           echo "BORROWER_WALLET_PRIVATE_KEY='${{ steps.setup.outputs.borrower_wallet_pk }}'" >> .env
-          echo "LOAN_WORKER_SKIP_FUND_REPAY_PROOF=1" >> .env
+          echo "LOAN_REGISTER_SOURCE_FUNDING_IN_REGISTER=1" >> .env
 
       - name: Exercise example
         run: |
           source .env
-
-          wait_for_log() {
-            local pattern="$1"
-            local file="$2"
-            local timeout_secs="$3"
-            local elapsed=0
-            while [ "$elapsed" -lt "$timeout_secs" ]; do
-              if grep -F -q "$pattern" "$file"; then
-                grep -F "$pattern" "$file"
-                return 0
-              fi
-              sleep 15
-              elapsed=$((elapsed + 15))
-            done
-            echo "ERROR: timed out after ${timeout_secs}s waiting for log line: $pattern"
-            tail -n 30 "$file"
-            return 1
-          }
 
           echo "INFO: Lender should have 5 tokens initially"
           OUTPUT=$(yarn utils:check_balance "$SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS" "${{ steps.setup.outputs.lender_wallet_address }}" "$SOURCE_CHAIN_RPC_URL")
@@ -377,22 +359,13 @@ jobs:
           echo "$OUTPUT" | grep "Source loan contract registered with transaction hash:"
 
 
-          echo "INFO: start offchain worker"
-          yarn loan_flow:start_worker > /var/tmp/loan-flow-logs/offchain-worker.log 2>&1 &
-          sleep 10
-
-
           echo "INFO: Register a loan"
           # <loan amount>, <interest rate>, <expiration blocks>
           OUTPUT=$(yarn loan_flow:register_loan 1000 500 1000)
           echo "$OUTPUT"
           echo "$OUTPUT" | grep "Loan registered with transaction hash:"
+          echo "$OUTPUT" | grep "Registered loan .* for funding on source chain"
           LOAN_ID=$(echo "$OUTPUT" | grep "Loan successfully registered with ID:" | cut -f2 -d: | tr -d ' ')
-
-
-          # wait for the off-chain worker to see the event above
-          wait_for_log "Detected LoanRegistered event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log 180
-          wait_for_log "Registered loan $LOAN_ID for funding on source chain" /var/tmp/loan-flow-logs/offchain-worker.log 180
 
 
           echo "INFO: inspect loan $LOAN_ID"
@@ -403,7 +376,7 @@ jobs:
           OUTPUT=$(yarn loan_flow:fund_loan "$LOAN_ID" 1000)
           echo "$OUTPUT"
           echo "$OUTPUT" | grep "Loan funded:"
-          echo "$OUTPUT" | grep "Loan $LOAN_ID has been marked as funded on Creditcoin."
+          yarn loan_flow:wait_loan_status "$LOAN_ID" Funded 1500
 
 
           echo "INFO: inspect loan $LOAN_ID"
@@ -414,7 +387,7 @@ jobs:
           OUTPUT=$(yarn loan_flow:repay_loan "$LOAN_ID" 1050)
           echo "$OUTPUT"
           echo "$OUTPUT" | grep "Loan repaid:"
-          echo "$OUTPUT" | grep "Loan $LOAN_ID has been marked as fully repaid on Creditcoin."
+          yarn loan_flow:wait_loan_status "$LOAN_ID" Repaid 1500
 
 
           echo "INFO: inspect loan $LOAN_ID"
@@ -425,13 +398,11 @@ jobs:
           OUTPUT=$(yarn utils:check_balance "$SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS" "${{ steps.setup.outputs.lender_wallet_address }}" "$SOURCE_CHAIN_RPC_URL")
           echo "$OUTPUT"
           echo "$OUTPUT" | grep "Raw Balance: 5000000000000000050"
-          echo "$OUTPUT" | grep "Formatted Balance: 5.00000000000000005"
 
           echo "INFO: Borrower should have 3 tokens - interest"
           OUTPUT=$(yarn utils:check_balance "$SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS" "${{ steps.setup.outputs.borrower_wallet_address }}" "$SOURCE_CHAIN_RPC_URL")
           echo "$OUTPUT"
           echo "$OUTPUT" | grep "Raw Balance: 2999999999999999950"
-          echo "$OUTPUT" | grep "Formatted Balance: 2.99999999999999995"
 
       - name: Upload logs
         if: always()

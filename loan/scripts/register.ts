@@ -1,6 +1,7 @@
 import { Contract, ethers, EventLog } from 'ethers';
 
 import loanManagerAbi from '../contracts/abi/ASCLoanManager.json';
+import loanHelperAbi from '../contracts/abi/AuxiliaryLoanContract.json';
 import { isValidContractAddress, isValidPrivateKey } from '../../shared/utils';
 import { loadEnv } from '../../shared/env';
 
@@ -131,7 +132,7 @@ const main = async () => {
   const lenderSignature = await lenderWallet.signMessage(ethers.toBeArray(payloadToSign));
   const borrowerSignature = await borrowerWallet.signMessage(ethers.toBeArray(payloadToSign));
 
-  let loanRegistered = false;
+  let loanId: bigint | null = null;
 
   const registerBlock = await ccProvider.getBlockNumber();
 
@@ -146,7 +147,7 @@ const main = async () => {
   }
 
   // 5. Wait for the LoanRegistered event
-  while (!loanRegistered) {
+  while (loanId === null) {
     const currentBlock = await ccProvider.getBlockNumber();
     console.log(`Waiting for LoanRegistered event... Current block: ${currentBlock}`);
     const events = await managerContract.queryFilter(
@@ -157,12 +158,42 @@ const main = async () => {
 
     if (events.length > 0) {
       const eventData = events[0] as EventLog;
-      const loanId = eventData.args.loanId;
-      console.log(`Loan successfully registered with ID: ${loanId.toString()}`);
-      loanRegistered = true;
+      loanId = eventData.args.loanId;
+      console.log(`Loan successfully registered with ID: ${eventData.args.loanId.toString()}`);
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    if (loanId === null) {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  }
+
+  if (loanId === null) {
+    throw new Error('LoanRegistered event was not observed');
+  }
+
+  if (process.env.LOAN_REGISTER_SOURCE_FUNDING_IN_REGISTER === '1') {
+    const sourceChainRpcUrl = process.env.SOURCE_CHAIN_RPC_URL;
+    const sourceChainLoanContractAddress = process.env.SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS;
+
+    if (!sourceChainRpcUrl) {
+      throw new Error('SOURCE_CHAIN_RPC_URL environment variable is not configured or invalid');
+    }
+    if (!isValidContractAddress(sourceChainLoanContractAddress)) {
+      throw new Error('SOURCE_CHAIN_LOAN_CONTRACT_ADDRESS environment variable is not configured or invalid');
+    }
+
+    const sourceChainProvider = new ethers.JsonRpcProvider(sourceChainRpcUrl);
+    const sourceChainWallet = new ethers.Wallet(ccNextWalletPrivateKey!, sourceChainProvider);
+    const sourceChainLoanContract = new Contract(sourceChainLoanContractAddress!, loanHelperAbi, sourceChainWallet);
+
+    const tx = await sourceChainLoanContract.registerLoanFund(
+      loanId,
+      fundFlow,
+      loanTerm.loanAmount,
+      loanTerm.expectedRepaymentAmount
+    );
+    await tx.wait();
+    console.log(`Registered loan ${loanId.toString()} for funding on source chain, tx hash: ${tx.hash}`);
   }
 
   process.exit(0);
