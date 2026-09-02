@@ -1,0 +1,3 @@
+bridge/contracts/abi/*.json text eol=lf
+loan/contracts/abi/*.json text eol=lf
+shared/contracts/abi/*.json text eol=lf

@@ -2,6 +2,7 @@
 **/dist/
 **/target/
 **/node_modules/
+lib/forge-std/
 **/*.rs.bk
 *.swp
 **/._*
@@ -26,3 +27,6 @@ megalinter-reports/
 # Local secrets — copy from .env.example / .env.devnet.example (see README)
 .env
 .env.devnet
+
+.tools/
+vendor/

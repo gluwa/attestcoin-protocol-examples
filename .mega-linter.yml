@@ -26,5 +26,7 @@ DISABLE_LINTERS:
   - TYPESCRIPT_ES
   - TYPESCRIPT_STANDARD
   - SPELL_CSPELL
+  # Tutorial markdown uses long command/URL lines; table formatter is noisy on existing docs.
+  - MARKDOWN_MARKDOWN_TABLE_FORMATTER
 
 SHOW_ELAPSED_TIME: true

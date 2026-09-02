@@ -1,11 +1,19 @@
 [profile.default]
 out = "out"
-src = "contracts"
-
+src = "bridge/contracts/sol"
 libs = ["node_modules"]
+# Used when forge create is run from the repo root (example CI workflows).
+# via_ir required: ASCMinter + package ASCBase hit "stack too deep" without it.
+remappings = [
+  "@openzeppelin/=node_modules/@openzeppelin/",
+  "@gluwa/asc-contracts/=node_modules/@gluwa/asc-contracts/",
+]
 solc_version = "0.8.30"
 optimizer = true
 optimizer_runs = 200
-via_ir = false
+via_ir = true
 evm_version = "shanghai"
 verbosity = 2
+
+[lint]
+lint_on_build = false

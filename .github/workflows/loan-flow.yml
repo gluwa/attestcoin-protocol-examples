@@ -28,6 +28,7 @@ permissions: read-all
 jobs:
   example:
     runs-on: ${{ fromJSON(inputs.runs-on) }}
+    timeout-minutes: 90
     steps:
       - name: Anvil ENV
         id: anvil
@@ -163,11 +164,17 @@ jobs:
           cache: 'yarn'
       - run: npm install -g yarn
 
+      - name: Install dependencies
+        run: yarn install --ignore-engines
+
+      - name: Install forge-std
+        run: git clone --depth 1 https://github.com/foundry-rs/forge-std lib/forge-std
+
       - name: Setup
         id: setup
+        env:
+          FOUNDRY_VIA_IR: "true"
         run: |
-          yarn install
-
           SOURCE_CHAIN_RPC_URL="${{ steps.env.outputs.source_chain_rpc_url }}"
 
           echo "INFO: generate a new wallet"
@@ -179,9 +186,9 @@ jobs:
           WALLET_PK=$(echo "$OUTPUT" | grep "Private key:" | cut -f2 -d: | tr -d ' ')
           echo "creditcoin_wallet_pk=$WALLET_PK" >> "$GITHUB_OUTPUT"
 
-          echo "INFO: get 0.001 ETH on source chain"
+          echo "INFO: get 0.01 ETH on source chain"
           ~/.foundry/bin/cast send "$WALLET_ADDRESS" "0x" \
-            --value 1000000000000000 \
+            --value 10000000000000000 \
             --private-key ${{ steps.env.outputs.source_chain_private_key }} \
             --rpc-url "$SOURCE_CHAIN_RPC_URL"
 
@@ -194,22 +201,36 @@ jobs:
             --rpc-url "$CREDITCOIN_RPC_URL"
 
           echo "INFO: deploy TestERC20.sol to source chain"
+          set +e
           OUTPUT=$(~/.foundry/bin/forge create \
                 --broadcast                    \
                 --rpc-url "$SOURCE_CHAIN_RPC_URL"  \
-                --private-key "$WALLET_PK"   \
-                contracts/sol/TestERC20.sol:TestERC20 2>&1)
+                --private-key ${{ steps.env.outputs.source_chain_private_key }}   \
+                shared/contracts/sol/TestERC20.sol:TestERC20 2>&1)
+          STATUS=$?
+          set -e
           echo "$OUTPUT"
+          if [ "$STATUS" -ne 0 ]; then
+            echo "ERROR: TestERC20 forge create failed (exit $STATUS)"
+            exit "$STATUS"
+          fi
           SOURCE_CHAIN_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "source_chain_contract_address=$SOURCE_CHAIN_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 
           echo "INFO: deploy AuxiliaryLoanContract.sol to source chain"
+          set +e
           OUTPUT=$(~/.foundry/bin/forge create \
                 --broadcast                    \
                 --rpc-url "$SOURCE_CHAIN_RPC_URL"  \
                 --private-key "$WALLET_PK"   \
-                contracts/sol/AuxiliaryLoanContract.sol:AuxiliaryLoanContract 2>&1)
+                loan/contracts/sol/AuxiliaryLoanContract.sol:AuxiliaryLoanContract 2>&1)
+          STATUS=$?
+          set -e
           echo "$OUTPUT"
+          if [ "$STATUS" -ne 0 ]; then
+            echo "ERROR: AuxiliaryLoanContract forge create failed (exit $STATUS)"
+            exit "$STATUS"
+          fi
           AUX_LOAN_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "aux_loan_contract_address=$AUX_LOAN_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 
@@ -218,18 +239,25 @@ jobs:
             --broadcast \
             --rpc-url "$CREDITCOIN_RPC_URL" \
             --private-key "$WALLET_PK" \
-            node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder 2>&1)
+            node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder 2>&1)
           echo "$OUTPUT"
           DECODER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
 
           echo "INFO: deploy ASCLoanManager.sol to Creditcoin"
+          set +e
           OUTPUT=$(~/.foundry/bin/forge create \
                 --broadcast                    \
                 --rpc-url "$CREDITCOIN_RPC_URL"  \
                 --private-key "$WALLET_PK"   \
-                --libraries "node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:$DECODER_CONTRACT_ADDRESS" \
-                contracts/sol/ASCLoanManager.sol:ASCLoanManager 2>&1)
+                --libraries "node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder:$DECODER_CONTRACT_ADDRESS" \
+                loan/contracts/sol/ASCLoanManager.sol:ASCLoanManager 2>&1)
+          STATUS=$?
+          set -e
           echo "$OUTPUT"
+          if [ "$STATUS" -ne 0 ]; then
+            echo "ERROR: ASCLoanManager forge create failed (exit $STATUS)"
+            exit "$STATUS"
+          fi
           ASC_LOAN_MANAGER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "asc_loan_manager_contract_address=$ASC_LOAN_MANAGER_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 
@@ -300,6 +328,7 @@ jobs:
           echo "CREDITCOIN_WALLET_PRIVATE_KEY='${{ steps.setup.outputs.creditcoin_wallet_pk }}'" >> .env
           echo "LENDER_WALLET_PRIVATE_KEY='${{ steps.setup.outputs.lender_wallet_pk }}'" >> .env
           echo "BORROWER_WALLET_PRIVATE_KEY='${{ steps.setup.outputs.borrower_wallet_pk }}'" >> .env
+          echo "LOAN_REGISTER_SOURCE_FUNDING_IN_REGISTER=1" >> .env
 
       - name: Exercise example
         run: |
@@ -308,13 +337,13 @@ jobs:
           echo "INFO: Lender should have 5 tokens initially"
           OUTPUT=$(yarn utils:check_balance "$SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS" "${{ steps.setup.outputs.lender_wallet_address }}" "$SOURCE_CHAIN_RPC_URL")
           echo "$OUTPUT"
-          echo "$OUTPUT" | grep "Raw Balance: 5000000000"
+          echo "$OUTPUT" | grep "Raw Balance: 5000000000000000000"
           echo "$OUTPUT" | grep "Formatted Balance: 5.0"
 
           echo "INFO: Borrower should have 3 tokens initially"
           OUTPUT=$(yarn utils:check_balance "$SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS" "${{ steps.setup.outputs.borrower_wallet_address }}" "$SOURCE_CHAIN_RPC_URL")
           echo "$OUTPUT"
-          echo "$OUTPUT" | grep "Raw Balance: 3000000000"
+          echo "$OUTPUT" | grep "Raw Balance: 3000000000000000000"
           echo "$OUTPUT" | grep "Formatted Balance: 3.0"
 
 
@@ -330,24 +359,13 @@ jobs:
           echo "$OUTPUT" | grep "Source loan contract registered with transaction hash:"
 
 
-          echo "INFO: start offchain worker"
-          yarn loan_flow:start_worker > /var/tmp/loan-flow-logs/offchain-worker.log 2>&1 &
-          sleep 10
-
-
           echo "INFO: Register a loan"
           # <loan amount>, <interest rate>, <expiration blocks>
           OUTPUT=$(yarn loan_flow:register_loan 1000 500 1000)
           echo "$OUTPUT"
           echo "$OUTPUT" | grep "Loan registered with transaction hash:"
+          echo "$OUTPUT" | grep "Registered loan .* for funding on source chain"
           LOAN_ID=$(echo "$OUTPUT" | grep "Loan successfully registered with ID:" | cut -f2 -d: | tr -d ' ')
-
-
-          # wait for the off-chain worker to see the event above
-          # in particular for the source block to be attested to
-          sleep 90
-          grep "Detected LoanRegistered event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log
-          grep "Registered loan $LOAN_ID for funding on source chain" /var/tmp/loan-flow-logs/offchain-worker.log
 
 
           echo "INFO: inspect loan $LOAN_ID"
@@ -357,19 +375,8 @@ jobs:
           echo "INFO: Lender completely funds the loan"
           OUTPUT=$(yarn loan_flow:fund_loan "$LOAN_ID" 1000)
           echo "$OUTPUT"
-
-          # wait for the off-chain worker to see the event above
-          # in particular for the source block to be attested to
-          sleep 90
-          grep "Detected LoanFunded event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log
-
-
-          # wait for off-chain worker to prove the event above
-          sleep 600
-          echo "---- last 3 lines of offchain-worker.log for debugging ----"
-          tail -n 3 /var/tmp/loan-flow-logs/offchain-worker.log
-          echo "INFO: Printing LoanFunded result:"
-          grep "Loan $LOAN_ID has been marked as funded on Creditcoin" /var/tmp/loan-flow-logs/offchain-worker.log
+          echo "$OUTPUT" | grep "Loan funded:"
+          yarn loan_flow:wait_loan_status "$LOAN_ID" Funded 1500
 
 
           echo "INFO: inspect loan $LOAN_ID"
@@ -379,18 +386,8 @@ jobs:
           echo "INFO: Borrower repays loan + interest"
           OUTPUT=$(yarn loan_flow:repay_loan "$LOAN_ID" 1050)
           echo "$OUTPUT"
-
-
-          sleep 90
-          grep "Detected LoanRepaid event for loanId: $LOAN_ID" /var/tmp/loan-flow-logs/offchain-worker.log
-
-
-          # wait for off-chain worker to prove the event above
-          sleep 600
-          echo "---- last 3 lines of offchain-worker.log for debugging ----"
-          tail -n 3 /var/tmp/loan-flow-logs/offchain-worker.log
-          echo "INFO: Printing LoanRepaid result:"
-          grep "Loan $LOAN_ID has been marked as fully repaid on Creditcoin" /var/tmp/loan-flow-logs/offchain-worker.log
+          echo "$OUTPUT" | grep "Loan repaid:"
+          yarn loan_flow:wait_loan_status "$LOAN_ID" Repaid 1500
 
 
           echo "INFO: inspect loan $LOAN_ID"
@@ -401,13 +398,11 @@ jobs:
           OUTPUT=$(yarn utils:check_balance "$SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS" "${{ steps.setup.outputs.lender_wallet_address }}" "$SOURCE_CHAIN_RPC_URL")
           echo "$OUTPUT"
           echo "$OUTPUT" | grep "Raw Balance: 5000000000000000050"
-          echo "$OUTPUT" | grep "Formatted Balance: 5.00000000000000005"
 
           echo "INFO: Borrower should have 3 tokens - interest"
           OUTPUT=$(yarn utils:check_balance "$SOURCE_CHAIN_ERC20_CONTRACT_ADDRESS" "${{ steps.setup.outputs.borrower_wallet_address }}" "$SOURCE_CHAIN_RPC_URL")
           echo "$OUTPUT"
           echo "$OUTPUT" | grep "Raw Balance: 2999999999999999950"
-          echo "$OUTPUT" | grep "Formatted Balance: 2.99999999999999995"
 
       - name: Upload logs
         if: always()

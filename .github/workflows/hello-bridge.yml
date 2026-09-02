@@ -163,11 +163,15 @@ jobs:
           cache: 'yarn'
       - run: npm install -g yarn
 
+      - name: Install dependencies
+        run: yarn install --ignore-engines
+
       - name: Setup
         id: setup
+        env:
+          # ASCMinter + package ASCBase need via-IR (stack too deep otherwise).
+          FOUNDRY_VIA_IR: "true"
         run: |
-          yarn install
-
           SOURCE_CHAIN_RPC_URL="${{ steps.env.outputs.source_chain_rpc_url }}"
 
           echo "INFO: generate a new wallet"
@@ -198,7 +202,7 @@ jobs:
                 --broadcast                    \
                 --rpc-url "$SOURCE_CHAIN_RPC_URL"  \
                 --private-key ${{ steps.env.outputs.source_chain_private_key }}   \
-                contracts/sol/TestERC20.sol:TestERC20 2>&1)
+                shared/contracts/sol/TestERC20.sol:TestERC20 2>&1)
           echo "$OUTPUT"
           SOURCE_CHAIN_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "source_chain_contract_address=$SOURCE_CHAIN_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
@@ -208,18 +212,25 @@ jobs:
             --broadcast \
             --rpc-url "$CREDITCOIN_RPC_URL" \
             --private-key ${{ steps.env.outputs.execution_chain_private_key }} \
-            node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder 2>&1)
+            node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder 2>&1)
           echo "$OUTPUT"
           DECODER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
 
           echo "INFO: deploy ASCMinter.sol to Creditcoin chain"
+          set +e
           OUTPUT=$(~/.foundry/bin/forge create \
               --broadcast \
               --rpc-url "$CREDITCOIN_RPC_URL" \
               --private-key ${{ steps.env.outputs.execution_chain_private_key }} \
-              --libraries "node_modules/@gluwa/usc-contracts/contracts/decoding/EvmV1Decoder.sol:EvmV1Decoder:$DECODER_CONTRACT_ADDRESS" \
-              contracts/sol/ASCMinter.sol:ASCMinter 2>&1)
+              --libraries "node_modules/@gluwa/asc-contracts/contracts/common/EvmV1Decoder.sol:EvmV1Decoder:$DECODER_CONTRACT_ADDRESS" \
+              bridge/contracts/sol/ASCMinter.sol:ASCMinter 2>&1)
+          STATUS=$?
+          set -e
           echo "$OUTPUT"
+          if [ "$STATUS" -ne 0 ]; then
+            echo "ERROR: ASCMinter forge create failed (exit $STATUS)"
+            exit "$STATUS"
+          fi
           ASC_MINTER_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
           echo "minter_contract_address=$ASC_MINTER_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 
@@ -228,7 +239,7 @@ jobs:
               --broadcast \
               --rpc-url "$CREDITCOIN_RPC_URL" \
               --private-key "$WALLET_PK" \
-              contracts/sol/BridgeTestToken.sol:BridgeTestToken \
+              bridge/contracts/sol/BridgeTestToken.sol:BridgeTestToken \
               --constructor-args "$ASC_MINTER_CONTRACT_ADDRESS" 2>&1)
           echo "$OUTPUT"
           ASC_MINTABLE_TOKEN=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")

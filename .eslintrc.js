@@ -32,6 +32,7 @@ module.exports = {
     // "eslint-plugin-react",
     '@typescript-eslint',
   ],
+  ignorePatterns: ['vendor/**', 'node_modules/**', 'dist/**', 'lib/**', 'out/**'],
   rules: {
     '@typescript-eslint/adjacent-overload-signatures': 'error',
     '@typescript-eslint/array-type': [

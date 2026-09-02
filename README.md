@@ -1,87 +1,36 @@
-# 🌉 ASC Testnet Bridge Examples 🌉
+# 🌉 Attestcoin Protocol Examples 🌉
 
-This repository is designed as a starting point for users and builders alike to explore the new
-Creditcoin cross-chain features brought forwards in the new `CC3 Testnet` update. Learn how to use
-the Creditcoin Decentralized Oracle through a series of guided tutorials where you get to set up and
-interact with your own decentralized bridge!
+This repository is a starting point for exploring cross-chain inter-operability using the Attestcoin protocol. Today, it contains several examples covering Attestcoin readability. Coming soon: examples using Attestcoin writability!
 
-## Before you start!
+By running through the tutorials in this repository, you will set up and interact with your own decentralized bridge and loan examples.
 
-Before attempting any of the tutorials, make sure the following are installed and available in your system:
+## Before you start
+
+Before attempting any of the tutorials, make sure the following are installed:
 
 - [yarn]
 - [foundry]
 
-After that install the required dependencies to run the examples, to do so simply run the
-following command in the root of this repo:
+Install dependencies from the repository root:
 
 ```sh
 yarn
 ```
 
-You will also need to set up the right version of foundry with `foundryup`:
+Set up Foundry:
 
 ```bash
 foundryup --version v1.2.3
-
 ```
-
-Next, create your own `.env` from the template. `.env` holds your wallet private key, so it is
-git-ignored and never committed — `.env.example` is the tracked copy, which carries only public
-network defaults:
-
-```bash
-cp .env.example .env
-```
-
-> [!CAUTION]
-> Keep your private key in `.env` only. Never put it in `.env.example`, which is tracked by git.
-
-Finally, source the `.env` file to load your configuration globally for all examples:
-
-```bash
-source .env
-```
-
-This ensures that all tutorial commands can access your wallet private key and RPC URLs without needing to manually substitute them.
 
 ## Tutorials
 
-Each tutorial is built to be as self-contained as possible. However, we still recommend you go
-through them in the following order:
+We recommend going through them in this order:
 
-1. 📚 [Hello Bridge]
-2. 📚 [Custom Contracts Bridging]
-3. 📚 [Bridge Offchain Worker]
-4. 📚 [Loan Flow]
-
-## Content
-
-Below is brief overview of each tutorial's content.
-
-### Hello Bridge
-
-Learn how to use the Creditcoin Decentralized Oracle from the perspective of an end user. [Hello
-Bridge] makes use of pre-existing smart contracts on the Sepolia and Creditcoin Testnet so as to
-minimize the amount of setup needed.
-
-### Custom Contracts Bridging
-
-Learn how to setup your own trustless cross-chain bridging logic by deploying your own contracts.
-[Custom Contracts Bridging] teaches you the perspective of a DApp builder by showing you how to set
-up custom logic across each chain you are deploying to.
-
-### Bridge Offchain Worker
-
-Streamline UX by automating away most transactions in the bridging process. [Bridge Offchain Worker]
-shows you how offchain workers can be used to simplify the user flow of your cross-chain DApp.
-
-### Loan Flow
-
-Building on top of what we learned with the [Bridge Offchain Worker] we take it a step further by
-implementing a loaning system using both a ASC contract, a source chain helper and an offchain worker
-to seamlesly coordinate between the two, and of course making use of our Oracle proving capabilities to
-add the final touches of trust into the process.
+1. 📚 [Hello Bridge] — pre-deployed contracts, manual proof submit
+2. 📚 [Custom Contracts Bridging] — deploy your ASC + optional worker (§7)
+3. 📚 [Bridge Offchain Worker] — short reference (main flow in custom-contracts §7)
+4. 📚 [Loan Flow] — reuses decoder library from bridge
 
 ## External Resources
 
@@ -91,10 +40,10 @@ add the final touches of trust into the process.
 
 [yarn]: https://yarnpkg.com/getting-started/install
 [foundry]: https://getfoundry.sh/
-[Hello Bridge]: ./hello-bridge/README.md
-[Custom Contracts Bridging]: ./custom-contracts-bridging/README.md
-[Bridge Offchain Worker]: ./bridge-offchain-worker/README.md
-[Loan Flow]: ./loan-flow/README.md
+[Hello Bridge]: ./bridge/hello-bridge/README.md
+[Custom Contracts Bridging]: ./bridge/custom-contracts-bridging/README.md
+[Bridge Offchain Worker]: ./bridge/bridge-offchain-worker/README.md
+[Loan Flow]: ./loan/README.md
 [ASC Architecture Overview]: https://docs.attestcoin.org/attestcoin-protocol/architecture
 [DApp Builder Infrastructure]: https://docs.attestcoin.org/attestcoin-protocol/dapp-builder-infrastructure
 [Attestcoin Readability Subsystems]: https://docs.attestcoin.org/attestcoin-protocol/attestcoin-readability

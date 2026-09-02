@@ -1,0 +1,8 @@
+# Tutorial docs: long lines, optional link defs, and tree fences are intentional.
+default: true
+MD013: false
+MD028: false
+MD033: false
+MD040: false
+MD041: false
+MD053: false
