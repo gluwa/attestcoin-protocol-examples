@@ -1,6 +1,6 @@
 import { Contract, JsonRpcApiProvider, TransactionReceipt, Log, LogDescription, EventLog } from 'ethers';
 
-import { proofProvider, chainInfo } from '@gluwa/usc-sdk';
+import { proofProvider, chainInfo } from '@gluwa/asc-sdk';
 
 /**
  * Tries to generate a proof for the given transaction hash on the specified chain. Will fail if the

@@ -9,7 +9,7 @@ import {
   submitFundProofToLoanManager,
   submitRepayProofToLoanManager,
 } from '../../shared/utils';
-import { proofProvider } from '@gluwa/usc-sdk';
+import { proofProvider } from '@gluwa/asc-sdk';
 
 /** Matches LoanStatus in LoanTypes.sol */
 const LOAN_STATUS_CREATED = 0;
