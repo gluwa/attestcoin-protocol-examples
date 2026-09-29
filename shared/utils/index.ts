@@ -48,14 +48,55 @@ export async function generateProofFor(
   console.log(`Block ${blockNumber} attested! Generating proof...`);
 
   // We can now proceed to generate the proof using the proof builder service
-  try {
-    const proof = await proofBuilder.getProof(txHash);
+  const proof = await fetchProofWithRetry(proofBuilder, txHash);
+
+  if (proof.success) {
     console.log('Proof generation successful!');
-    return proof;
-  } catch (error) {
-    console.error('Error during proof generation: ', error);
-    throw error;
+  } else {
+    console.error(`Proof generation failed after ${PROOF_FETCH_MAX_ATTEMPTS} attempts: ${proof.error}`);
   }
+
+  return proof;
+}
+
+/** How many times to ask the proof builder for a proof before giving up. */
+export const PROOF_FETCH_MAX_ATTEMPTS = 60;
+
+/** Pause between proof fetch attempts. */
+export const PROOF_FETCH_RETRY_DELAY_MS = 1000;
+
+/**
+ * Fetches a proof, retrying while the proof builder does not have one yet.
+ *
+ * `waitUntilHeightAttested` only waits for the prover's chain-wide attested-height watermark to
+ * reach our block. The archiver used to run ahead of attestation, so a proof was ready as soon as
+ * that watermark moved; it no longer does, which leaves a window where the height is attested but
+ * the roots for that block have not been archived and the request fails (503). The window is short,
+ * so a few seconds of polling covers it — and it is negligible next to the attestation wait we have
+ * already done by this point.
+ *
+ * Note `getProof` reports failure by returning an unsuccessful result rather than throwing.
+ *
+ * @param proofBuilder Proof builder service client, already bound to the source chain key.
+ * @param txHash Transaction hash on the source chain to fetch the proof for.
+ * @returns The first successful result, or the last failure once attempts are exhausted.
+ */
+export async function fetchProofWithRetry(
+  proofBuilder: proofProvider.service.ProofBuilder,
+  txHash: string
+): Promise<proofProvider.ProofResult> {
+  let result = await proofBuilder.getProof(txHash);
+
+  for (let attempt = 2; !result.success && attempt <= PROOF_FETCH_MAX_ATTEMPTS; attempt++) {
+    console.log(
+      `Proof not available yet, retrying in ${PROOF_FETCH_RETRY_DELAY_MS}ms ` +
+        `(attempt ${attempt}/${PROOF_FETCH_MAX_ATTEMPTS})...`
+    );
+    await new Promise((resolve) => setTimeout(resolve, PROOF_FETCH_RETRY_DELAY_MS));
+    result = await proofBuilder.getProof(txHash);
+  }
+
+  return result;
 }
 
 async function computeGasLimit(
