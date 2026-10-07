@@ -1,6 +1,6 @@
 import { ethers } from 'ethers';
 
-import { chainInfo } from '@gluwa/asc-sdk';
+import { chainInfo } from '@gluwa/attestcoin-sdk';
 import { isValidContractAddress, isValidPrivateKey } from './utils';
 import { loadEnv } from './env';
 
