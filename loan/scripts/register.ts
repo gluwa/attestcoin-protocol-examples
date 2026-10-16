@@ -129,8 +129,8 @@ const main = async () => {
   // 3. Sign payload by both lender and borrower
   const payloadToSign = ethers.solidityPackedKeccak256(payloadTypes, payload);
 
-  const lenderSignature = await lenderWallet.signMessage(ethers.toBeArray(payloadToSign));
-  const borrowerSignature = await borrowerWallet.signMessage(ethers.toBeArray(payloadToSign));
+  const lenderSignature = await lenderWallet.signMessage(ethers.getBytes(payloadToSign));
+  const borrowerSignature = await borrowerWallet.signMessage(ethers.getBytes(payloadToSign));
 
   let loanId: bigint | null = null;
 
