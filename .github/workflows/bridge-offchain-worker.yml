@@ -274,9 +274,26 @@ jobs:
           echo "$OUTPUT" | grep "Raw Balance: 0"
           echo "$OUTPUT" | grep "Formatted Balance: 0.0"
 
+          WORKER_LOG=/var/tmp/bridge-offchain-worker-logs/offchain-worker.log
+          # Wait for a line in the worker's log instead of sleeping a fixed time: poll every
+          # 5 s up to a ceiling, and on timeout show the log so the failure says why.
+          wait_for_log() {
+            local pattern=$1 timeout=$2 waited=0
+            until grep -q "$pattern" "$WORKER_LOG"; do
+              if [ "$waited" -ge "$timeout" ]; then
+                echo "ERROR: '$pattern' not in the worker log after ${timeout}s" >&2
+                tail -n 50 "$WORKER_LOG" >&2
+                return 1
+              fi
+              sleep 5
+              waited=$((waited + 5))
+            done
+            echo "INFO: '$pattern' after ${waited}s"
+          }
+
           echo "INFO: start offchain worker"
-          yarn offchain:start_worker > /var/tmp/bridge-offchain-worker-logs/offchain-worker.log 2>&1 &
-          sleep 10
+          yarn offchain:start_worker > "$WORKER_LOG" 2>&1 &
+          wait_for_log "Listening for burn events" 60
 
           echo "INFO: burn the tokens (on source chain) we want to bridge"
           OUTPUT=$(~/.foundry/bin/cast send --rpc-url "$SOURCE_CHAIN_RPC_URL" \
@@ -284,15 +301,14 @@ jobs:
             "burn(uint256)" 5000000000000000000        \
             --private-key "$CREDITCOIN_WALLET_PRIVATE_KEY" 2>&1)
           echo "$OUTPUT"
-          sleep 20
 
           # Log that our token burn was detected
-          grep "Detected burn of" /var/tmp/bridge-offchain-worker-logs/offchain-worker.log
+          wait_for_log "Detected burn of" 60
 
-          # wait for attestations for the source block where we burned the tokens
+          # wait for attestations for the source block where we burned the tokens; usually a
+          # few minutes, with the old fixed wait kept as the ceiling
           echo "INFO: Wait for mint query to be processed by the ASC contract"
-          sleep 960
-          grep "Tokens minted!" /var/tmp/bridge-offchain-worker-logs/offchain-worker.log
+          wait_for_log "Tokens minted!" 960
 
           echo "INFO: Verify bridged tokens"
           OUTPUT=$(yarn utils:check_balance "$ASC_CUSTOM_MINTABLE_TOKEN" "${{ steps.setup.outputs.creditcoin_wallet_address }}")
