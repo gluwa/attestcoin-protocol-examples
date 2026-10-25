@@ -202,7 +202,12 @@ contract ASCLoanManager is Ownable, ASCBase {
     }
 
     /**
-     * @dev Mark a loan as expired, can only be called by the contract owner
+     * @dev Mark a loan as expired. Repayment is proven — `_noteLoanRepayment` accepts it only through
+     *      a Block Prover proof — but expiry is declared, by the owner, because non-repayment is the
+     *      absence of a transaction and the Attestcoin Protocol proves presence: there is nothing on
+     *      the source chain for a proof to point at. `onlyOwner` is the honest simplification for a
+     *      demonstration. A production system needs its own answer for negative facts, and should
+     *      not copy an administrator into its trust model without noticing.
      * @param loanId ID of the loan to mark as expired
      */
     function markLoanAsExpired(uint256 loanId) external onlyOwner {
