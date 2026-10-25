@@ -27,7 +27,7 @@ jobs:
         run: git clone --depth 1 https://github.com/foundry-rs/forge-std lib/forge-std
 
       - name: Install Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: 'yarn'
@@ -61,7 +61,7 @@ jobs:
           sudo .github/install-solidity-compiler.sh
 
       - name: Install Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: 'yarn'
