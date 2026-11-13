@@ -24,7 +24,7 @@ postgres://(.*)
 https://github.com/gluwa/creditcoin3/pull(.*)
 https://developer.metamask.io(.*)
 https://(.*).creditcoin.network/
-https://blockchain.googleapis.com/v1/projects/(.*)
+https://(.*)\.quiknode\.pro/(.*)
 https://github.com/gluwa/usc-contracts(.*)
 https://github.com/gluwa/asc-contracts(.*)
 https://docs.creditcoin.org/attestcoin-protocol(.*)
