@@ -295,12 +295,39 @@ jobs:
           yarn offchain:start_worker > "$WORKER_LOG" 2>&1 &
           wait_for_log "Listening for burn events" 60
 
+          # The source chain RPC (QuickNode) load-balances across nodes, so right after
+          # the burn is mined a node that hasn't seen the block yet can report no
+          # receipt. A plain `cast send` then fails even though the burn landed. Send
+          # without waiting and poll for the receipt ourselves; cast's stderr goes
+          # straight to the log so any failure shows the real error.
           echo "INFO: burn the tokens (on source chain) we want to bridge"
-          OUTPUT=$(~/.foundry/bin/cast send --rpc-url "$SOURCE_CHAIN_RPC_URL" \
+          BURN_TX=$(~/.foundry/bin/cast send --async --rpc-url "$SOURCE_CHAIN_RPC_URL" \
             "$SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS"  \
             "burn(uint256)" 5000000000000000000        \
-            --private-key "$CREDITCOIN_WALLET_PRIVATE_KEY" 2>&1)
-          echo "$OUTPUT"
+            --private-key "$CREDITCOIN_WALLET_PRIVATE_KEY")
+          if ! [[ "$BURN_TX" =~ ^0x[0-9a-fA-F]{64}$ ]]; then
+            echo "ERROR: cast send did not return a transaction hash: '$BURN_TX'" >&2
+            exit 1
+          fi
+          echo "INFO: burn tx $BURN_TX"
+
+          BURN_STATUS=""
+          RECEIPT=""
+          for attempt in $(seq 1 30); do
+            if RECEIPT=$(~/.foundry/bin/cast receipt --async --json \
+                  --rpc-url "$SOURCE_CHAIN_RPC_URL" "$BURN_TX"); then
+              BURN_STATUS=$(echo "$RECEIPT" | jq -r .status)
+              break
+            fi
+            echo "INFO: no receipt for the burn yet (attempt $attempt/30)"
+            sleep 4
+          done
+          if [ "$BURN_STATUS" != "0x1" ]; then
+            echo "ERROR: burn tx $BURN_TX did not succeed (status '${BURN_STATUS:-no receipt after 120s}')" >&2
+            echo "$RECEIPT" >&2
+            exit 1
+          fi
+          echo "INFO: burn mined successfully"
 
           # Log that our token burn was detected
           wait_for_log "Detected burn of" 60
