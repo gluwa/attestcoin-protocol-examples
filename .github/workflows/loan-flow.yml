@@ -186,11 +186,11 @@ jobs:
           WALLET_PK=$(echo "$OUTPUT" | grep "Private key:" | cut -f2 -d: | tr -d ' ')
           echo "creditcoin_wallet_pk=$WALLET_PK" >> "$GITHUB_OUTPUT"
 
+          # Every source-chain transaction goes through .github/send-source-tx.sh,
+          # which waits until the RPC reliably shows it; see the script for why.
           echo "INFO: get 0.01 ETH on source chain"
-          ~/.foundry/bin/cast send "$WALLET_ADDRESS" "0x" \
-            --value 10000000000000000 \
-            --private-key ${{ steps.env.outputs.source_chain_private_key }} \
-            --rpc-url "$SOURCE_CHAIN_RPC_URL"
+          .github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "${{ steps.env.outputs.source_chain_private_key }}" \
+            "$WALLET_ADDRESS" --value 10000000000000000 > /dev/null
 
           CREDITCOIN_RPC_URL="${{ steps.env.outputs.creditcoin_rpc_url }}"
 
@@ -201,37 +201,24 @@ jobs:
             --rpc-url "$CREDITCOIN_RPC_URL"
 
           echo "INFO: deploy TestERC20.sol to source chain"
-          set +e
-          OUTPUT=$(~/.foundry/bin/forge create \
-                --broadcast                    \
-                --rpc-url "$SOURCE_CHAIN_RPC_URL"  \
-                --private-key ${{ steps.env.outputs.source_chain_private_key }}   \
-                shared/contracts/sol/TestERC20.sol:TestERC20 2>&1)
-          STATUS=$?
-          set -e
-          echo "$OUTPUT"
-          if [ "$STATUS" -ne 0 ]; then
-            echo "ERROR: TestERC20 forge create failed (exit $STATUS)"
-            exit "$STATUS"
+          BYTECODE=$(~/.foundry/bin/forge inspect --contracts shared/contracts/sol TestERC20 bytecode)
+          if ! RECEIPT=$(.github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "${{ steps.env.outputs.source_chain_private_key }}" \
+            --create "$BYTECODE"); then
+            echo "ERROR: TestERC20 deployment failed"
+            exit 1
           fi
-          SOURCE_CHAIN_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
+          SOURCE_CHAIN_CONTRACT_ADDRESS=$(echo "$RECEIPT" | jq -r .contractAddress)
+          echo "Deployed to: $SOURCE_CHAIN_CONTRACT_ADDRESS"
           echo "source_chain_contract_address=$SOURCE_CHAIN_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 
           echo "INFO: deploy AuxiliaryLoanContract.sol to source chain"
-          set +e
-          OUTPUT=$(~/.foundry/bin/forge create \
-                --broadcast                    \
-                --rpc-url "$SOURCE_CHAIN_RPC_URL"  \
-                --private-key "$WALLET_PK"   \
-                loan/contracts/sol/AuxiliaryLoanContract.sol:AuxiliaryLoanContract 2>&1)
-          STATUS=$?
-          set -e
-          echo "$OUTPUT"
-          if [ "$STATUS" -ne 0 ]; then
-            echo "ERROR: AuxiliaryLoanContract forge create failed (exit $STATUS)"
-            exit "$STATUS"
+          BYTECODE=$(~/.foundry/bin/forge inspect --contracts loan/contracts/sol AuxiliaryLoanContract bytecode)
+          if ! RECEIPT=$(.github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "$WALLET_PK" --create "$BYTECODE"); then
+            echo "ERROR: AuxiliaryLoanContract deployment failed"
+            exit 1
           fi
-          AUX_LOAN_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
+          AUX_LOAN_CONTRACT_ADDRESS=$(echo "$RECEIPT" | jq -r .contractAddress)
+          echo "Deployed to: $AUX_LOAN_CONTRACT_ADDRESS"
           echo "aux_loan_contract_address=$AUX_LOAN_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 
           echo "INFO: deploy EvmV1Decoder.sol to Creditcoin chain"
@@ -271,10 +258,8 @@ jobs:
           echo "lender_wallet_pk=$LENDER_WALLET_PK" >> "$GITHUB_OUTPUT"
 
           echo "INFO: get 0.001 ETH on source chain"
-          ~/.foundry/bin/cast send "$LENDER_WALLET_ADDRESS" "0x" \
-            --value 1000000000000000 \
-            --private-key ${{ steps.env.outputs.source_chain_private_key }} \
-            --rpc-url "$SOURCE_CHAIN_RPC_URL"
+          .github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "${{ steps.env.outputs.source_chain_private_key }}" \
+            "$LENDER_WALLET_ADDRESS" --value 1000000000000000 > /dev/null
 
           echo "INFO: get 0.002 CTC on Creditcoin chain"
           ~/.foundry/bin/cast send "$LENDER_WALLET_ADDRESS" "0x" \
@@ -283,10 +268,8 @@ jobs:
             --rpc-url "$CREDITCOIN_RPC_URL"
 
           echo "INFO: mint 5 tokens on source chain"
-          ~/.foundry/bin/cast send --rpc-url "$SOURCE_CHAIN_RPC_URL" \
-            "$SOURCE_CHAIN_CONTRACT_ADDRESS"  \
-            "mint(uint256)" 5000000000000000000   \
-            --private-key "$LENDER_WALLET_PK"
+          .github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "$LENDER_WALLET_PK" \
+            "$SOURCE_CHAIN_CONTRACT_ADDRESS" "mint(uint256)" 5000000000000000000 > /dev/null
 
 
           echo "INFO: generate a Borrower wallet"
@@ -299,10 +282,8 @@ jobs:
           echo "borrower_wallet_pk=$BORROWER_WALLET_PK" >> "$GITHUB_OUTPUT"
 
           echo "INFO: get 0.001 ETH on source chain"
-          ~/.foundry/bin/cast send "$BORROWER_WALLET_ADDRESS" "0x" \
-            --value 1000000000000000 \
-            --private-key ${{ steps.env.outputs.source_chain_private_key }} \
-            --rpc-url "$SOURCE_CHAIN_RPC_URL"
+          .github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "${{ steps.env.outputs.source_chain_private_key }}" \
+            "$BORROWER_WALLET_ADDRESS" --value 1000000000000000 > /dev/null
 
           echo "INFO: get 0.002 CTC on Creditcoin chain"
           ~/.foundry/bin/cast send "$BORROWER_WALLET_ADDRESS" "0x" \
@@ -311,10 +292,8 @@ jobs:
             --rpc-url "$CREDITCOIN_RPC_URL"
 
           echo "INFO: mint 3 tokens on source chain"
-          ~/.foundry/bin/cast send --rpc-url "$SOURCE_CHAIN_RPC_URL" \
-            "$SOURCE_CHAIN_CONTRACT_ADDRESS"  \
-            "mint(uint256)" 3000000000000000000   \
-            --private-key "$BORROWER_WALLET_PK"
+          .github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "$BORROWER_WALLET_PK" \
+            "$SOURCE_CHAIN_CONTRACT_ADDRESS" "mint(uint256)" 3000000000000000000 > /dev/null
 
       - name: Prepare local .env
         run: |

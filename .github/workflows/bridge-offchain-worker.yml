@@ -182,11 +182,11 @@ jobs:
           WALLET_PK=$(echo "$OUTPUT" | grep "Private key:" | cut -f2 -d: | tr -d ' ')
           echo "creditcoin_wallet_pk=$WALLET_PK" >> "$GITHUB_OUTPUT"
 
+          # Every source-chain transaction goes through .github/send-source-tx.sh,
+          # which waits until the RPC reliably shows it; see the script for why.
           echo "INFO: get 0.006 ETH on source chain"
-          ~/.foundry/bin/cast send "$WALLET_ADDRESS" "0x" \
-            --value 6000000000000000 \
-            --private-key ${{ steps.env.outputs.source_chain_private_key }} \
-            --rpc-url "$SOURCE_CHAIN_RPC_URL"
+          .github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "${{ steps.env.outputs.source_chain_private_key }}" \
+            "$WALLET_ADDRESS" --value 6000000000000000 > /dev/null
 
           CREDITCOIN_RPC_URL="${{ steps.env.outputs.creditcoin_rpc_url }}"
 
@@ -197,13 +197,10 @@ jobs:
             --rpc-url "$CREDITCOIN_RPC_URL"
 
           echo "INFO: deploy TestERC20.sol to source chain"
-          OUTPUT=$(~/.foundry/bin/forge create \
-                --broadcast                    \
-                --rpc-url "$SOURCE_CHAIN_RPC_URL"  \
-                --private-key "$WALLET_PK"   \
-                shared/contracts/sol/TestERC20.sol:TestERC20 2>&1)
-          echo "$OUTPUT"
-          SOURCE_CHAIN_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
+          BYTECODE=$(~/.foundry/bin/forge inspect --contracts shared/contracts/sol TestERC20 bytecode)
+          RECEIPT=$(.github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "$WALLET_PK" --create "$BYTECODE")
+          SOURCE_CHAIN_CONTRACT_ADDRESS=$(echo "$RECEIPT" | jq -r .contractAddress)
+          echo "Deployed to: $SOURCE_CHAIN_CONTRACT_ADDRESS"
           echo "source_chain_contract_address=$SOURCE_CHAIN_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 
           echo "INFO: deploy EvmV1Decoder.sol to Creditcoin chain"
@@ -295,39 +292,12 @@ jobs:
           yarn offchain:start_worker > "$WORKER_LOG" 2>&1 &
           wait_for_log "Listening for burn events" 60
 
-          # The source chain RPC (QuickNode) load-balances across nodes, so right after
-          # the burn is mined a node that hasn't seen the block yet can report no
-          # receipt. A plain `cast send` then fails even though the burn landed. Send
-          # without waiting and poll for the receipt ourselves; cast's stderr goes
-          # straight to the log so any failure shows the real error.
+          # .github/send-source-tx.sh waits until the RPC reliably shows the burn;
+          # see the script for why.
           echo "INFO: burn the tokens (on source chain) we want to bridge"
-          BURN_TX=$(~/.foundry/bin/cast send --async --rpc-url "$SOURCE_CHAIN_RPC_URL" \
-            "$SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS"  \
-            "burn(uint256)" 5000000000000000000        \
-            --private-key "$CREDITCOIN_WALLET_PRIVATE_KEY")
-          if ! [[ "$BURN_TX" =~ ^0x[0-9a-fA-F]{64}$ ]]; then
-            echo "ERROR: cast send did not return a transaction hash: '$BURN_TX'" >&2
-            exit 1
-          fi
-          echo "INFO: burn tx $BURN_TX"
-
-          BURN_STATUS=""
-          RECEIPT=""
-          for attempt in $(seq 1 30); do
-            if RECEIPT=$(~/.foundry/bin/cast receipt --async --json \
-                  --rpc-url "$SOURCE_CHAIN_RPC_URL" "$BURN_TX"); then
-              BURN_STATUS=$(echo "$RECEIPT" | jq -r .status)
-              break
-            fi
-            echo "INFO: no receipt for the burn yet (attempt $attempt/30)"
-            sleep 4
-          done
-          if [ "$BURN_STATUS" != "0x1" ]; then
-            echo "ERROR: burn tx $BURN_TX did not succeed (status '${BURN_STATUS:-no receipt after 120s}')" >&2
-            echo "$RECEIPT" >&2
-            exit 1
-          fi
-          echo "INFO: burn mined successfully"
+          RECEIPT=$(.github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "$CREDITCOIN_WALLET_PRIVATE_KEY" \
+            "$SOURCE_CHAIN_CUSTOM_CONTRACT_ADDRESS" "burn(uint256)" 5000000000000000000)
+          echo "INFO: burn tx $(echo "$RECEIPT" | jq -r .transactionHash)"
 
           # Log that our token burn was detected
           wait_for_log "Detected burn of" 60
