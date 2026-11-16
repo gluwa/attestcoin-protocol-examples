@@ -69,9 +69,13 @@ const main = async () => {
     throw new Error('CREDITCOIN_WALLET_PRIVATE_KEY environment variable is not configured or invalid');
   }
 
+  // Checksummed form, so it compares equal to the addresses ethers returns in events
+  // whether the configured address was lowercase or checksummed
+  const burnerAddress = ethers.getAddress(sourceChainContractAddress!);
+
   // 1. Create connection to source chain burner contract
   const ethProvider = new ethers.JsonRpcProvider(sourceChainRpcUrl);
-  const burnerContract = new Contract(sourceChainContractAddress!, burnerAbi, ethProvider);
+  const burnerContract = new Contract(burnerAddress, burnerAbi, ethProvider);
 
   // 2. Create connection to minter contract on Creditcoin ASC chain
   const ccProvider = new ethers.JsonRpcProvider(ccNextRpcUrl);
@@ -110,7 +114,7 @@ const main = async () => {
         }
 
         // Validate that the event is from the wallet address we're monitoring and the contract we deployed
-        if (from !== wallet.address || contractAddress !== sourceChainContractAddress) {
+        if (from !== wallet.address || contractAddress !== burnerAddress) {
           return;
         }
 

@@ -20,12 +20,21 @@
 # Instead, this script:
 #   1. reads the nonce several times and keeps the highest, then builds and
 #      signs the transaction with that nonce (`cast mktx`). Signing first fixes
-#      the hash before anything is sent, so resending after an error can never
+#      the hash before anything is sent, so resending after an error can't
 #      create a second transaction;
 #   2. publishes it, retrying on errors;
 #   3. polls for the receipt and fails unless the transaction succeeded;
 #   4. waits until several reads in a row show both the receipt and the higher
 #      nonce, so the caller's next request sees the new state.
+# A new transaction is signed only when publishing fails with a gas price that
+# is too low, or when the nonce stays used for ~30s while our receipt stays
+# missing (another sender took it, e.g. parallel workflows sharing the funding
+# key). The receipt check keeps watching every hash sent so far, but if our
+# first transaction was in fact mined and every read missed it for that long,
+# the rebuilt one can land as well.
+#
+# Contract addresses in the printed receipt are checksummed (cast prints them
+# lowercase), matching what `forge create` and ethers return.
 # It never waits for new blocks, so it also works against anvil, which only
 # mines when it receives a transaction.
 
@@ -45,7 +54,7 @@ MAX_ROUNDS=3         # rebuilds allowed if another transaction takes our nonce
 BUILD_ATTEMPTS=10
 PUBLISH_ATTEMPTS=10
 RECEIPT_ATTEMPTS=45  # 45 x DELAY = 3 minutes for the transaction to be mined
-NONCE_TAKEN_CHECKS=5 # consecutive checks before deciding our nonce was taken
+NONCE_TAKEN_CHECKS=8 # consecutive checks (~30s) before deciding our nonce was taken
 SETTLE_READS=3       # consecutive reads that must agree once it is mined
 SETTLE_ATTEMPTS=15   # at most ~1 minute; real lag lasts seconds
 DELAY=4
@@ -84,6 +93,8 @@ build_tx() {
 
 # Publishing the same signed transaction again is harmless: it has the same
 # hash, so the node either accepts it once or reports that it already has it.
+# Returns 4 if the gas price was too low, so the caller can rebuild with a
+# fresh estimate.
 publish_tx() {
   local attempt out
   for attempt in $(seq 1 "$PUBLISH_ATTEMPTS"); do
@@ -91,11 +102,16 @@ publish_tx() {
       return 0
     fi
     case "$out" in
-      *"already known"* | *"nonce too low"* | *"underpriced"*)
+      *"already known"* | *"nonce too low"* | *"replacement transaction underpriced"*)
         # The node already has a transaction with this nonce: ours from an
         # earlier attempt, or another one. The receipt check tells which.
         log "publish: $out"
         return 0
+        ;;
+      *"transaction underpriced"* | *"less than block base fee"*)
+        # Nothing was accepted; resending the same signed transaction won't help.
+        log "publish: gas price too low: $out"
+        return 4
         ;;
     esac
     log "publish failed (attempt $attempt/$PUBLISH_ATTEMPTS): $out"
@@ -104,15 +120,24 @@ publish_tx() {
   return 1
 }
 
-# Sets RECEIPT. Returns 1 if the transaction is never mined, and 3 if the nonce
-# kept showing as used while our transaction stayed missing, meaning another
+# Polls every transaction sent so far, since one from an earlier round may have
+# been mined after all. Sets RECEIPT, and TX_HASH and NONCE to the transaction
+# found. Returns 1 if none is ever mined, and 3 if the current nonce kept
+# showing as used while our transactions stayed missing, meaning another
 # transaction took the nonce.
 wait_for_receipt() {
-  local attempt taken=0 nonce
+  local attempt taken=0 nonce i
   for attempt in $(seq 1 "$RECEIPT_ATTEMPTS"); do
-    if RECEIPT=$("$CAST" receipt --async --json --rpc-url "$RPC_URL" "$TX_HASH" 2>/dev/null); then
-      return 0
-    fi
+    for i in "${!SENT_HASHES[@]}"; do
+      if RECEIPT=$("$CAST" receipt --async --json --rpc-url "$RPC_URL" "${SENT_HASHES[$i]}" 2>/dev/null); then
+        if [ "${SENT_HASHES[$i]}" != "$TX_HASH" ]; then
+          log "warning: earlier transaction ${SENT_HASHES[$i]} was mined; $TX_HASH may land as well"
+        fi
+        TX_HASH=${SENT_HASHES[$i]}
+        NONCE=${SENT_NONCES[$i]}
+        return 0
+      fi
+    done
     if nonce=$(highest_nonce) && [ "$nonce" -gt "$NONCE" ]; then
       taken=$((taken + 1))
       [ "$taken" -ge "$NONCE_TAKEN_CHECKS" ] && return 3
@@ -143,6 +168,8 @@ wait_until_settled() {
 }
 
 RECEIPT=""
+SENT_HASHES=()
+SENT_NONCES=()
 for round in $(seq 1 "$MAX_ROUNDS"); do
   RECEIPT=""
   if ! build_tx "$@"; then
@@ -150,10 +177,21 @@ for round in $(seq 1 "$MAX_ROUNDS"); do
     exit 1
   fi
   log "sending $TX_HASH from $FROM (nonce $NONCE)"
-  if ! publish_tx; then
-    log "giving up: could not publish $TX_HASH"
-    exit 1
-  fi
+  rc=0
+  publish_tx || rc=$?
+  case $rc in
+    0) ;;
+    4)
+      log "rebuilding with a fresh gas price (round $round/$MAX_ROUNDS)"
+      continue
+      ;;
+    *)
+      log "giving up: could not publish $TX_HASH"
+      exit 1
+      ;;
+  esac
+  SENT_HASHES+=("$TX_HASH")
+  SENT_NONCES+=("$NONCE")
 
   rc=0
   wait_for_receipt || rc=$?
@@ -161,14 +199,14 @@ for round in $(seq 1 "$MAX_ROUNDS"); do
     0) break ;;
     3) log "nonce $NONCE was used by another transaction; rebuilding (round $round/$MAX_ROUNDS)" ;;
     *)
-      log "giving up: no receipt for $TX_HASH after $((RECEIPT_ATTEMPTS * DELAY))s"
+      log "giving up: no receipt for ${SENT_HASHES[*]} after $((RECEIPT_ATTEMPTS * DELAY))s"
       exit 1
       ;;
   esac
 done
 
 if [ -z "$RECEIPT" ]; then
-  log "giving up: another transaction took the nonce in all $MAX_ROUNDS rounds"
+  log "giving up: no transaction was mined in $MAX_ROUNDS rounds"
   exit 1
 fi
 
@@ -183,6 +221,12 @@ if ! wait_until_settled; then
   # The transaction succeeded, so carry on; the next call may still see stale
   # state, but failing here would hide which step really broke.
   log "warning: the RPC never consistently showed $TX_HASH; continuing anyway"
+fi
+
+CONTRACT=$(jq -r '.contractAddress // empty' <<<"$RECEIPT")
+if [ -n "$CONTRACT" ]; then
+  CONTRACT=$("$CAST" to-check-sum-address "$CONTRACT")
+  RECEIPT=$(jq --arg addr "$CONTRACT" '.contractAddress = $addr' <<<"$RECEIPT")
 fi
 
 log "mined $TX_HASH in block $(jq -r .blockNumber <<<"$RECEIPT")"
