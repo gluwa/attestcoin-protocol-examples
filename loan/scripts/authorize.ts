@@ -51,9 +51,11 @@ const main = async () => {
   // 2. Authorize the token to be used in loans
   try {
     const tx = await sourceChainLoanContract.addAuthorizedToken(tokenAddress);
+    // Wait until it is mined, so the next step (registering a loan) sees the token as authorized
+    await tx.wait();
     console.log('Token authorized with transaction hash: ', tx.hash);
   } catch (error: any) {
-    console.error('Error authorizing token: ', error.shortMessage);
+    console.error('Error authorizing token: ', error.shortMessage ?? error.message);
     process.exit(1);
   }
 

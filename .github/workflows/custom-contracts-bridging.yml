@@ -44,7 +44,7 @@ jobs:
         if: inputs.source_chain_kind == 'sepolia'
         run: |
           # shellcheck disable=SC2129
-          echo "source_chain_rpc_url=https://blockchain.googleapis.com/v1/projects/usc-integration-test/locations/asia-east1/endpoints/ethereum-sepolia/rpc?key=${{ secrets.GOOGLE_SEPOLIA_RPC_KEY }}" >> "$GITHUB_OUTPUT"
+          echo "source_chain_rpc_url=https://cold-burned-log.ethereum-sepolia.quiknode.pro/${{ secrets.QUICKNODE_SEPOLIA_RPC_KEY }}" >> "$GITHUB_OUTPUT"
           echo "source_chain_key=1" >> "$GITHUB_OUTPUT"
           # note: this is NEW_LENDER_ in 1Password & must be funded on Sepolia
           echo "wallet_pk=${{ secrets.DEVNET_EVM_PK }}" >> "$GITHUB_OUTPUT"
@@ -182,11 +182,11 @@ jobs:
           WALLET_PK=$(echo "$OUTPUT" | grep "Private key:" | cut -f2 -d: | tr -d ' ')
           echo "creditcoin_wallet_pk=$WALLET_PK" >> "$GITHUB_OUTPUT"
 
+          # Every source-chain transaction goes through .github/send-source-tx.sh,
+          # which waits until the RPC reliably shows it; see the script for why.
           echo "INFO: get 0.01 ETH on source chain"
-          ~/.foundry/bin/cast send "$WALLET_ADDRESS" "0x" \
-            --value 10000000000000000 \
-            --private-key ${{ steps.env.outputs.source_chain_private_key }} \
-            --rpc-url "$SOURCE_CHAIN_RPC_URL"
+          .github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "${{ steps.env.outputs.source_chain_private_key }}" \
+            "$WALLET_ADDRESS" --value 10000000000000000 > /dev/null
 
           CREDITCOIN_RPC_URL="${{ steps.env.outputs.creditcoin_rpc_url }}"
 
@@ -197,13 +197,10 @@ jobs:
             --rpc-url "$CREDITCOIN_RPC_URL"
 
           echo "INFO: deploy TestERC20.sol to source chain"
-          OUTPUT=$(~/.foundry/bin/forge create \
-                --broadcast                    \
-                --rpc-url "$SOURCE_CHAIN_RPC_URL"  \
-                --private-key "$WALLET_PK"   \
-                shared/contracts/sol/TestERC20.sol:TestERC20 2>&1)
-          echo "$OUTPUT"
-          SOURCE_CHAIN_CONTRACT_ADDRESS=$(echo "$OUTPUT" | grep "Deployed to:" | cut -f2 -d: | tr -d " ")
+          BYTECODE=$(~/.foundry/bin/forge inspect --contracts shared/contracts/sol TestERC20 bytecode)
+          RECEIPT=$(.github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "$WALLET_PK" --create "$BYTECODE")
+          SOURCE_CHAIN_CONTRACT_ADDRESS=$(echo "$RECEIPT" | jq -r .contractAddress)
+          echo "Deployed to: $SOURCE_CHAIN_CONTRACT_ADDRESS"
           echo "source_chain_contract_address=$SOURCE_CHAIN_CONTRACT_ADDRESS" >> "$GITHUB_OUTPUT"
 
           echo "INFO: deploy EvmV1Decoder.sol to Creditcoin chain"
@@ -258,12 +255,10 @@ jobs:
           echo "INFO: NOT minting tokens on source chain. Should already have some minted"
 
           echo "INFO: burn the tokens (on source chain) we want to bridge"
-          OUTPUT=$(~/.foundry/bin/cast send --rpc-url "$SOURCE_CHAIN_RPC_URL" \
-            "$SOURCE_CHAIN_CONTRACT_ADDRESS"  \
-            "burn(uint256)" 5000000000000000000        \
-            --private-key "$WALLET_PK" 2>&1)
-          echo "$OUTPUT"
-          BURN_TX_HASH=$(echo "$OUTPUT" | grep "transactionHash " | tr -s " " | cut -f2 -d" ")
+          RECEIPT=$(.github/send-source-tx.sh "$SOURCE_CHAIN_RPC_URL" "$WALLET_PK" \
+            "$SOURCE_CHAIN_CONTRACT_ADDRESS" "burn(uint256)" 5000000000000000000)
+          BURN_TX_HASH=$(echo "$RECEIPT" | jq -r .transactionHash)
+          echo "INFO: burn tx $BURN_TX_HASH"
           echo "burn_tx_hash=$BURN_TX_HASH" >> "$GITHUB_OUTPUT"
 
       - name: Prepare local .env
